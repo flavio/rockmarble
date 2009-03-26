@@ -3,8 +3,8 @@
 # -------------------------------------------------
 TARGET = rockmarble
 TEMPLATE = app
-INCLUDEPATH += /usr/include/marble
-LIBS += -lmarblewidget
+INCLUDEPATH += /usr/include/marble /home/flavio/hacking/testinstall/include/qjson
+LIBS += -L/home/flavio/hacking/testinstall/lib/qjson -lmarblewidget -lqjson
 SOURCES += main.cpp \
     mainwindow.cpp \
     artist.cpp \

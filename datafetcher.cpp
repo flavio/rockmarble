@@ -26,6 +26,8 @@
 // QtGui
 #include <QtGui/QApplication>
 
+#include <json_driver.hh>
+
 DataFetcher::DataFetcher(QObject *parent)
     : QObject(parent),
       m_nam(new QNetworkAccessManager(this))
@@ -60,7 +62,7 @@ void DataFetcher::getArtistEvents(const QString& artist)
     // Cleanup
     clearData(artist);
 
-    QUrl urlEL("http://ws.audioscrobbler.com/2.0/?method=artist.getevents&api_key=b25b959554ed76058ac220b7b2e0a026");
+    QUrl urlEL("http://ws.audioscrobbler.com/2.0/?method=artist.getevents&api_key=b25b959554ed76058ac220b7b2e0a026&format=json");
     urlEL.addQueryItem("artist", artist);
     doRequest(urlEL, DataFetcher::ArtistEventsRequest, artist);
 }
@@ -91,20 +93,21 @@ void DataFetcher::requestFinished(QNetworkReply *reply)
     switch(requestType) {
     case DataFetcher::ArtistEventsRequest: {
         if (reply->error() == QNetworkReply::NoError) {
-            bool success;
+            bool errors;
             QString errorMessage;
-            int errorLine;
-            int errorColumn;
             QString response (reply->readAll());
-            success = true;
-            if (success) {
-                emit getArtistEventsReady(QVariant(response), true, QString());
+
+            JSonDriver driver;
+            QVariant events = driver.parse (response, &errors);
+            if (!errors) {
+                emit getArtistEventsReady(events, true, QString());
             } else {
-                QString errorText = QString("An error occured while parsing XML document for artist \"%1\"!").arg(artistName);
+                QString errorText = QString("An error occured while parsing json response for artist \"%1\"!").arg(artistName);
                 qCritical() << errorText;
                 qCritical() << "URL requested:" << reply->request().url().toString();
                 qCritical() << "URL processed:" << reply->url().toString();
                 //qCritical("%s [L:%d-C:%d]", qPrintable(errorMessage), errorLine, errorColumn);
+                qCritical() << "Error converting reply to json object:" << driver.error();
                 emit getArtistEventsReady(QVariant(), false, errorText);
             }
         } else {

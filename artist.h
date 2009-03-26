@@ -1,18 +1,15 @@
 //#ifndef ARTIST_H
 //#define ARTIST_H
 //
-//class QNetworkAccessManager;
+//#include <QString>
 //
 //class Artist
 //{
 //  public:
 //    Artist(const QString& name);
 //
-//    void getEvents();
-//
 //  private:
-//    QSting m_name;
-//    QNetworkAccessManager* m_net_manager;
+//    QString m_name;
 //};
 //
 //#endif // ARTIST_H

@@ -1,5 +1,7 @@
 #include "mainwindow.h"
 
+#include "datafetcher.h"
+
 #include <MarbleMap.h>
 #include <MarbleModel.h>
 #include <QAbstractItemModel>
@@ -22,6 +24,10 @@ MainWindow::MainWindow(QWidget *parent)
 
   connect( lineEdit, SIGNAL(returnPressed()), this, SLOT(search()));
   connect (action_load_kde_developer, SIGNAL(triggered()), this, SLOT(loadKdeDevelopers()));
+  connect( artistEdit, SIGNAL(returnPressed()), this, SLOT(searchEvents()));
+
+  m_df = DataFetcher::instance();
+  connect (m_df, SIGNAL(getArtistEventsReady(QVariant,bool,QString)), this, SLOT(slotArtistEventsReady(QVariant,bool,QString)));
 }
 
 MainWindow::~MainWindow()
@@ -46,11 +52,24 @@ void MainWindow::search()
   }
 }
 
+void MainWindow::searchEvents() {
+  QString artist = artistEdit->text();
+  m_df->getArtistEvents(artist);
+}
+
 void MainWindow::loadKdeDevelopers()
 {
 //  QString filename = "/home/flavio/marble/kde-devel-locations.kml";
   QString filename = "/home/flavio/marble/foo.kml";
   marble->addPlaceMarkFile(filename);
   marble->update();
+}
+
+void MainWindow::slotArtistEventsReady(QVariant data, bool successfull, QString error) {
+  if (successfull) {
+    qDebug() << data;
+  } else {
+    qDebug() << error;
+  }
 }
 

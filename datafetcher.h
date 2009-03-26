@@ -22,47 +22,48 @@
 */
 
 
-#ifndef __DATAFETCHER_H__
-#define __DATAFETCHER_H__
+#ifndef DATAFETCHER_H
+#define DATAFETCHER_H
 
 // QtCore
 #include <QtCore/QHash>
 #include <QtCore/QObject>
-#include <QtCore/QSet>
+//#include <QtCore/QSet>
+#include <QtCore/QString>
+#include <QtCore/QVariant>
 // QtNetwork
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkReply>
+
 // Forward declarations
 class QUrl;
 
-
-class DataFetcher : public QObject
+class DataFetcher  : public QObject
 {
-    Q_OBJECT
+  Q_OBJECT
 
-public:
-    static DataFetcher * instance();
+  public:
+    static DataFetcher* instance();
     void getArtistEvents(const QString& artist);
 
-Q_SIGNALS:
+  Q_SIGNALS:
     // SIG: getArtistEventsReady()
     // #1 : Reply converted to a QVarian object
     // #2 : Was the request successful ?
     // #3 : Error Message
     void getArtistEventsReady(QVariant, bool, QString);
 
-private Q_SLOTS:
+  private Q_SLOTS:
     void requestFinished(QNetworkReply *);
 
-private:
+  private:
     enum RequestType {
-        ArtistEventsRequest
+       ArtistEventsRequest
     };
     enum CustomAttribute {
-        RequestTypeAttribute = int(QNetworkRequest::User),
-        ArtistNameAttribute = int(QNetworkRequest::User+1)
+       RequestTypeAttribute = int(QNetworkRequest::User),
+       ArtistNameAttribute = int(QNetworkRequest::User+1)
     };
-
 
     DataFetcher(QObject *parent = 0);
     DataFetcher(const DataFetcher &);
@@ -71,15 +72,18 @@ private:
 
     void doRequest(const QUrl &url, RequestType requestType, const QString& artistName = "");
 
-    // Test if we got all the necessary data before emitting signal
-//    void emissionCheck(const int &showId);
+   // Test if we got all the necessary data before emitting signal
+  // void emissionCheck(const int &showId);
 
     // Convert NetworkError code to QString
-//    QString errorCodeToText(QNetworkReply::NetworkError errorCode);
+    QString errorCodeToText(QNetworkReply::NetworkError errorCode);
 
-    QNetworkAccessManager *m_nam;
+    void clearData(const QString& artistName);
+
+    QNetworkAccessManager* m_nam;
 
     QHash<QString, QVariant> m_artistEventsHash;
     QHash<QString, QString>  m_artistEventsError;
+};
 
-#endif // __DATAFETCHER_H__
+#endif // DATAFETCHER_H

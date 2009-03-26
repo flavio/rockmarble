@@ -20,19 +20,33 @@
       <item>
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
-         <widget class="QLineEdit" name="lineEdit"/>
-        </item>
-        <item>
-         <widget class="QListView" name="listView"/>
-        </item>
-        <item>
-         <widget class="Marble::MarbleNavigator" name="navigator">
-          <property name="toolTip">
-           <string>Navigation Control</string>
+         <widget class="QGroupBox" name="groupBox">
+          <property name="title">
+           <string>Cities</string>
           </property>
-          <property name="whatsThis">
-           <string>Use this control to navigate.</string>
-          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_3">
+           <item>
+            <widget class="QLineEdit" name="lineEdit"/>
+           </item>
+           <item>
+            <widget class="QListView" name="listView"/>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="groupBox_2">
+             <property name="title">
+              <string>Artist</string>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_4">
+              <item>
+               <widget class="QLineEdit" name="artistEdit"/>
+              </item>
+              <item>
+               <widget class="QListView" name="artistList"/>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
          </widget>
         </item>
        </layout>
@@ -91,11 +105,6 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
-  <customwidget>
-   <class>Marble::MarbleNavigator</class>
-   <extends>QWidget</extends>
-   <header>MarbleNavigator.h</header>
-  </customwidget>
   <customwidget>
    <class>Marble::MarbleWidget</class>
    <extends>QWidget</extends>

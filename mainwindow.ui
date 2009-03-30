@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
+    <width>1090</width>
     <height>400</height>
    </rect>
   </property>
@@ -14,7 +14,7 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout_2">
+   <layout class="QVBoxLayout" name="verticalLayout_5">
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
@@ -34,14 +34,14 @@
            <item>
             <widget class="QGroupBox" name="groupBox_2">
              <property name="title">
-              <string>Artist</string>
+              <string>Artists</string>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_4">
               <item>
                <widget class="QLineEdit" name="artistEdit"/>
               </item>
               <item>
-               <widget class="QListView" name="artistList"/>
+               <widget class="QListWidget" name="artistList"/>
               </item>
              </layout>
             </widget>
@@ -67,6 +67,51 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QGroupBox" name="groupBox_3">
+        <property name="title">
+         <string>Tour dates</string>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item>
+          <widget class="QTableWidget" name="eventTable">
+           <property name="editTriggers">
+            <set>QAbstractItemView::NoEditTriggers</set>
+           </property>
+           <property name="dragDropOverwriteMode">
+            <bool>false</bool>
+           </property>
+           <property name="selectionMode">
+            <enum>QAbstractItemView::SingleSelection</enum>
+           </property>
+           <property name="selectionBehavior">
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+           <column>
+            <property name="text">
+             <string>Country</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>City</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Location</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Date</string>
+            </property>
+           </column>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
      </layout>
     </item>
    </layout>
@@ -76,7 +121,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>600</width>
+     <width>1090</width>
      <height>26</height>
     </rect>
    </property>

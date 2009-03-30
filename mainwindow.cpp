@@ -1,11 +1,15 @@
 #include "mainwindow.h"
 
+#include "artist.h"
 #include "datafetcher.h"
+#include "event.h"
+#include "location.h"
 
 #include <MarbleMap.h>
 #include <MarbleModel.h>
 #include <QAbstractItemModel>
-#include <QSortFilterProxyModel>
+#include <QListWidgetItem>
+#include <QtGui/QTableWidgetItem>
 
 #include <QDebug>
 
@@ -28,10 +32,15 @@ MainWindow::MainWindow(QWidget *parent)
 
   m_df = DataFetcher::instance();
   connect (m_df, SIGNAL(getArtistEventsReady(QVariant,bool,QString)), this, SLOT(slotArtistEventsReady(QVariant,bool,QString)));
+
+  connect(artistList, SIGNAL(currentRowChanged(int)), this, SLOT(slotCurrentArtistRowChanged(int)));
 }
 
 MainWindow::~MainWindow()
 {
+  foreach (Artist* artist, m_artists)
+    delete artist;
+  m_artists.clear();
 }
 
 void MainWindow::search()
@@ -65,9 +74,57 @@ void MainWindow::loadKdeDevelopers()
   marble->update();
 }
 
+void MainWindow::slotCurrentArtistRowChanged(int row)
+{
+  QString artist = artistList->item(row)->text();
+  setupEventTable(artist);
+}
+
+void MainWindow::setupEventTable(const QString& artistName)
+{
+  qDebug() << "setupEventTable for" << artistName;
+  // country
+  // city
+  // location
+  // date
+  Artist* artist = m_artists[artistName];
+  eventTable->clearContents();
+  int row = 0;
+  foreach(Event* event, artist->events()) {
+    QTableWidgetItem* country = new QTableWidgetItem(event->location()->country());
+    QTableWidgetItem* city = new QTableWidgetItem(event->location()->city());
+    QTableWidgetItem* location = new QTableWidgetItem(QString("%1 - %2").arg(event->location()->name()).arg(event->location()->street()));
+    QTableWidgetItem* date = new QTableWidgetItem(event->date().toString());
+
+    eventTable->insertRow(row);
+
+    eventTable->setItem(row, 0, country);
+    eventTable->setItem(row, 1, city);
+    eventTable->setItem(row, 2, location);
+    eventTable->setItem(row, 3, date);
+    eventTable->update();
+    row++;
+  }
+}
+
+void MainWindow::slotCurrentEventChanged(int currentRow, int currentColumn, int previousRow, int previousColumn) {
+
+}
+
 void MainWindow::slotArtistEventsReady(QVariant data, bool successfull, QString error) {
   if (successfull) {
-    qDebug() << data;
+    Artist* artist = new Artist (data);
+
+    QMap<QString,Artist*>::iterator match = m_artists.find(artist->name());
+    if (match != m_artists.end()) {
+      Artist* a = match.value();
+      delete a;
+      m_artists[artist->name()] = artist;
+    } else {
+      m_artists.insert(artist->name(), artist);
+      new QListWidgetItem(artist->name(), artistList);
+    }
+
   } else {
     qDebug() << error;
   }

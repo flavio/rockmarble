@@ -25,3 +25,4 @@ FORMS += mainwindow.ui
 QT += network
 CONFIG += warn_on \
     debug_and_release
+RESOURCES += resources.qrc

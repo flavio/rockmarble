@@ -19,9 +19,7 @@ class MainWindow : public QMainWindow, private Ui::MainWindowClass
     ~MainWindow();
 
   private slots:
-    void search();
-    void loadKdeDevelopers();
-    void searchEvents();
+    void slotAddArtist();
     void slotArtistEventsReady(QVariant,bool,QString);
     void slotCurrentArtistRowChanged(int);
     void slotCurrentEventChanged(const QModelIndex & current, const QModelIndex & previous);

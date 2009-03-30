@@ -22,29 +22,65 @@
         <item>
          <widget class="QGroupBox" name="groupBox">
           <property name="title">
-           <string>Cities</string>
+           <string>Artists</string>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_3">
            <item>
-            <widget class="QLineEdit" name="lineEdit"/>
+            <layout class="QHBoxLayout" name="horizontalLayout_2">
+             <item>
+              <widget class="QPushButton" name="addArtist">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>Add a new artist</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="icon">
+                <iconset resource="resources.qrc">
+                 <normaloff>:/images/icons/list-add.png</normaloff>:/images/icons/list-add.png</iconset>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="lastfm">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="icon">
+                <iconset resource="resources.qrc">
+                 <normaloff>:/images/icons/icon_lastfm.gif</normaloff>:/images/icons/icon_lastfm.gif</iconset>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
            </item>
            <item>
-            <widget class="QListView" name="listView"/>
-           </item>
-           <item>
-            <widget class="QGroupBox" name="groupBox_2">
-             <property name="title">
-              <string>Artists</string>
-             </property>
-             <layout class="QVBoxLayout" name="verticalLayout_4">
-              <item>
-               <widget class="QLineEdit" name="artistEdit"/>
-              </item>
-              <item>
-               <widget class="QListWidget" name="artistList"/>
-              </item>
-             </layout>
-            </widget>
+            <widget class="QListWidget" name="artistList"/>
            </item>
           </layout>
          </widget>
@@ -69,6 +105,9 @@
       </item>
       <item>
        <widget class="QGroupBox" name="eventsBox">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
         <property name="title">
          <string>Tour dates</string>
         </property>
@@ -80,9 +119,6 @@
            </property>
            <property name="selectionBehavior">
             <enum>QAbstractItemView::SelectRows</enum>
-           </property>
-           <property name="sortingEnabled">
-            <bool>true</bool>
            </property>
           </widget>
          </item>
@@ -106,7 +142,7 @@
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="action_load_kde_developer"/>
+    <addaction name="actionExit"/>
    </widget>
    <addaction name="menuFile"/>
   </widget>
@@ -118,10 +154,15 @@
     <bool>false</bool>
    </attribute>
   </widget>
-  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QStatusBar" name="m_statusBar"/>
   <action name="action_load_kde_developer">
    <property name="text">
     <string>Load kde-developer</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
    </property>
   </action>
  </widget>
@@ -133,6 +174,8 @@
    <header>MarbleWidget.h</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

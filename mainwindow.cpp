@@ -7,8 +7,9 @@
 #include <MarbleMap.h>
 #include <MarbleModel.h>
 #include <QAbstractItemModel>
+#include <QInputDialog>
 #include <QListWidgetItem>
-//#include <QtGui/QItemSelectionModel>
+#include <QStatusBar>
 
 #include <QDebug>
 
@@ -23,11 +24,7 @@ MainWindow::MainWindow(QWidget *parent)
   marble->setShowGps(true);
   marble->setDownloadUrl( "http://download.kde.org/apps/marble/" );
 
-  listView->setModel(marble->model()->placeMarkModel());
-
-  connect( lineEdit, SIGNAL(returnPressed()), this, SLOT(search()));
-  connect (action_load_kde_developer, SIGNAL(triggered()), this, SLOT(loadKdeDevelopers()));
-  connect( artistEdit, SIGNAL(returnPressed()), this, SLOT(searchEvents()));
+  connect( addArtist, SIGNAL(clicked()), this, SLOT(slotAddArtist()));
 
   m_df = DataFetcher::instance();
   connect (m_df, SIGNAL(getArtistEventsReady(QVariant,bool,QString)), this, SLOT(slotArtistEventsReady(QVariant,bool,QString)));
@@ -42,35 +39,15 @@ MainWindow::~MainWindow()
   m_artists.clear();
 }
 
-void MainWindow::search()
-{
-  QString text = lineEdit->text();
-  MarbleModel* model = marble->model();
-  QAbstractItemModel* itemModel = model->placeMarkModel();
-  listView ->setModel(itemModel);
-  QModelIndexList matches = itemModel-> match(itemModel->index(0,0), Qt::DisplayRole, QVariant(text));
-  qDebug() << "MATCHES for" << text << ":" << matches.size();
-  if (!matches.empty()) {
-    QModelIndex match = matches[0];
-    if (match.isValid()) {
-      listView->setCurrentIndex(match);
-      marble->map()->centerOn(match);
-      marble->update();
-    }
+void MainWindow::slotAddArtist() {
+  bool ok;
+  QString artist = QInputDialog::getText(this, tr("rockmarble - add a new artist"),
+                                          tr("Artist name:"), QLineEdit::Normal,
+                                          "", &ok);
+ if (ok && !artist.isEmpty()) {
+    m_df->getArtistEvents(artist);
+    m_statusBar->showMessage(tr("retrieving event dates for %1").arg(artist));
   }
-}
-
-void MainWindow::searchEvents() {
-  QString artist = artistEdit->text();
-  m_df->getArtistEvents(artist);
-}
-
-void MainWindow::loadKdeDevelopers()
-{
-//  QString filename = "/home/flavio/marble/kde-devel-locations.kml";
-  QString filename = "/home/flavio/marble/foo.kml";
-  marble->addPlaceMarkFile(filename);
-  marble->update();
 }
 
 void MainWindow::slotCurrentArtistRowChanged(int row)
@@ -89,7 +66,7 @@ void MainWindow::slotCurrentEventChanged(const QModelIndex & current, const QMod
   qreal latitude, longitude;
 
   if (model->getCoordinates(current, &latitude, &longitude)) {
-    marble->zoomView(500);
+    marble->centerOn(longitude, latitude, true);
     marble->update();
   }
 }
@@ -107,8 +84,9 @@ void MainWindow::slotArtistEventsReady(QVariant data, bool successfull, QString 
       m_artists.insert(artist->name(), new EventModel(artist));
       new QListWidgetItem(artist->name(), artistList);
     }
+    m_statusBar->showMessage(tr("Event dates for %1 successfully retrieved").arg(artist->name()), 1200);
   } else {
-    qDebug() << error;
+    m_statusBar->showMessage(error);
   }
 }
 

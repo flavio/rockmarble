@@ -68,45 +68,22 @@
        </widget>
       </item>
       <item>
-       <widget class="QGroupBox" name="groupBox_3">
+       <widget class="QGroupBox" name="eventsBox">
         <property name="title">
          <string>Tour dates</string>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
-          <widget class="QTableWidget" name="eventTable">
-           <property name="editTriggers">
-            <set>QAbstractItemView::NoEditTriggers</set>
-           </property>
-           <property name="dragDropOverwriteMode">
-            <bool>false</bool>
-           </property>
+          <widget class="QTableView" name="eventTable">
            <property name="selectionMode">
             <enum>QAbstractItemView::SingleSelection</enum>
            </property>
            <property name="selectionBehavior">
             <enum>QAbstractItemView::SelectRows</enum>
            </property>
-           <column>
-            <property name="text">
-             <string>Country</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>City</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Location</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>Date</string>
-            </property>
-           </column>
+           <property name="sortingEnabled">
+            <bool>true</bool>
+           </property>
           </widget>
          </item>
         </layout>

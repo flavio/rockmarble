@@ -3,11 +3,12 @@
 
 #include <QtGui/QMainWindow>
 #include <QtCore/QMap>
+#include <QtCore/QModelIndex>
 
 #include "ui_mainwindow.h"
 
-class Artist;
 class DataFetcher;
+class EventModel;
 
 class MainWindow : public QMainWindow, private Ui::MainWindowClass
 {
@@ -23,13 +24,11 @@ class MainWindow : public QMainWindow, private Ui::MainWindowClass
     void searchEvents();
     void slotArtistEventsReady(QVariant,bool,QString);
     void slotCurrentArtistRowChanged(int);
-    void slotCurrentEventChanged(int currentRow, int currentColumn, int previousRow, int previousColumn);
+    void slotCurrentEventChanged(const QModelIndex & current, const QModelIndex & previous);
 
   private:
-    void setupEventTable(const QString& artistName);
-
     DataFetcher* m_df;
-    QMap<QString, Artist*> m_artists;
+    QMap<QString, EventModel*> m_artists;
 };
 
 #endif // MAINWINDOW_H

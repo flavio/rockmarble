@@ -2,14 +2,13 @@
 
 #include "artist.h"
 #include "datafetcher.h"
-#include "event.h"
-#include "location.h"
+#include "eventmodel.h"
 
 #include <MarbleMap.h>
 #include <MarbleModel.h>
 #include <QAbstractItemModel>
 #include <QListWidgetItem>
-#include <QtGui/QTableWidgetItem>
+//#include <QtGui/QItemSelectionModel>
 
 #include <QDebug>
 
@@ -20,7 +19,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
   setupUi(this);
 
-  marble->setMapThemeId("earth/plain/plain.dgml");
+  marble->setMapThemeId("earth/openstreetmap/openstreetmap.dgml");
   marble->setShowGps(true);
   marble->setDownloadUrl( "http://download.kde.org/apps/marble/" );
 
@@ -38,8 +37,8 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-  foreach (Artist* artist, m_artists)
-    delete artist;
+  foreach (EventModel* model, m_artists)
+    delete model;
   m_artists.clear();
 }
 
@@ -77,54 +76,37 @@ void MainWindow::loadKdeDevelopers()
 void MainWindow::slotCurrentArtistRowChanged(int row)
 {
   QString artist = artistList->item(row)->text();
-  setupEventTable(artist);
+  eventsBox->setTitle(tr("%1 tour dates").arg(artist));
+  eventTable->setModel(m_artists[artist]);
+  connect(eventTable->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(slotCurrentEventChanged(QModelIndex,QModelIndex)));
+  eventTable->update();
 }
 
-void MainWindow::setupEventTable(const QString& artistName)
-{
-  qDebug() << "setupEventTable for" << artistName;
-  // country
-  // city
-  // location
-  // date
-  Artist* artist = m_artists[artistName];
-  eventTable->clearContents();
-  int row = 0;
-  foreach(Event* event, artist->events()) {
-    QTableWidgetItem* country = new QTableWidgetItem(event->location()->country());
-    QTableWidgetItem* city = new QTableWidgetItem(event->location()->city());
-    QTableWidgetItem* location = new QTableWidgetItem(QString("%1 - %2").arg(event->location()->name()).arg(event->location()->street()));
-    QTableWidgetItem* date = new QTableWidgetItem(event->date().toString());
+void MainWindow::slotCurrentEventChanged(const QModelIndex & current, const QModelIndex & previous ) {
+  Q_UNUSED( previous)
+  EventModel* model = static_cast<EventModel*>(eventTable->model());
 
-    eventTable->insertRow(row);
+  qreal latitude, longitude;
 
-    eventTable->setItem(row, 0, country);
-    eventTable->setItem(row, 1, city);
-    eventTable->setItem(row, 2, location);
-    eventTable->setItem(row, 3, date);
-    eventTable->update();
-    row++;
+  if (model->getCoordinates(current, &latitude, &longitude)) {
+    marble->zoomView(500);
+    marble->update();
   }
-}
-
-void MainWindow::slotCurrentEventChanged(int currentRow, int currentColumn, int previousRow, int previousColumn) {
-
 }
 
 void MainWindow::slotArtistEventsReady(QVariant data, bool successfull, QString error) {
   if (successfull) {
     Artist* artist = new Artist (data);
 
-    QMap<QString,Artist*>::iterator match = m_artists.find(artist->name());
+    QMap<QString,EventModel*>::iterator match = m_artists.find(artist->name());
     if (match != m_artists.end()) {
-      Artist* a = match.value();
-      delete a;
-      m_artists[artist->name()] = artist;
+      EventModel* model = match.value();
+      delete model;
+      m_artists[artist->name()] = new EventModel(artist);
     } else {
-      m_artists.insert(artist->name(), artist);
+      m_artists.insert(artist->name(), new EventModel(artist));
       new QListWidgetItem(artist->name(), artistList);
     }
-
   } else {
     qDebug() << error;
   }

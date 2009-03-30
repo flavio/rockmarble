@@ -11,6 +11,6 @@ Location::Location(const QVariant& data )
   m_street = location["street"].toString();
 
   QVariantMap geo_point = location["geo:point"].toMap();
-  m_lat = geo_point["geo:lat"].toInt();
-  m_long = geo_point["geo:long"].toInt();
+  m_lat = geo_point["geo:lat"].toDouble();
+  m_long = geo_point["geo:long"].toDouble();
 }

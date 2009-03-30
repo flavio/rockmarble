@@ -80,14 +80,14 @@
     <value type="QString" >CPU=x86_64</value>
     <value type="QString" >CSHEDIT=emacs</value>
     <value type="QString" >CVS_RSH=ssh</value>
-    <value type="QString" >DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-yxFjwkfA2h,guid=14b857554ac5a7835096dca149cb2ad4</value>
+    <value type="QString" >DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-VWOsJC9BKo,guid=8bf544e07b8984d9c22eb3b049d05cf3</value>
     <value type="QString" >DESKTOP_SESSION=kde4</value>
     <value type="QString" >DESKTOP_STARTUP_ID=</value>
     <value type="QString" >DISPLAY=:0.0</value>
     <value type="QString" >DM_CONTROL=/var/run/xdmctl</value>
     <value type="QString" >ENV=/etc/bash.bashrc</value>
     <value type="QString" >FROM_HEADER=</value>
-    <value type="QString" >GPG_AGENT_INFO=/tmp/gpg-R5ZH1M/S.gpg-agent:4782:1</value>
+    <value type="QString" >GPG_AGENT_INFO=/tmp/gpg-ATgwnT/S.gpg-agent:4844:1</value>
     <value type="QString" >GROFF_NO_SGR=yes</value>
     <value type="QString" >GS_LIB=/home/flavio/.fonts</value>
     <value type="QString" >GTK2_RC_FILES=/etc/gtk-2.0/gtkrc:/home/flavio/.gtkrc-2.0-kde4:/usr/share/themes//QtCurve/gtk-2.0/gtkrc:/home/flavio/.gtkrc-2.0-qtengine:/home/flavio/.gtkrc-2.0:/home/flavio/.kde4/share/config/gtkrc-2.0</value>
@@ -114,6 +114,7 @@
     <value type="QString" >LADSPA_PATH=/usr/lib64/ladspa</value>
     <value type="QString" >LANG=en_US.UTF-8</value>
     <value type="QString" >LANGUAGE=</value>
+    <value type="QString" >LD_LIBRARY_PATH=/home/flavio/hacking/testinstall/lib/qjson</value>
     <value type="QString" >LESS=-RS#3NM~g</value>
     <value type="QString" >LESSCLOSE=lessclose.sh %s %s</value>
     <value type="QString" >LESSKEY=/etc/lesskey.bin</value>
@@ -140,12 +141,12 @@
     <value type="QString" >QT_PLUGIN_PATH=/home/flavio/.kde4/lib64/kde4/plugins/:/usr/lib64/kde4/plugins/</value>
     <value type="QString" >QT_SYSTEM_DIR=/usr/share/desktop-data</value>
     <value type="QString" >SDK_HOME=/usr/lib64/jvm/java</value>
-    <value type="QString" >SESSION_MANAGER=local/gemini:@/tmp/.ICE-unix/4840,unix/gemini:/tmp/.ICE-unix/4840</value>
+    <value type="QString" >SESSION_MANAGER=local/gemini:@/tmp/.ICE-unix/4901,unix/gemini:/tmp/.ICE-unix/4901</value>
     <value type="QString" >SHELL=/bin/bash</value>
     <value type="QString" >SHLVL=1</value>
-    <value type="QString" >SSH_AGENT_PID=4783</value>
+    <value type="QString" >SSH_AGENT_PID=4845</value>
     <value type="QString" >SSH_ASKPASS=/usr/lib64/ssh/x11-ssh-askpass</value>
-    <value type="QString" >SSH_AUTH_SOCK=/tmp/ssh-bCOpG4710/agent.4710</value>
+    <value type="QString" >SSH_AUTH_SOCK=/tmp/ssh-toTvC4772/agent.4772</value>
     <value type="QString" >TERM=xterm</value>
     <value type="QString" >TEXINPUTS=:/home/flavio/.TeX:/usr/share/doc/.TeX:/usr/doc/.TeX</value>
     <value type="QString" >TMPDIR=/tmp</value>
@@ -157,7 +158,7 @@
     <value type="QString" >XCURSOR_THEME=Oxygen_Black</value>
     <value type="QString" >XDG_CONFIG_DIRS=/etc/xdg</value>
     <value type="QString" >XDG_DATA_DIRS=/usr/share:/etc/opt/kde3/share:/opt/kde3/share</value>
-    <value type="QString" >XDG_SESSION_COOKIE=7eae1c834963ad42dcafb6e3484e75d0-1238051538.209151-1865157445</value>
+    <value type="QString" >XDG_SESSION_COOKIE=7eae1c834963ad42dcafb6e3484e75d0-1238392049.386887-719502177</value>
     <value type="QString" >XDM_MANAGED=method=classic</value>
     <value type="QString" >XKEYSYMDB=/usr/share/X11/XKeysymDB</value>
     <value type="QString" >XMODIFIERS=@im=local</value>
@@ -190,14 +191,14 @@
     <value type="QString" >CPU=x86_64</value>
     <value type="QString" >CSHEDIT=emacs</value>
     <value type="QString" >CVS_RSH=ssh</value>
-    <value type="QString" >DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-yxFjwkfA2h,guid=14b857554ac5a7835096dca149cb2ad4</value>
+    <value type="QString" >DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-VWOsJC9BKo,guid=8bf544e07b8984d9c22eb3b049d05cf3</value>
     <value type="QString" >DESKTOP_SESSION=kde4</value>
     <value type="QString" >DESKTOP_STARTUP_ID=</value>
     <value type="QString" >DISPLAY=:0.0</value>
     <value type="QString" >DM_CONTROL=/var/run/xdmctl</value>
     <value type="QString" >ENV=/etc/bash.bashrc</value>
     <value type="QString" >FROM_HEADER=</value>
-    <value type="QString" >GPG_AGENT_INFO=/tmp/gpg-R5ZH1M/S.gpg-agent:4782:1</value>
+    <value type="QString" >GPG_AGENT_INFO=/tmp/gpg-ATgwnT/S.gpg-agent:4844:1</value>
     <value type="QString" >GROFF_NO_SGR=yes</value>
     <value type="QString" >GS_LIB=/home/flavio/.fonts</value>
     <value type="QString" >GTK2_RC_FILES=/etc/gtk-2.0/gtkrc:/home/flavio/.gtkrc-2.0-kde4:/usr/share/themes//QtCurve/gtk-2.0/gtkrc:/home/flavio/.gtkrc-2.0-qtengine:/home/flavio/.gtkrc-2.0:/home/flavio/.kde4/share/config/gtkrc-2.0</value>
@@ -224,6 +225,7 @@
     <value type="QString" >LADSPA_PATH=/usr/lib64/ladspa</value>
     <value type="QString" >LANG=en_US.UTF-8</value>
     <value type="QString" >LANGUAGE=</value>
+    <value type="QString" >LD_LIBRARY_PATH=/home/flavio/hacking/testinstall/lib/qjson</value>
     <value type="QString" >LESS=-RS#3NM~g</value>
     <value type="QString" >LESSCLOSE=lessclose.sh %s %s</value>
     <value type="QString" >LESSKEY=/etc/lesskey.bin</value>
@@ -250,12 +252,12 @@
     <value type="QString" >QT_PLUGIN_PATH=/home/flavio/.kde4/lib64/kde4/plugins/:/usr/lib64/kde4/plugins/</value>
     <value type="QString" >QT_SYSTEM_DIR=/usr/share/desktop-data</value>
     <value type="QString" >SDK_HOME=/usr/lib64/jvm/java</value>
-    <value type="QString" >SESSION_MANAGER=local/gemini:@/tmp/.ICE-unix/4840,unix/gemini:/tmp/.ICE-unix/4840</value>
+    <value type="QString" >SESSION_MANAGER=local/gemini:@/tmp/.ICE-unix/4901,unix/gemini:/tmp/.ICE-unix/4901</value>
     <value type="QString" >SHELL=/bin/bash</value>
     <value type="QString" >SHLVL=1</value>
-    <value type="QString" >SSH_AGENT_PID=4783</value>
+    <value type="QString" >SSH_AGENT_PID=4845</value>
     <value type="QString" >SSH_ASKPASS=/usr/lib64/ssh/x11-ssh-askpass</value>
-    <value type="QString" >SSH_AUTH_SOCK=/tmp/ssh-bCOpG4710/agent.4710</value>
+    <value type="QString" >SSH_AUTH_SOCK=/tmp/ssh-toTvC4772/agent.4772</value>
     <value type="QString" >TERM=xterm</value>
     <value type="QString" >TEXINPUTS=:/home/flavio/.TeX:/usr/share/doc/.TeX:/usr/doc/.TeX</value>
     <value type="QString" >TMPDIR=/tmp</value>
@@ -267,7 +269,7 @@
     <value type="QString" >XCURSOR_THEME=Oxygen_Black</value>
     <value type="QString" >XDG_CONFIG_DIRS=/etc/xdg</value>
     <value type="QString" >XDG_DATA_DIRS=/usr/share:/etc/opt/kde3/share:/opt/kde3/share</value>
-    <value type="QString" >XDG_SESSION_COOKIE=7eae1c834963ad42dcafb6e3484e75d0-1238051538.209151-1865157445</value>
+    <value type="QString" >XDG_SESSION_COOKIE=7eae1c834963ad42dcafb6e3484e75d0-1238392049.386887-719502177</value>
     <value type="QString" >XDM_MANAGED=method=classic</value>
     <value type="QString" >XKEYSYMDB=/usr/share/X11/XKeysymDB</value>
     <value type="QString" >XMODIFIERS=@im=local</value>
@@ -304,33 +306,33 @@
     <value type="QString" >CPU=x86_64</value>
     <value type="QString" >CSHEDIT=emacs</value>
     <value type="QString" >CVS_RSH=ssh</value>
-    <value type="QString" >DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-yxFjwkfA2h,guid=14b857554ac5a7835096dca149cb2ad4</value>
+    <value type="QString" >DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-7JJaZlyuEe,guid=ca0721de913080ad9f04883c49cfa06b</value>
     <value type="QString" >DESKTOP_SESSION=kde4</value>
     <value type="QString" >DESKTOP_STARTUP_ID=</value>
     <value type="QString" >DISPLAY=:0.0</value>
     <value type="QString" >DM_CONTROL=/var/run/xdmctl</value>
     <value type="QString" >ENV=/etc/bash.bashrc</value>
     <value type="QString" >FROM_HEADER=</value>
-    <value type="QString" >GPG_AGENT_INFO=/tmp/gpg-R5ZH1M/S.gpg-agent:4782:1</value>
+    <value type="QString" >GPG_AGENT_INFO=/tmp/gpg-mI8n9K/S.gpg-agent:3805:1</value>
+    <value type="QString" >GREP_OPTIONS=--color -I </value>
     <value type="QString" >GROFF_NO_SGR=yes</value>
     <value type="QString" >GS_LIB=/home/flavio/.fonts</value>
-    <value type="QString" >GTK2_RC_FILES=/etc/gtk-2.0/gtkrc:/home/flavio/.gtkrc-2.0-kde4:/usr/share/themes//QtCurve/gtk-2.0/gtkrc:/home/flavio/.gtkrc-2.0-qtengine:/home/flavio/.gtkrc-2.0:/home/flavio/.kde4/share/config/gtkrc-2.0</value>
+    <value type="QString" >GTK2_RC_FILES=/etc/gtk-2.0/gtkrc:/usr/share/themes//QtCurve/gtk-2.0/gtkrc:/home/flavio/.gtkrc-2.0-qtengine:/home/flavio/.gtkrc-2.0:/home/flavio/.kde4/share/config/gtkrc-2.0</value>
     <value type="QString" >GTK_RC_FILES=/etc/gtk/gtkrc:/home/flavio/.gtkrc::/home/flavio/.kde4/share/config/gtkrc</value>
     <value type="QString" >G_BROKEN_FILENAMES=1</value>
     <value type="QString" >G_FILENAME_ENCODING=@locale,UTF-8,ISO-8859-15,CP1252</value>
     <value type="QString" >HISTSIZE=1000</value>
     <value type="QString" >HOME=/home/flavio</value>
-    <value type="QString" >HOST=gemini</value>
-    <value type="QString" >HOSTNAME=gemini</value>
+    <value type="QString" >HOST=roesti</value>
+    <value type="QString" >HOSTNAME=roesti</value>
     <value type="QString" >HOSTTYPE=x86_64</value>
     <value type="QString" >INFODIR=/usr/local/info:/usr/share/info:/usr/info</value>
     <value type="QString" >INFOPATH=/usr/local/info:/usr/share/info:/usr/info</value>
     <value type="QString" >INPUTRC=/home/flavio/.inputrc</value>
-    <value type="QString" >JAVA_BINDIR=/usr/lib64/jvm/java/bin</value>
-    <value type="QString" >JAVA_HOME=/usr/lib64/jvm/java</value>
-    <value type="QString" >JAVA_ROOT=/usr/lib64/jvm/java</value>
-    <value type="QString" >JDK_HOME=/usr/lib64/jvm/java</value>
-    <value type="QString" >JRE_HOME=/usr/lib64/jvm/java/jre</value>
+    <value type="QString" >JAVA_BINDIR=/usr/lib64/jvm/jre/bin</value>
+    <value type="QString" >JAVA_HOME=/usr/lib64/jvm/jre</value>
+    <value type="QString" >JAVA_ROOT=/usr/lib64/jvm/jre</value>
+    <value type="QString" >JRE_HOME=/usr/lib64/jvm/jre</value>
     <value type="QString" >KDE_FULL_SESSION=true</value>
     <value type="QString" >KDE_MULTIHEAD=false</value>
     <value type="QString" >KDE_SESSION_UID=1000</value>
@@ -338,12 +340,12 @@
     <value type="QString" >LADSPA_PATH=/usr/lib64/ladspa</value>
     <value type="QString" >LANG=en_US.UTF-8</value>
     <value type="QString" >LANGUAGE=</value>
-    <value type="QString" >LESS=-RS#3NM~g</value>
+    <value type="QString" >LD_LIBRARY_PATH=/home/flavio/hacking/xesamqlib/lib/</value>
+    <value type="QString" >LESS=-r</value>
     <value type="QString" >LESSCLOSE=lessclose.sh %s %s</value>
     <value type="QString" >LESSKEY=/etc/lesskey.bin</value>
     <value type="QString" >LESSOPEN=lessopen.sh %s</value>
     <value type="QString" >LESS_ADVANCED_PREPROCESSOR=no</value>
-    <value type="QString" >LIBXCB_ALLOW_SLOPPY_LOCK=1</value>
     <value type="QString" >LOGNAME=flavio</value>
     <value type="QString" >LS_COLORS=no=00:fi=00:di=01;34:ln=00;36:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=41;33;01:ex=00;32:*.cmd=00;32:*.exe=01;32:*.com=01;32:*.bat=01;32:*.btm=01;32:*.dll=01;32:*.tar=00;31:*.tbz=00;31:*.tgz=00;31:*.rpm=00;31:*.deb=00;31:*.arj=00;31:*.taz=00;31:*.lzh=00;31:*.lzma=00;31:*.zip=00;31:*.zoo=00;31:*.z=00;31:*.Z=00;31:*.gz=00;31:*.bz2=00;31:*.tb2=00;31:*.tz2=00;31:*.tbz2=00;31:*.avi=01;35:*.bmp=01;35:*.fli=01;35:*.gif=01;35:*.jpg=01;35:*.jpeg=01;35:*.mng=01;35:*.mov=01;35:*.mpg=01;35:*.pcx=01;35:*.pbm=01;35:*.pgm=01;35:*.png=01;35:*.ppm=01;35:*.tga=01;35:*.tif=01;35:*.xbm=01;35:*.xpm=01;35:*.dl=01;35:*.gl=01;35:*.wmv=01;35:*.aiff=00;32:*.au=00;32:*.mid=00;32:*.mp3=00;32:*.ogg=00;32:*.voc=00;32:*.wav=00;32:</value>
     <value type="QString" >LS_OPTIONS=-N --color=tty -T 0</value>
@@ -356,20 +358,19 @@
     <value type="QString" >OPERADIR=/usr/share/opera</value>
     <value type="QString" >OSTYPE=linux</value>
     <value type="QString" >PAGER=less</value>
-    <value type="QString" >PATH=/usr/bin:/home/flavio/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/X11R6/bin:/usr/games:/opt/kde3/bin:/usr/lib/mit/bin:/usr/lib/mit/sbin:/usr/lib/qt3/bin</value>
+    <value type="QString" >PATH=/usr/bin:/home/flavio/bin:/usr/local/bin:/usr/bin:/bin:/usr/bin/X11:/usr/X11R6/bin:/usr/games:/opt/kde3/bin:/usr/lib64/jvm/jre/bin:/usr/lib/mit/bin:/usr/lib/mit/sbin:/usr/lib/qt3/bin</value>
     <value type="QString" >PROFILEREAD=true</value>
     <value type="QString" >PWD=/home/flavio</value>
     <value type="QString" >PYTHONSTARTUP=/etc/pythonstart</value>
     <value type="QString" >QTDIR=/usr</value>
     <value type="QString" >QT_PLUGIN_PATH=/home/flavio/.kde4/lib64/kde4/plugins/:/usr/lib64/kde4/plugins/</value>
     <value type="QString" >QT_SYSTEM_DIR=/usr/share/desktop-data</value>
-    <value type="QString" >SDK_HOME=/usr/lib64/jvm/java</value>
-    <value type="QString" >SESSION_MANAGER=local/gemini:@/tmp/.ICE-unix/4840,unix/gemini:/tmp/.ICE-unix/4840</value>
+    <value type="QString" >SESSION_MANAGER=local/roesti:@/tmp/.ICE-unix/3866,unix/roesti:/tmp/.ICE-unix/3866</value>
     <value type="QString" >SHELL=/bin/bash</value>
     <value type="QString" >SHLVL=1</value>
-    <value type="QString" >SSH_AGENT_PID=4783</value>
+    <value type="QString" >SSH_AGENT_PID=3806</value>
     <value type="QString" >SSH_ASKPASS=/usr/lib64/ssh/x11-ssh-askpass</value>
-    <value type="QString" >SSH_AUTH_SOCK=/tmp/ssh-bCOpG4710/agent.4710</value>
+    <value type="QString" >SSH_AUTH_SOCK=/tmp/ssh-jbWGp3734/agent.3734</value>
     <value type="QString" >TERM=xterm</value>
     <value type="QString" >TEXINPUTS=:/home/flavio/.TeX:/usr/share/doc/.TeX:/usr/doc/.TeX</value>
     <value type="QString" >TMPDIR=/tmp</value>
@@ -377,11 +378,11 @@
     <value type="QString" >USE_FAM=</value>
     <value type="QString" >WINDOWMANAGER=/usr/bin/startkde</value>
     <value type="QString" >WINDOWPATH=7</value>
-    <value type="QString" >XAUTHLOCALHOSTNAME=gemini</value>
+    <value type="QString" >XAUTHLOCALHOSTNAME=roesti</value>
     <value type="QString" >XCURSOR_THEME=Oxygen_Black</value>
     <value type="QString" >XDG_CONFIG_DIRS=/etc/xdg</value>
     <value type="QString" >XDG_DATA_DIRS=/usr/share:/etc/opt/kde3/share:/opt/kde3/share</value>
-    <value type="QString" >XDG_SESSION_COOKIE=7eae1c834963ad42dcafb6e3484e75d0-1238051538.209151-1865157445</value>
+    <value type="QString" >XDG_SESSION_COOKIE=7eae1c834963ad42dcafb6e3484e75d0-1238343785.225746-1269849779</value>
     <value type="QString" >XDM_MANAGED=method=classic</value>
     <value type="QString" >XKEYSYMDB=/usr/share/X11/XKeysymDB</value>
     <value type="QString" >XMODIFIERS=@im=local</value>

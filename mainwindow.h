@@ -23,6 +23,7 @@ class MainWindow : public QMainWindow, private Ui::MainWindowClass
     void slotArtistEventsReady(QVariant,bool,QString);
     void slotCurrentArtistRowChanged(int);
     void slotCurrentEventChanged(const QModelIndex & current, const QModelIndex & previous);
+    void slotFilterTextChanged(const QString& text);
 
   private:
     DataFetcher* m_df;

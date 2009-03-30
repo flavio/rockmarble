@@ -3,6 +3,7 @@
 #include "artist.h"
 #include "datafetcher.h"
 #include "eventmodel.h"
+#include "eventsortfilterproxymodel.h"
 
 #include <MarbleMap.h>
 #include <MarbleModel.h>
@@ -24,12 +25,14 @@ MainWindow::MainWindow(QWidget *parent)
   marble->setShowGps(true);
   marble->setDownloadUrl( "http://download.kde.org/apps/marble/" );
 
-  connect( addArtist, SIGNAL(clicked()), this, SLOT(slotAddArtist()));
+  eventTable->setSortingEnabled(true);
 
   m_df = DataFetcher::instance();
   connect (m_df, SIGNAL(getArtistEventsReady(QVariant,bool,QString)), this, SLOT(slotArtistEventsReady(QVariant,bool,QString)));
 
+  connect( addArtist, SIGNAL(clicked()), this, SLOT(slotAddArtist()));
   connect(artistList, SIGNAL(currentRowChanged(int)), this, SLOT(slotCurrentArtistRowChanged(int)));
+  connect(filterEdit, SIGNAL(textChanged(QString)), this, SLOT(slotFilterTextChanged(QString)));
 }
 
 MainWindow::~MainWindow()
@@ -50,22 +53,37 @@ void MainWindow::slotAddArtist() {
   }
 }
 
+void MainWindow::slotFilterTextChanged(const QString& text)
+{
+  EventSortFilterProxyModel* proxyModel = static_cast<EventSortFilterProxyModel*>( eventTable->model());
+  proxyModel->setFilterFixedString(text);
+  proxyModel->setFilterKeyColumn(filterComboBox->currentIndex());
+  proxyModel->setFilterCaseSensitivity ( Qt::CaseInsensitive );
+}
+
 void MainWindow::slotCurrentArtistRowChanged(int row)
 {
   QString artist = artistList->item(row)->text();
   eventsBox->setTitle(tr("%1 tour dates").arg(artist));
-  eventTable->setModel(m_artists[artist]);
+
+  EventModel* sourceModel = m_artists[artist];
+  QSortFilterProxyModel* proxyModel = new QSortFilterProxyModel();
+
+  proxyModel->setSourceModel(sourceModel);
+  eventTable->setModel(proxyModel);
+
   connect(eventTable->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(slotCurrentEventChanged(QModelIndex,QModelIndex)));
   eventTable->update();
 }
 
 void MainWindow::slotCurrentEventChanged(const QModelIndex & current, const QModelIndex & previous ) {
   Q_UNUSED( previous)
-  EventModel* model = static_cast<EventModel*>(eventTable->model());
+  QSortFilterProxyModel* proxyModel = dynamic_cast<QSortFilterProxyModel*>(eventTable->model());
+  EventModel* model = dynamic_cast<EventModel*>(proxyModel->sourceModel());
 
   qreal latitude, longitude;
 
-  if (model->getCoordinates(current, &latitude, &longitude)) {
+  if (model->getCoordinates(model->index(current.row(),current.column()), &latitude, &longitude)) {
     marble->centerOn(longitude, latitude, true);
     marble->update();
   }

@@ -113,6 +113,34 @@
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <item>
+            <widget class="QLabel" name="label">
+             <property name="text">
+              <string>Filter by</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="filterEdit"/>
+           </item>
+           <item>
+            <widget class="QComboBox" name="filterComboBox">
+             <item>
+              <property name="text">
+               <string>Country</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>City</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
           <widget class="QTableView" name="eventTable">
            <property name="selectionMode">
             <enum>QAbstractItemView::SingleSelection</enum>
@@ -135,7 +163,7 @@
      <x>0</x>
      <y>0</y>
      <width>1090</width>
-     <height>26</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

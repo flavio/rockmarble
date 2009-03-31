@@ -18,13 +18,26 @@
   * Boston, MA 02110-1301, USA.
   */
 
-#include <QtGui/QApplication>
-#include "mainwindow.h"
+#ifndef JSONCONVERTERTHREAD_H
+#define JSONCONVERTERTHREAD_H
 
-int main(int argc, char *argv[])
+#include <QThread>
+
+#include <QtCore/QVariant>
+
+class JSonConverterThread  : public QThread
 {
-    QApplication a(argc, argv);
-    MainWindow w;
-    w.show();
-    return a.exec();
-}
+  Q_OBJECT
+  public:
+    JSonConverterThread(QString& data, QObject* parent = 0);
+
+    void run();
+
+  signals:
+    void conversionFinished(QVariant, bool, QString);
+
+  private:
+    QString m_data;
+};
+
+#endif // JSONCONVERTERTHREAD_H

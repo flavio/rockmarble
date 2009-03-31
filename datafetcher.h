@@ -45,24 +45,27 @@ class DataFetcher  : public QObject
   public:
     static DataFetcher* instance();
     void getArtistEvents(const QString& artist);
+    void getTopArtists(const QString& user);
 
   Q_SIGNALS:
-    // SIG: getArtistEventsReady()
     // #1 : Reply converted to a QVarian object
     // #2 : Was the request successful ?
     // #3 : Error Message
-    void getArtistEventsReady(QVariant, bool, QString);
+    void getArtistEventsReady(QString, bool, QString);
+    void getTopArtistsReady(QString, bool, QString);
 
   private Q_SLOTS:
     void requestFinished(QNetworkReply *);
 
   private:
     enum RequestType {
-       ArtistEventsRequest
+       ArtistEventsRequest,
+       TopArtistsRequest
     };
     enum CustomAttribute {
        RequestTypeAttribute = int(QNetworkRequest::User),
-       ArtistNameAttribute = int(QNetworkRequest::User+1)
+       ArtistNameAttribute = int(QNetworkRequest::User+1),
+       UserNameAttribute = int(QNetworkRequest::User+2)
     };
 
     DataFetcher(QObject *parent = 0);
@@ -72,18 +75,18 @@ class DataFetcher  : public QObject
 
     void doRequest(const QUrl &url, RequestType requestType, const QString& artistName = "");
 
-   // Test if we got all the necessary data before emitting signal
-  // void emissionCheck(const int &showId);
-
     // Convert NetworkError code to QString
     QString errorCodeToText(QNetworkReply::NetworkError errorCode);
 
-    void clearData(const QString& artistName);
+    void clearArtistData(const QString& artistName);
+    void clearUserData(const QString& userName);
 
     QNetworkAccessManager* m_nam;
 
     QHash<QString, QVariant> m_artistEventsHash;
     QHash<QString, QString>  m_artistEventsError;
+    QHash<QString, QVariant> m_topArtistsHash;
+    QHash<QString, QString>  m_topArtistsError;
 };
 
 #endif // DATAFETCHER_H

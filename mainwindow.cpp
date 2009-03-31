@@ -1,13 +1,35 @@
+/* This file is part of rockmarble
+  *
+  * Copyright (C) 2009 Flavio Castelli <flavio@castelli.name>
+  *
+  * This library is free software; you can redistribute it and/or
+  * modify it under the terms of the GNU Library General Public
+  * License as published by the Free Software Foundation; either
+  * version 2 of the License, or (at your option) any later version.
+  *
+  * This library is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  * Library General Public License for more details.
+  *
+  * You should have received a copy of the GNU Library General Public License
+  * along with this library; see the file COPYING.LIB.  If not, write to
+  * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+  * Boston, MA 02110-1301, USA.
+  */
+
 #include "mainwindow.h"
 
 #include "artist.h"
 #include "datafetcher.h"
 #include "eventmodel.h"
 #include "eventsortfilterproxymodel.h"
+#include "jsonconverterthread.h"
 
+#include <QAbstractItemModel>
 #include <MarbleMap.h>
 #include <MarbleModel.h>
-#include <QAbstractItemModel>
+#include <QMessageBox>
 #include <QInputDialog>
 #include <QListWidgetItem>
 #include <QStatusBar>
@@ -27,12 +49,19 @@ MainWindow::MainWindow(QWidget *parent)
 
   eventTable->setSortingEnabled(true);
 
+  // data fetcher
   m_df = DataFetcher::instance();
-  connect (m_df, SIGNAL(getArtistEventsReady(QVariant,bool,QString)), this, SLOT(slotArtistEventsReady(QVariant,bool,QString)));
+  connect (m_df, SIGNAL(getArtistEventsReady(QString,bool,QString)), this, SLOT(slotArtistEventsReady(QString,bool,QString)));
+  connect (m_df, SIGNAL(getTopArtistsReady(QString,bool,QString)), this, SLOT(slotTopArtistsReady(QString,bool,QString)));
 
-  connect( addArtist, SIGNAL(clicked()), this, SLOT(slotAddArtist()));
+  // gui signals
+  connect(addArtistBtn, SIGNAL(clicked()), this, SLOT(slotAddArtist()));
+  connect(importLastfmBtn, SIGNAL(clicked()), this, SLOT(slotImportLastfm()));
+
   connect(artistList, SIGNAL(currentRowChanged(int)), this, SLOT(slotCurrentArtistRowChanged(int)));
   connect(filterEdit, SIGNAL(textChanged(QString)), this, SLOT(slotFilterTextChanged(QString)));
+  connect(actionExit, SIGNAL(triggered()), this, SLOT(close()));
+  connect(action_about, SIGNAL(triggered()), this, SLOT(slotAbout()));
 }
 
 MainWindow::~MainWindow()
@@ -42,14 +71,38 @@ MainWindow::~MainWindow()
   m_artists.clear();
 }
 
+void MainWindow::slotAbout()
+{
+  QMessageBox::about(this, tr("About rockmarble"), tr("Simple program for tracking tour dates of your favourite artists.\nFlavio Castelli <flavio@castelli.name>"));
+}
+
 void MainWindow::slotAddArtist() {
   bool ok;
-  QString artist = QInputDialog::getText(this, tr("rockmarble - add a new artist"),
+  QString artist = QInputDialog::getText(this, tr("Add a new artist"),
                                           tr("Artist name:"), QLineEdit::Normal,
                                           "", &ok);
- if (ok && !artist.isEmpty()) {
+  if (ok && !artist.isEmpty()) {
+    addArtist(artist);
+  }
+}
+
+void MainWindow::addArtist(const QString& artist)
+{
+  if (!artist.isEmpty()) {
     m_df->getArtistEvents(artist);
     m_statusBar->showMessage(tr("retrieving event dates for %1").arg(artist));
+  }
+}
+
+void MainWindow::slotImportLastfm() {
+  bool ok;
+  QString user = QInputDialog::getText(this, tr("Import last.fm top artists"),
+                              tr("Your last.fm user name:"), QLineEdit::Normal,
+                              "", &ok);
+
+  if (ok && !user.isEmpty()) {
+    m_df->getTopArtists(user);
+    m_statusBar->showMessage(tr("retrieving top artists for user %1").arg(user));
   }
 }
 
@@ -67,29 +120,45 @@ void MainWindow::slotCurrentArtistRowChanged(int row)
   eventsBox->setTitle(tr("%1 tour dates").arg(artist));
 
   EventModel* sourceModel = m_artists[artist];
-  QSortFilterProxyModel* proxyModel = new QSortFilterProxyModel();
 
-  proxyModel->setSourceModel(sourceModel);
-  eventTable->setModel(proxyModel);
+  if (sourceModel->rowCount() != 0) {
+    stackedWidget->setCurrentIndex(0);
+    QSortFilterProxyModel* proxyModel = new QSortFilterProxyModel();
 
-  connect(eventTable->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(slotCurrentEventChanged(QModelIndex,QModelIndex)));
+    proxyModel->setSourceModel(sourceModel);
+    eventTable->setModel(proxyModel);
+
+    connect(eventTable->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(slotCurrentEventChanged(QModelIndex,QModelIndex)));
+  } else {
+    stackedWidget->setCurrentIndex(1);
+  }
   eventTable->update();
 }
 
 void MainWindow::slotCurrentEventChanged(const QModelIndex & current, const QModelIndex & previous ) {
   Q_UNUSED( previous)
-  QSortFilterProxyModel* proxyModel = dynamic_cast<QSortFilterProxyModel*>(eventTable->model());
-  EventModel* model = dynamic_cast<EventModel*>(proxyModel->sourceModel());
+  QSortFilterProxyModel* proxyModel = static_cast<QSortFilterProxyModel*>(eventTable->model());
+  EventModel* model = static_cast<EventModel*>(proxyModel->sourceModel());
 
   qreal latitude, longitude;
 
-  if (model->getCoordinates(model->index(current.row(),current.column()), &latitude, &longitude)) {
+  if (model->getCoordinates(proxyModel->mapToSource(current), &latitude, &longitude)) {
     marble->centerOn(longitude, latitude, true);
     marble->update();
   }
 }
 
-void MainWindow::slotArtistEventsReady(QVariant data, bool successfull, QString error) {
+void MainWindow::slotArtistEventsReady(QString data, bool successfull, QString error) {
+  if (successfull) {
+    JSonConverterThread* thread = new JSonConverterThread(data, this);
+    connect(thread, SIGNAL(conversionFinished(QVariant, bool, QString)), this, SLOT(slotArtistEventConverted(QVariant, bool, QString)));
+    thread->start();
+  } else {
+    m_statusBar->showMessage(error);
+  }
+}
+
+void MainWindow::slotArtistEventConverted(QVariant data, bool successfull, QString error) {
   if (successfull) {
     Artist* artist = new Artist (data);
 
@@ -103,6 +172,33 @@ void MainWindow::slotArtistEventsReady(QVariant data, bool successfull, QString 
       new QListWidgetItem(artist->name(), artistList);
     }
     m_statusBar->showMessage(tr("Event dates for %1 successfully retrieved").arg(artist->name()), 1200);
+  } else {
+    m_statusBar->showMessage(error);
+  }
+}
+
+void MainWindow::slotTopArtistsReady(QString data, bool successfull, QString error) {
+  if (successfull) {
+    JSonConverterThread* thread = new JSonConverterThread (data, this);
+    connect(thread, SIGNAL(conversionFinished(QVariant, bool, QString)), this, SLOT(slotTopArtistConverted(QVariant, bool, QString)));
+    thread->start();
+  } else {
+    m_statusBar->showMessage(error);
+  }
+}
+
+void MainWindow::slotTopArtistConverted(QVariant data, bool successfull, QString error) {
+  if (successfull) {
+    QVariantMap response = data.toMap();
+    QVariantMap topartists = response["topartists"].toMap();
+    QVariantList artists = topartists["artist"].toList();
+
+    foreach(QVariant entry, artists) {
+      QVariantMap artist = entry.toMap();
+      QString artistName = artist["name"].toString();
+      //qDebug() << artistName;
+      addArtist(artistName);
+    }
   } else {
     m_statusBar->showMessage(error);
   }

@@ -15,14 +15,18 @@ SOURCES += main.cpp \
     event.cpp \
     location.cpp \
     eventmodel.cpp \
-    eventsortfilterproxymodel.cpp
+    eventsortfilterproxymodel.cpp \
+    lineedit.cpp \
+    jsonconverterthread.cpp
 HEADERS += mainwindow.h \
     artist.h \
     datafetcher.h \
     location.h \
     event.h \
     eventmodel.h \
-    eventsortfilterproxymodel.h
+    eventsortfilterproxymodel.h \
+    lineedit.h \
+    jsonconverterthread.h
 FORMS += mainwindow.ui
 QT += network
 CONFIG += warn_on \

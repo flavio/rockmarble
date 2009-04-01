@@ -80,14 +80,14 @@
     <value type="QString" >CPU=x86_64</value>
     <value type="QString" >CSHEDIT=emacs</value>
     <value type="QString" >CVS_RSH=ssh</value>
-    <value type="QString" >DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-aHjafXanf8,guid=c138a07e63a2b5bd27ce4a1749d1bd39</value>
+    <value type="QString" >DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-g0JGIObC8O,guid=0c4e2d35e30e42944eaab5ee49d3190d</value>
     <value type="QString" >DESKTOP_SESSION=kde4</value>
     <value type="QString" >DESKTOP_STARTUP_ID=</value>
     <value type="QString" >DISPLAY=:0.0</value>
     <value type="QString" >DM_CONTROL=/var/run/xdmctl</value>
     <value type="QString" >ENV=/etc/bash.bashrc</value>
     <value type="QString" >FROM_HEADER=</value>
-    <value type="QString" >GPG_AGENT_INFO=/tmp/gpg-ga5Lb6/S.gpg-agent:4778:1</value>
+    <value type="QString" >GPG_AGENT_INFO=/tmp/gpg-Jm7nsj/S.gpg-agent:4800:1</value>
     <value type="QString" >GROFF_NO_SGR=yes</value>
     <value type="QString" >GS_LIB=/home/flavio/.fonts</value>
     <value type="QString" >GTK2_RC_FILES=/etc/gtk-2.0/gtkrc:/home/flavio/.gtkrc-2.0-kde4:/usr/share/themes//QtCurve/gtk-2.0/gtkrc:/home/flavio/.gtkrc-2.0-qtengine:/home/flavio/.gtkrc-2.0:/home/flavio/.kde4/share/config/gtkrc-2.0</value>
@@ -141,12 +141,12 @@
     <value type="QString" >QT_PLUGIN_PATH=/home/flavio/.kde4/lib64/kde4/plugins/:/usr/lib64/kde4/plugins/</value>
     <value type="QString" >QT_SYSTEM_DIR=/usr/share/desktop-data</value>
     <value type="QString" >SDK_HOME=/usr/lib64/jvm/java</value>
-    <value type="QString" >SESSION_MANAGER=local/gemini:@/tmp/.ICE-unix/4835,unix/gemini:/tmp/.ICE-unix/4835</value>
+    <value type="QString" >SESSION_MANAGER=local/gemini:@/tmp/.ICE-unix/4858,unix/gemini:/tmp/.ICE-unix/4858</value>
     <value type="QString" >SHELL=/bin/bash</value>
     <value type="QString" >SHLVL=1</value>
-    <value type="QString" >SSH_AGENT_PID=4779</value>
+    <value type="QString" >SSH_AGENT_PID=4801</value>
     <value type="QString" >SSH_ASKPASS=/usr/lib64/ssh/x11-ssh-askpass</value>
-    <value type="QString" >SSH_AUTH_SOCK=/tmp/ssh-AfvcX4706/agent.4706</value>
+    <value type="QString" >SSH_AUTH_SOCK=/tmp/ssh-ugCrQ4728/agent.4728</value>
     <value type="QString" >TERM=xterm</value>
     <value type="QString" >TEXINPUTS=:/home/flavio/.TeX:/usr/share/doc/.TeX:/usr/doc/.TeX</value>
     <value type="QString" >TMPDIR=/tmp</value>
@@ -158,7 +158,7 @@
     <value type="QString" >XCURSOR_THEME=Oxygen_Black</value>
     <value type="QString" >XDG_CONFIG_DIRS=/etc/xdg</value>
     <value type="QString" >XDG_DATA_DIRS=/usr/share:/etc/opt/kde3/share:/opt/kde3/share</value>
-    <value type="QString" >XDG_SESSION_COOKIE=7eae1c834963ad42dcafb6e3484e75d0-1238482228.952854-306076705</value>
+    <value type="QString" >XDG_SESSION_COOKIE=7eae1c834963ad42dcafb6e3484e75d0-1238571275.65911-918703190</value>
     <value type="QString" >XDM_MANAGED=method=classic</value>
     <value type="QString" >XKEYSYMDB=/usr/share/X11/XKeysymDB</value>
     <value type="QString" >XMODIFIERS=@im=local</value>
@@ -177,7 +177,7 @@
     <value type="QString" >CONFIG+=debug</value>
    </valuelist>
    <value key="abstractProcess.command" type="QString" >/usr/bin/qmake</value>
-   <value key="abstractProcess.enabled" type="bool" >true</value>
+   <value key="abstractProcess.enabled" type="bool" >false</value>
    <value key="abstractProcess.workingDirectory" type="QString" >/home/flavio/hacking/rockmarble</value>
    <value key="buildConfiguration" type="int" >10</value>
   </valuemap>
@@ -191,14 +191,14 @@
     <value type="QString" >CPU=x86_64</value>
     <value type="QString" >CSHEDIT=emacs</value>
     <value type="QString" >CVS_RSH=ssh</value>
-    <value type="QString" >DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-aHjafXanf8,guid=c138a07e63a2b5bd27ce4a1749d1bd39</value>
+    <value type="QString" >DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-g0JGIObC8O,guid=0c4e2d35e30e42944eaab5ee49d3190d</value>
     <value type="QString" >DESKTOP_SESSION=kde4</value>
     <value type="QString" >DESKTOP_STARTUP_ID=</value>
     <value type="QString" >DISPLAY=:0.0</value>
     <value type="QString" >DM_CONTROL=/var/run/xdmctl</value>
     <value type="QString" >ENV=/etc/bash.bashrc</value>
     <value type="QString" >FROM_HEADER=</value>
-    <value type="QString" >GPG_AGENT_INFO=/tmp/gpg-ga5Lb6/S.gpg-agent:4778:1</value>
+    <value type="QString" >GPG_AGENT_INFO=/tmp/gpg-Jm7nsj/S.gpg-agent:4800:1</value>
     <value type="QString" >GROFF_NO_SGR=yes</value>
     <value type="QString" >GS_LIB=/home/flavio/.fonts</value>
     <value type="QString" >GTK2_RC_FILES=/etc/gtk-2.0/gtkrc:/home/flavio/.gtkrc-2.0-kde4:/usr/share/themes//QtCurve/gtk-2.0/gtkrc:/home/flavio/.gtkrc-2.0-qtengine:/home/flavio/.gtkrc-2.0:/home/flavio/.kde4/share/config/gtkrc-2.0</value>
@@ -252,12 +252,12 @@
     <value type="QString" >QT_PLUGIN_PATH=/home/flavio/.kde4/lib64/kde4/plugins/:/usr/lib64/kde4/plugins/</value>
     <value type="QString" >QT_SYSTEM_DIR=/usr/share/desktop-data</value>
     <value type="QString" >SDK_HOME=/usr/lib64/jvm/java</value>
-    <value type="QString" >SESSION_MANAGER=local/gemini:@/tmp/.ICE-unix/4835,unix/gemini:/tmp/.ICE-unix/4835</value>
+    <value type="QString" >SESSION_MANAGER=local/gemini:@/tmp/.ICE-unix/4858,unix/gemini:/tmp/.ICE-unix/4858</value>
     <value type="QString" >SHELL=/bin/bash</value>
     <value type="QString" >SHLVL=1</value>
-    <value type="QString" >SSH_AGENT_PID=4779</value>
+    <value type="QString" >SSH_AGENT_PID=4801</value>
     <value type="QString" >SSH_ASKPASS=/usr/lib64/ssh/x11-ssh-askpass</value>
-    <value type="QString" >SSH_AUTH_SOCK=/tmp/ssh-AfvcX4706/agent.4706</value>
+    <value type="QString" >SSH_AUTH_SOCK=/tmp/ssh-ugCrQ4728/agent.4728</value>
     <value type="QString" >TERM=xterm</value>
     <value type="QString" >TEXINPUTS=:/home/flavio/.TeX:/usr/share/doc/.TeX:/usr/doc/.TeX</value>
     <value type="QString" >TMPDIR=/tmp</value>
@@ -269,7 +269,7 @@
     <value type="QString" >XCURSOR_THEME=Oxygen_Black</value>
     <value type="QString" >XDG_CONFIG_DIRS=/etc/xdg</value>
     <value type="QString" >XDG_DATA_DIRS=/usr/share:/etc/opt/kde3/share:/opt/kde3/share</value>
-    <value type="QString" >XDG_SESSION_COOKIE=7eae1c834963ad42dcafb6e3484e75d0-1238482228.952854-306076705</value>
+    <value type="QString" >XDG_SESSION_COOKIE=7eae1c834963ad42dcafb6e3484e75d0-1238571275.65911-918703190</value>
     <value type="QString" >XDM_MANAGED=method=classic</value>
     <value type="QString" >XKEYSYMDB=/usr/share/X11/XKeysymDB</value>
     <value type="QString" >XMODIFIERS=@im=local</value>

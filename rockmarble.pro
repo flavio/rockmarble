@@ -33,3 +33,5 @@ QT += network
 CONFIG += warn_on \
     debug_and_release
 RESOURCES += resources.qrc
+target.path +=/usr/bin/
+INSTALLS += target

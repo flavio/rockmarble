@@ -4,8 +4,8 @@
 TARGET = rockmarble
 TEMPLATE = app
 INCLUDEPATH += /usr/include/marble \
-    /home/flavio/hacking/testinstall/include/qjson
-LIBS += -L/home/flavio/hacking/testinstall/lib/qjson \
+    /usr/include/qjson
+LIBS += -L/usr/lib/qjson -L/usr/lib64/qjson \
     -lmarblewidget \
     -lqjson
 SOURCES += main.cpp \

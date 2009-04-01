@@ -26,7 +26,8 @@ HEADERS += mainwindow.h \
     eventmodel.h \
     eventsortfilterproxymodel.h \
     lineedit.h \
-    jsonconverterthread.h
+    jsonconverterthread.h \
+    defines.h
 FORMS += mainwindow.ui
 QT += network
 CONFIG += warn_on \

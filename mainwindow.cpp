@@ -22,6 +22,7 @@
 
 #include "artist.h"
 #include "datafetcher.h"
+#include "defines.h"
 #include "eventmodel.h"
 #include "eventsortfilterproxymodel.h"
 #include "jsonconverterthread.h"
@@ -33,8 +34,6 @@
 #include <QInputDialog>
 #include <QListWidgetItem>
 #include <QStatusBar>
-
-#include <QDebug>
 
 using namespace Marble;
 
@@ -73,7 +72,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::slotAbout()
 {
-  QMessageBox::about(this, tr("About rockmarble"), tr("Simple program for tracking tour dates of your favourite artists.\nFlavio Castelli <flavio@castelli.name>"));
+  QMessageBox::about(this, tr("About rockmarble"), tr("rockmarble version %1\n\nSimple program for tracking tour dates of your favourite artists.\n\nFlavio Castelli <flavio@castelli.name>").arg(ROCKMARBLE_VERSION));
 }
 
 void MainWindow::slotAddArtist() {
@@ -190,14 +189,18 @@ void MainWindow::slotTopArtistsReady(QString data, bool successfull, QString err
 void MainWindow::slotTopArtistConverted(QVariant data, bool successfull, QString error) {
   if (successfull) {
     QVariantMap response = data.toMap();
-    QVariantMap topartists = response["topartists"].toMap();
-    QVariantList artists = topartists["artist"].toList();
+    if (!response.contains("error")) {
+      QVariantMap topartists = response["topartists"].toMap();
+      QVariantList artists = topartists["artist"].toList();
 
-    foreach(QVariant entry, artists) {
-      QVariantMap artist = entry.toMap();
-      QString artistName = artist["name"].toString();
-      //qDebug() << artistName;
-      addArtist(artistName);
+      foreach(QVariant entry, artists) {
+        QVariantMap artist = entry.toMap();
+        QString artistName = artist["name"].toString();
+        addArtist(artistName);
+      }
+    }
+    else {
+      m_statusBar->showMessage(response["message"].toString());
     }
   } else {
     m_statusBar->showMessage(error);

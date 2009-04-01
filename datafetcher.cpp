@@ -28,7 +28,7 @@
 
 #include <json_driver.hh>
 
-#define API_KEY "b25b959554ed76058ac220b7b2e0a026"
+#include "defines.h"
 
 DataFetcher::DataFetcher(QObject *parent)
   : QObject(parent),
@@ -86,8 +86,8 @@ void DataFetcher::doRequest(const QUrl &url, DataFetcher::RequestType requestTyp
 {
   qDebug() << Q_FUNC_INFO;
   QNetworkRequest request;
-  //QString httpUA = QString("nextShows/%1 (http://nextshows.googlecode.com/)").arg(NEXTSHOWS_VERSION);
-  //    request.setRawHeader("User-Agent", qPrintable(httpUA));
+  QString httpUA = QString("rockmarble/%1 (http://github.com/flavio/rockmarble/tree/master)").arg(ROCKMARBLE_VERSION);
+  request.setRawHeader("User-Agent", qPrintable(httpUA));
   request.setUrl(url);
 
   // Set some attributes

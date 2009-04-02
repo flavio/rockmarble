@@ -59,6 +59,7 @@ MainWindow::MainWindow(QWidget *parent)
 
   connect(artistList, SIGNAL(currentRowChanged(int)), this, SLOT(slotCurrentArtistRowChanged(int)));
   connect(filterEdit, SIGNAL(textChanged(QString)), this, SLOT(slotFilterTextChanged(QString)));
+  connect(filterComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(slotFilterIndexChanged()));
   connect(actionExit, SIGNAL(triggered()), this, SLOT(close()));
   connect(action_about, SIGNAL(triggered()), this, SLOT(slotAbout()));
 }
@@ -113,6 +114,11 @@ void MainWindow::slotFilterTextChanged(const QString& text)
   proxyModel->setFilterCaseSensitivity ( Qt::CaseInsensitive );
 }
 
+void MainWindow::slotFilterIndexChanged()
+{
+  slotFilterTextChanged(filterEdit->text());
+}
+
 void MainWindow::slotCurrentArtistRowChanged(int row)
 {
   QString artist = artistList->item(row)->text();
@@ -126,6 +132,8 @@ void MainWindow::slotCurrentArtistRowChanged(int row)
 
     proxyModel->setSourceModel(sourceModel);
     eventTable->setModel(proxyModel);
+
+    slotFilterTextChanged(filterEdit->text());
 
     connect(eventTable->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(slotCurrentEventChanged(QModelIndex,QModelIndex)));
   } else {

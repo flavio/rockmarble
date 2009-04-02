@@ -55,6 +55,7 @@ class MainWindow : public QMainWindow, private Ui::MainWindowClass
     void slotCurrentArtistRowChanged(int);
     void slotCurrentEventChanged(const QModelIndex & current, const QModelIndex & previous);
     void slotFilterTextChanged(const QString& text);
+    void slotFilterIndexChanged();
 
   private:
     void addArtist(const QString&name);

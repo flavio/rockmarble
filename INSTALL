@@ -1,0 +1,15 @@
+Installing rockmarble
+--------------
+
+QJson requires:
+- Qt 4.0 or greater
+- QJson 0.5 or greater
+
+For Unix/Linux/Mac/Windows:
+
+  qmake
+  make
+  make install
+
+Please report problems to:
+  flavio@castelli.name

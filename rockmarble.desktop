@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Exec=rockmarble
+Name=rockarble
+ame[x-test]=xxrockmarblexx
+GenericName=Follow your favourite artists around the world
+genericName[it]=Segui i tuoi artisti preferiti per il mondo
+icon=rockmarble
+Terminal=false
+Categories=Qt;KDE;Multimedia;
+X-DocPath=rockmarble/index.html

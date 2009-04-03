@@ -16,8 +16,7 @@ SOURCES += main.cpp \
     location.cpp \
     eventmodel.cpp \
     eventsortfilterproxymodel.cpp \
-    lineedit.cpp \
-    jsonconverterthread.cpp
+    lineedit.cpp 
 HEADERS += mainwindow.h \
     artist.h \
     datafetcher.h \
@@ -26,7 +25,6 @@ HEADERS += mainwindow.h \
     eventmodel.h \
     eventsortfilterproxymodel.h \
     lineedit.h \
-    jsonconverterthread.h \
     defines.h
 FORMS += mainwindow.ui
 QT += network

@@ -25,7 +25,8 @@
 #include "defines.h"
 #include "eventmodel.h"
 #include "eventsortfilterproxymodel.h"
-#include "jsonconverterthread.h"
+
+#include <jsonconverterthread.h>
 
 #include <QAbstractItemModel>
 #include <MarbleMap.h>

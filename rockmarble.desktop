@@ -1,11 +1,13 @@
 [Desktop Entry]
 Type=Application
 Exec=rockmarble
-Name=rockarble
-ame[x-test]=xxrockmarblexx
-GenericName=Follow your favourite artists around the world
-genericName[it]=Segui i tuoi artisti preferiti per il mondo
-icon=rockmarble
+Name=rockmarble
+Name[x-test]=xxrockmarblexx
+GenericName=Artist tour dates tracker
+GenericName[x-test]=xxArtist tour dates trackerxx
+Comment=rockmarble - follow your favourite artist all around the world!
+Comment[x-test]=xxrockmarble - follow your favourite artist all around the world!xx
+Icon=rockmarble
 Terminal=false
-Categories=Qt;KDE;Multimedia;
+Categories=AudioVideo;
 X-DocPath=rockmarble/index.html

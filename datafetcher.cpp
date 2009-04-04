@@ -80,9 +80,21 @@ void DataFetcher::getTopArtists(const QString& user)
   urlEL.addQueryItem("user", user);
   urlEL.addQueryItem("period", "overall");
   doRequest(urlEL, DataFetcher::TopArtistsRequest, user);
-  }
+}
 
-void DataFetcher::doRequest(const QUrl &url, DataFetcher::RequestType requestType, const QString &artistName)
+void DataFetcher::getEventsNearLocation(const QString& location)
+{
+  qDebug() << Q_FUNC_INFO;
+
+  // Cleanup
+  clearLocationData(location);
+
+  QUrl urlEL(QString("http://ws.audioscrobbler.com/2.0/?method=geo.getevents&api_key=%1&format=json").arg(API_KEY));
+  urlEL.addQueryItem("location", location);
+  doRequest(urlEL, DataFetcher::EventsNearLocationRequest, location);
+}
+
+void DataFetcher::doRequest(const QUrl &url, DataFetcher::RequestType requestType, const QString &string)
 {
   qDebug() << Q_FUNC_INFO;
   QNetworkRequest request;
@@ -93,8 +105,13 @@ void DataFetcher::doRequest(const QUrl &url, DataFetcher::RequestType requestTyp
   // Set some attributes
   // Request Type
   request.setAttribute(QNetworkRequest::Attribute(RequestTypeAttribute), QVariant((int)requestType));
-  // Artist name
-  request.setAttribute(QNetworkRequest::Attribute(ArtistNameAttribute), QVariant(artistName));
+
+  if (requestType == EventsNearLocationRequest) {
+    request.setAttribute(QNetworkRequest::Attribute(EventsNearLocationAttribute), QVariant(string));
+  } else {
+    // Artist name
+    request.setAttribute(QNetworkRequest::Attribute(ArtistNameAttribute), QVariant(string));
+  }
 
   m_nam->get(request);
 } // doRequest()
@@ -137,6 +154,22 @@ void DataFetcher::requestFinished(QNetworkReply *reply)
       }
       break;
     }
+  case DataFetcher::EventsNearLocationRequest:
+    {
+      QString locationName = reply->request().attribute(QNetworkRequest::Attribute(EventsNearLocationAttribute)).toString();
+      if (reply->error() == QNetworkReply::NoError) {
+        QString errorMessage;
+        QString response (reply->readAll());
+        emit getEventsNearLocationReady(response, true, "");
+      } else {
+        QString errorText = QString("A network error occured while searching for events near \"%1\" [%2]!").arg(locationName).arg(errorCodeToText(reply->error()));
+        qCritical() << errorText;
+        qCritical() << "URL requested:" << reply->request().url().toString();
+        qCritical() << "URL processed:" << reply->url().toString();
+        emit getEventsNearLocationReady("", false, errorText);
+      }
+      break;
+    }
   default:
     qWarning("%s\nThis should never happen [%d]!!!", Q_FUNC_INFO, requestType);
   }
@@ -173,3 +206,11 @@ void DataFetcher::clearUserData(const QString& userName)
   m_topArtistsHash.remove(userName);
   m_topArtistsError.remove(userName);
 }
+
+void DataFetcher::clearLocationData(const QString& locationName)
+{
+  qDebug() << Q_FUNC_INFO;
+  m_eventsNearLocationHash.remove(locationName);
+  m_eventsNearLocationError.remove(locationName);
+}
+

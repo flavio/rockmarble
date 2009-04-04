@@ -46,6 +46,7 @@ class DataFetcher  : public QObject
     static DataFetcher* instance();
     void getArtistEvents(const QString& artist);
     void getTopArtists(const QString& user);
+    void getEventsNearLocation(const QString& location);
 
   Q_SIGNALS:
     // #1 : Reply converted to a QVarian object
@@ -53,6 +54,7 @@ class DataFetcher  : public QObject
     // #3 : Error Message
     void getArtistEventsReady(QString, bool, QString);
     void getTopArtistsReady(QString, bool, QString);
+    void getEventsNearLocationReady(QString, bool, QString);
 
   private Q_SLOTS:
     void requestFinished(QNetworkReply *);
@@ -60,12 +62,14 @@ class DataFetcher  : public QObject
   private:
     enum RequestType {
        ArtistEventsRequest,
-       TopArtistsRequest
+       TopArtistsRequest,
+       EventsNearLocationRequest
     };
     enum CustomAttribute {
        RequestTypeAttribute = int(QNetworkRequest::User),
        ArtistNameAttribute = int(QNetworkRequest::User+1),
-       UserNameAttribute = int(QNetworkRequest::User+2)
+       UserNameAttribute = int(QNetworkRequest::User+2),
+       EventsNearLocationAttribute = int(QNetworkRequest::User+3)
     };
 
     DataFetcher(QObject *parent = 0);
@@ -73,13 +77,14 @@ class DataFetcher  : public QObject
     DataFetcher * operator=(DataFetcher const &);
     ~DataFetcher();
 
-    void doRequest(const QUrl &url, RequestType requestType, const QString& artistName = "");
+    void doRequest(const QUrl &url, RequestType requestType, const QString& string = "");
 
     // Convert NetworkError code to QString
     QString errorCodeToText(QNetworkReply::NetworkError errorCode);
 
     void clearArtistData(const QString& artistName);
     void clearUserData(const QString& userName);
+    void clearLocationData(const QString& locationName);
 
     QNetworkAccessManager* m_nam;
 
@@ -87,6 +92,8 @@ class DataFetcher  : public QObject
     QHash<QString, QString>  m_artistEventsError;
     QHash<QString, QVariant> m_topArtistsHash;
     QHash<QString, QString>  m_topArtistsError;
+    QHash<QString, QVariant> m_eventsNearLocationHash;
+    QHash<QString, QString>  m_eventsNearLocationError;
 };
 
 #endif // DATAFETCHER_H

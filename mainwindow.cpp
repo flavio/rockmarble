@@ -53,12 +53,15 @@ MainWindow::MainWindow(QWidget *parent)
   m_df = DataFetcher::instance();
   connect (m_df, SIGNAL(getArtistEventsReady(QString,bool,QString)), this, SLOT(slotArtistEventsReady(QString,bool,QString)));
   connect (m_df, SIGNAL(getTopArtistsReady(QString,bool,QString)), this, SLOT(slotTopArtistsReady(QString,bool,QString)));
+  connect (m_df, SIGNAL(getEventsNearLocationReady(QString,bool,QString)), this, SLOT (slotEventsNearLocationReady(QString,bool,QString)));
 
   // gui signals
   connect(addArtistBtn, SIGNAL(clicked()), this, SLOT(slotAddArtist()));
   connect(importLastfmBtn, SIGNAL(clicked()), this, SLOT(slotImportLastfm()));
+  connect(addCityBtn, SIGNAL(clicked()), this, SLOT(slotAddCity()));
 
   connect(artistList, SIGNAL(currentRowChanged(int)), this, SLOT(slotCurrentArtistRowChanged(int)));
+  connect(citiesList, SIGNAL(currentRowChanged(int)), this, SLOT(slotCurrentCityRowChanged(int)));
   connect(filterEdit, SIGNAL(textChanged(QString)), this, SLOT(slotFilterTextChanged(QString)));
   connect(filterComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(slotFilterIndexChanged()));
   connect(actionExit, SIGNAL(triggered()), this, SLOT(close()));
@@ -87,6 +90,17 @@ void MainWindow::slotAddArtist() {
   }
 }
 
+void MainWindow::slotAddCity() {
+  bool ok;
+  QString city = QInputDialog::getText(this, tr("Find events near"),
+                                          tr("City name:"), QLineEdit::Normal,
+                                          "", &ok);
+  if (ok && !city.isEmpty()) {
+    addCity(city);
+  }
+}
+
+
 void MainWindow::addArtist(const QString& artist)
 {
   if (!artist.isEmpty()) {
@@ -104,6 +118,14 @@ void MainWindow::slotImportLastfm() {
   if (ok && !user.isEmpty()) {
     m_df->getTopArtists(user);
     m_statusBar->showMessage(tr("retrieving top artists for user %1").arg(user));
+  }
+}
+
+void MainWindow::addCity(const QString& city)
+{
+  if (!city.isEmpty()) {
+    m_df->getEventsNearLocation(city);
+    m_statusBar->showMessage(tr("retrieving event near %1").arg(city));
   }
 }
 
@@ -142,6 +164,30 @@ void MainWindow::slotCurrentArtistRowChanged(int row)
   }
   eventTable->update();
 }
+
+void MainWindow::slotCurrentCityRowChanged(int row)
+{
+//  QString city = citiesList->item(row)->text();
+//  eventsBox->setTitle(tr("%Events near %1").arg(city));
+//
+//  LocationModel* sourceModel = m_locations[city];
+//
+//  if (sourceModel->rowCount() != 0) {
+//    stackedWidget->setCurrentIndex(0);
+//    QSortFilterProxyModel* proxyModel = new QSortFilterProxyModel();
+//
+//    proxyModel->setSourceModel(sourceModel);
+//    eventTable->setModel(proxyModel);
+//
+//    slotFilterTextChanged(filterEdit->text());
+//
+//    connect(eventTable->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(slotCurrentEventChanged(QModelIndex,QModelIndex)));
+//  } else {
+//    stackedWidget->setCurrentIndex(1);
+//  }
+//  eventTable->update();
+}
+
 
 void MainWindow::slotCurrentEventChanged(const QModelIndex & current, const QModelIndex & previous ) {
   Q_UNUSED( previous)
@@ -215,4 +261,34 @@ void MainWindow::slotTopArtistConverted(QVariant data, bool successfull, QString
     m_statusBar->showMessage(error);
   }
 }
+
+void MainWindow::slotEventsNearLocationReady(QString data, bool successfull, QString error) {
+  if (successfull) {
+    JSonConverterThread* thread = new JSonConverterThread(data, this);
+    connect(thread, SIGNAL(conversionFinished(QVariant, bool, QString)), this, SLOT(slotEventsNearLocationConverted(QVariant,bool,QString)));
+    thread->start();
+  } else {
+    m_statusBar->showMessage(error);
+  }
+}
+
+void MainWindow::slotEventsNearLocationConverted(QVariant data, bool successfull, QString error) {
+  if (successfull) {
+    Artist* artist = new Artist (data);
+
+    QMap<QString,EventModel*>::iterator match = m_artists.find(artist->name());
+    if (match != m_artists.end()) {
+      EventModel* model = match.value();
+      delete model;
+      m_artists[artist->name()] = new EventModel(artist);
+    } else {
+      m_artists.insert(artist->name(), new EventModel(artist));
+      new QListWidgetItem(artist->name(), artistList);
+    }
+    m_statusBar->showMessage(tr("Event dates for %1 successfully retrieved").arg(artist->name()), 1200);
+  } else {
+    m_statusBar->showMessage(error);
+  }
+}
+
 

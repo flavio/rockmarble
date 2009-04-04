@@ -44,6 +44,7 @@ class MainWindow : public QMainWindow, private Ui::MainWindowClass
   private slots:
     void slotAddArtist();
     void slotImportLastfm();
+    void slotAddCity();
     void slotAbout();
 
     void slotArtistEventsReady(QString,bool,QString);
@@ -52,13 +53,18 @@ class MainWindow : public QMainWindow, private Ui::MainWindowClass
     void slotTopArtistsReady(QString,bool,QString);
     void slotTopArtistConverted(QVariant, bool, QString);
 
+    void slotEventsNearLocationReady(QString,bool,QString);
+    void slotEventsNearLocationConverted(QVariant, bool, QString);
+
     void slotCurrentArtistRowChanged(int);
+    void slotCurrentCityRowChanged(int);
     void slotCurrentEventChanged(const QModelIndex & current, const QModelIndex & previous);
     void slotFilterTextChanged(const QString& text);
     void slotFilterIndexChanged();
 
   private:
-    void addArtist(const QString&name);
+    void addArtist(const QString& name);
+    void addCity(const QString& name);
 
 
     DataFetcher* m_df;

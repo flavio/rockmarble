@@ -382,6 +382,9 @@ void MainWindow::slotEventsNearLocationConverted(QVariant data, bool successfull
       if (page < totalPages){
         m_df->getEventsNearLocation(city, ++page);
         m_statusBar->showMessage(tr("More events near %1 to fetch (we are at page %2/%3)").arg(city).arg(page).arg(totalPages), 1200);
+
+        if ((citiesList->currentRow() != -1) && (citiesList->currentItem()->text().compare(city) == 0))
+          slotCurrentCityRowChanged(citiesList->currentRow());
       }
       else
         m_statusBar->showMessage(tr("All event dates near %1 successfully retrieved").arg(city), 1200);

@@ -22,6 +22,7 @@
 #define EVENT_H
 
 #include <QDate>
+#include <QStringList>
 #include <QVariant>
 #include <QTime>
 
@@ -33,13 +34,14 @@ public:
     Event(const QVariant& data);
     ~Event();
 
-    QString artist() { return m_artist; }
+    QString headliner() { return m_headliner; }
+    QStringList artists() { return m_artists; }
     QDate date() { return m_date; }
     Location* location() { return m_location; }
 
     private:
       int m_id;
-      QString m_artist;
+      QStringList m_artists;
       QString m_headliner;
       QString m_title;
       QString m_description;

@@ -49,7 +49,7 @@ int EventModel::columnCount ( const QModelIndex & parent) const
   if (parent.isValid())
     return 0;
   else
-    return 5;
+    return 6;
 }
 
 QModelIndex EventModel::index ( int row, int column, const QModelIndex & parent) const
@@ -90,8 +90,10 @@ QVariant EventModel::data ( const QModelIndex & index, int role) const
       return QString("%1 - %2").arg(event->location()->name()).arg(event->location()->street());
     case DateColumn:
       return event->date().toString();
-    case ArtistColumn:
-      return event->artist();
+    case ArtistsColumn:
+      return event->artists().join("; ");
+    case HeadlinerColumn:
+      return event->headliner();
     default:
       return QVariant();
   }
@@ -113,7 +115,7 @@ QVariant EventModel::headerData ( int section, Qt::Orientation orientation, int 
         return tr("Location");
       case DateColumn:
         return tr("Date");
-      case ArtistColumn:
+      case ArtistsColumn:
         return tr("Artist");
       default:
         return QVariant();

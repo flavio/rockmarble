@@ -39,8 +39,8 @@ class EventModel : public QAbstractTableModel
     // city
     // location
     // date
-    enum Columns { ArtistColumn = 0, CountryColumn = 1, CityColumn = 2,
-                   LocationColumn = 3, DateColumn = 4};
+    enum Columns { HeadlinerColumn = 0, ArtistsColumn = 1, CountryColumn = 2,
+                   CityColumn = 3, LocationColumn = 4, DateColumn = 5};
 
     int rowCount ( const QModelIndex & parent = QModelIndex() ) const;
     int columnCount ( const QModelIndex & parent = QModelIndex() ) const;

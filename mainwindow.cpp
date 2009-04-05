@@ -59,11 +59,12 @@ MainWindow::MainWindow(QWidget *parent)
   filterComboBox->addItem(tr("Country"), EventModel::CountryColumn);
   filterComboBox->addItem(tr("City"), EventModel::CityColumn);
   filterComboBox->addItem(tr("Location"), EventModel::LocationColumn);
-  filterComboBox->addItem(tr("Artist"), EventModel::ArtistColumn);
+  filterComboBox->addItem(tr("Headliner"), EventModel::HeadlinerColumn);
+  filterComboBox->addItem(tr("Artists"), EventModel::ArtistsColumn);
 
   // last filtering rules
   m_lastArtistFilterRule = EventModel::CountryColumn;
-  m_lastCityFilterRule = EventModel::ArtistColumn;
+  m_lastCityFilterRule = EventModel::HeadlinerColumn;
 
   // gui signals
   connect(addArtistBtn, SIGNAL(clicked()), this, SLOT(slotAddArtist()));
@@ -212,8 +213,8 @@ void MainWindow::slotCurrentArtistRowChanged(int row)
 
     proxyModel->setSourceModel(sourceModel);
     eventTable->setModel(proxyModel);
-    eventTable->hideColumn(EventModel::ArtistColumn);
-    filterComboBox->removeItem( filterComboBox->findData(EventModel::ArtistColumn));
+    eventTable->hideColumn(EventModel::HeadlinerColumn);
+    filterComboBox->removeItem( filterComboBox->findData(EventModel::HeadlinerColumn));
 
     filterEdit->setText(m_lastArtistFilterText);
     filterComboBox->setCurrentIndex( filterComboBox->findData(m_lastArtistFilterRule));
@@ -239,9 +240,9 @@ void MainWindow::slotCurrentCityRowChanged(int row)
 
     proxyModel->setSourceModel(sourceModel);
     eventTable->setModel(proxyModel);
-    eventTable->showColumn(EventModel::ArtistColumn);
-    if (filterComboBox->findData(EventModel::ArtistColumn) == -1)
-      filterComboBox->addItem(tr("Artist"), EventModel::ArtistColumn);
+    eventTable->showColumn(EventModel::HeadlinerColumn);
+    if (filterComboBox->findData(EventModel::HeadlinerColumn) == -1)
+      filterComboBox->addItem(tr("Headliner"), EventModel::HeadlinerColumn);
 
     filterEdit->setText(m_lastCityFilterText);
     filterComboBox->setCurrentIndex( filterComboBox->findData(m_lastCityFilterRule));

@@ -28,7 +28,10 @@ Event::Event(const QVariant& data)
   m_id = event["id"].toInt();
 
   QVariantMap artists = event["artists"].toMap();
-  m_artist = artists["artist"].toString();
+  if (artists["artist"].canConvert<QStringList>())
+    m_artists = artists["artist"].toStringList();
+  else
+    m_artists << artists["artist"].toString();
   m_headliner = artists["headliner"].toString();
 
   m_title = event["title"].toString();

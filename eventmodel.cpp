@@ -19,19 +19,21 @@
   */
 
 #include "eventmodel.h"
-#include "artist.h"
 #include "event.h"
 #include "location.h"
 
-EventModel::EventModel(Artist* artist, QObject* parent)
-  : QAbstractTableModel(parent),
-    m_artist(artist)
+EventModel::EventModel(EventList& events, QObject* parent)
+  : QAbstractTableModel(parent)
 {
+  m_events = new EventList(events);
 }
 
 EventModel::~EventModel()
 {
-  delete m_artist;
+  foreach(Event* event, *m_events)
+    delete event;
+  m_events->clear();
+  delete m_events;
 }
 
 int EventModel::rowCount (const QModelIndex & parent) const
@@ -39,7 +41,7 @@ int EventModel::rowCount (const QModelIndex & parent) const
   if (parent.isValid())
     return 0;
   else
-    return m_artist->events().size();
+    return m_events->size();
 }
 
 int EventModel::columnCount ( const QModelIndex & parent) const
@@ -60,13 +62,13 @@ QModelIndex EventModel::index ( int row, int column, const QModelIndex & parent)
   if (parent.isValid())
     return QModelIndex();
 
-  if (row > m_artist->events().size())
+  if (row > m_events->size())
     return QModelIndex();
 
   if (column > this->columnCount())
     return QModelIndex();
 
-  return createIndex(row, column, m_artist);
+  return createIndex(row, column, m_events);
 }
 
 QVariant EventModel::data ( const QModelIndex & index, int role) const
@@ -77,12 +79,12 @@ QVariant EventModel::data ( const QModelIndex & index, int role) const
   if (!index.isValid())
     return QVariant();
 
-  Artist* artist = static_cast<Artist*>(index.internalPointer());
+  EventList* events = static_cast<EventList*>(index.internalPointer());
 
-  if (index.row() > artist->events().size())
+  if (index.row() > events->size())
     return QVariant();
 
-  Event* event = artist->events().at(index.row());
+  Event* event = events->at(index.row());
   switch (index.column())
   {
     case 0:
@@ -106,13 +108,13 @@ QVariant EventModel::headerData ( int section, Qt::Orientation orientation, int 
   if (orientation == Qt::Horizontal) {
     switch (section)
     {
-      case 0:
+      case CountryColumn:
         return tr("Country");
-      case 1:
+      case CityColumn:
         return tr("City");
-      case 2:
+      case LocationColumn:
         return tr("Location");
-      case 3:
+      case DateColumn:
         return tr("Date");
       default:
         return QVariant();
@@ -135,12 +137,12 @@ bool EventModel::getCoordinates(const QModelIndex& index, qreal* latitude, qreal
   if (!index.isValid())
     return false;
 
-  Artist* artist = static_cast<Artist*>(index.internalPointer());
+  EventList* events = static_cast<EventList*>(index.internalPointer());
 
-  if (index.row() > artist->events().size())
+  if (index.row() > events->size())
     return false;
 
-  Event* event = artist->events().at(index.row());
+  Event* event = events->at(index.row());
 
   *latitude = event->location()->latitude();
   *longitude = event->location()->longitude();

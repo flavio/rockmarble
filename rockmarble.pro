@@ -5,20 +5,19 @@ TARGET = rockmarble
 TEMPLATE = app
 INCLUDEPATH += /usr/include/marble \
     /usr/include/qjson
-LIBS += -L/usr/lib/qjson -L/usr/lib64/qjson \
+LIBS += -L/usr/lib/qjson \
+    -L/usr/lib64/qjson \
     -lmarblewidget \
     -lqjson
 SOURCES += main.cpp \
     mainwindow.cpp \
-    artist.cpp \
     datafetcher.cpp \
     event.cpp \
     location.cpp \
     eventmodel.cpp \
     eventsortfilterproxymodel.cpp \
-    lineedit.cpp 
+    lineedit.cpp
 HEADERS += mainwindow.h \
-    artist.h \
     datafetcher.h \
     location.h \
     event.h \
@@ -31,5 +30,5 @@ QT += network
 CONFIG += warn_on \
     debug_and_release
 RESOURCES += resources.qrc
-target.path +=/usr/bin/
+target.path += /usr/bin/
 INSTALLS += target

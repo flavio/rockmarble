@@ -22,14 +22,19 @@
 #define EVENTMODEL_H
 
 #include <QtCore/QAbstractTableModel>
+#include <QtCore/QList>
 
-class Artist;
+class Event;
+
+#define EventList QList<Event*>
 
 class EventModel : public QAbstractTableModel
 {
   public:
-    EventModel(Artist* artist, QObject* parent = 0);
+    EventModel(EventList& events, QObject* parent = 0);
     virtual ~EventModel();
+
+    enum Columns { CountryColumn, CityColumn, LocationColumn, DateColumn};
 
     int rowCount ( const QModelIndex & parent = QModelIndex() ) const;
     int columnCount ( const QModelIndex & parent = QModelIndex() ) const;
@@ -41,7 +46,7 @@ class EventModel : public QAbstractTableModel
     bool getCoordinates(const QModelIndex& index, qreal* latitude, qreal* longitude);
 
   private:
-    Artist* m_artist;
+    EventList* m_events;
 };
 
 #endif // EVENTMODEL_H

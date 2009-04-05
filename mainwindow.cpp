@@ -20,9 +20,9 @@
 
 #include "mainwindow.h"
 
-#include "artist.h"
 #include "datafetcher.h"
 #include "defines.h"
+#include "event.h"
 #include "eventmodel.h"
 #include "eventsortfilterproxymodel.h"
 
@@ -70,9 +70,13 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-  foreach (EventModel* model, m_artists)
-    delete model;
+  foreach (EventModel* event, m_artists.values())
+    delete event;
   m_artists.clear();
+
+  foreach (EventModel* event, m_cities.values())
+    delete event;
+  m_cities.clear();
 }
 
 void MainWindow::slotAbout()
@@ -214,18 +218,25 @@ void MainWindow::slotArtistEventsReady(QString data, bool successfull, QString e
 
 void MainWindow::slotArtistEventConverted(QVariant data, bool successfull, QString error) {
   if (successfull) {
-    Artist* artist = new Artist (data);
+    QVariantMap response = data.toMap();
+    response = response["events"].toMap();
+    QString artist = response["artist"].toString();
 
-    QMap<QString,EventModel*>::iterator match = m_artists.find(artist->name());
-    if (match != m_artists.end()) {
-      EventModel* model = match.value();
-      delete model;
-      m_artists[artist->name()] = new EventModel(artist);
-    } else {
-      m_artists.insert(artist->name(), new EventModel(artist));
-      new QListWidgetItem(artist->name(), artistList);
-    }
-    m_statusBar->showMessage(tr("Event dates for %1 successfully retrieved").arg(artist->name()), 1200);
+    QVariantList events = response["event"].toList();
+
+    EventList eventList;
+
+    foreach(QVariant event, events)
+      eventList.push_back(new Event(event));
+
+    if (!m_artists.contains(artist))
+      new QListWidgetItem(artist, artistList);
+    else
+      delete m_artists[artist];
+
+    m_artists.insert(artist, new EventModel(eventList));
+
+    m_statusBar->showMessage(tr("Event dates for %1 successfully retrieved").arg(artist), 1200);
   } else {
     m_statusBar->showMessage(error);
   }
@@ -273,22 +284,22 @@ void MainWindow::slotEventsNearLocationReady(QString data, bool successfull, QSt
 }
 
 void MainWindow::slotEventsNearLocationConverted(QVariant data, bool successfull, QString error) {
-  if (successfull) {
-    Artist* artist = new Artist (data);
-
-    QMap<QString,EventModel*>::iterator match = m_artists.find(artist->name());
-    if (match != m_artists.end()) {
-      EventModel* model = match.value();
-      delete model;
-      m_artists[artist->name()] = new EventModel(artist);
-    } else {
-      m_artists.insert(artist->name(), new EventModel(artist));
-      new QListWidgetItem(artist->name(), artistList);
-    }
-    m_statusBar->showMessage(tr("Event dates for %1 successfully retrieved").arg(artist->name()), 1200);
-  } else {
-    m_statusBar->showMessage(error);
-  }
+//  if (successfull) {
+//    Artist* artist = new Artist (data);
+//
+//    QMap<QString,EventModel*>::iterator match = m_artists.find(artist->name());
+//    if (match != m_artists.end()) {
+//      EventModel* model = match.value();
+//      delete model;
+//      m_artists[artist->name()] = new EventModel(artist);
+//    } else {
+//      m_artists.insert(artist->name(), new EventModel(artist));
+//      new QListWidgetItem(artist->name(), artistList);
+//    }
+//    m_statusBar->showMessage(tr("Event dates for %1 successfully retrieved").arg(artist->name()), 1200);
+//  } else {
+//    m_statusBar->showMessage(error);
+//  }
 }
 
 

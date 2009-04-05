@@ -28,8 +28,6 @@
 
 #include "ui_mainwindow.h"
 
-
-
 class DataFetcher;
 class EventModel;
 
@@ -69,6 +67,7 @@ class MainWindow : public QMainWindow, private Ui::MainWindowClass
 
     DataFetcher* m_df;
     QMap<QString, EventModel*> m_artists;
+    QMap<QString, EventModel*> m_cities;
 };
 
 #endif // MAINWINDOW_H

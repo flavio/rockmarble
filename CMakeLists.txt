@@ -54,7 +54,6 @@ include(${QT_USE_FILE})
 set(rockmarble_SRCS
   main.cpp
   mainwindow.cpp
-  artist.cpp
   datafetcher.cpp
   event.cpp
   location.cpp

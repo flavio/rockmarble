@@ -82,7 +82,7 @@ void DataFetcher::getTopArtists(const QString& user)
   doRequest(urlEL, DataFetcher::TopArtistsRequest, user);
 }
 
-void DataFetcher::getEventsNearLocation(const QString& location)
+void DataFetcher::getEventsNearLocation(const QString& location, const int page)
 {
   qDebug() << Q_FUNC_INFO;
 
@@ -91,6 +91,11 @@ void DataFetcher::getEventsNearLocation(const QString& location)
 
   QUrl urlEL(QString("http://ws.audioscrobbler.com/2.0/?method=geo.getevents&api_key=%1&format=json").arg(API_KEY));
   urlEL.addQueryItem("location", location);
+  if (page != -1) {
+    QString pageParam;
+    pageParam.setNum(page);
+    urlEL.addQueryItem("page", pageParam);
+  }
   doRequest(urlEL, DataFetcher::EventsNearLocationRequest, location);
 }
 

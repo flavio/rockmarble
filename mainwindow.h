@@ -22,14 +22,14 @@
 #define MAINWINDOW_H
 
 #include <QtGui/QMainWindow>
-#include <QtCore/QMap>
+#include <QtCore/QMultiMap>
 #include <QtCore/QModelIndex>
 #include <QVariant>
 
 #include "ui_mainwindow.h"
 
 class DataFetcher;
-class EventModel;
+class Event;
 
 class MainWindow : public QMainWindow, private Ui::MainWindowClass
 {
@@ -66,8 +66,8 @@ class MainWindow : public QMainWindow, private Ui::MainWindowClass
     void addCity(const QString& name);
 
     DataFetcher* m_df;
-    QMap<QString, EventModel*> m_artists;
-    QMap<QString, EventModel*> m_cities;
+    QMultiMap<QString, Event*> m_artists;
+    QMultiMap<QString, Event*> m_cities;
 
     QString m_lastArtistFilterText;
     int m_lastArtistFilterRule;

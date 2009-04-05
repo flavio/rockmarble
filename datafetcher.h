@@ -46,7 +46,7 @@ class DataFetcher  : public QObject
     static DataFetcher* instance();
     void getArtistEvents(const QString& artist);
     void getTopArtists(const QString& user);
-    void getEventsNearLocation(const QString& location);
+    void getEventsNearLocation(const QString& location, const int page = -1);
 
   Q_SIGNALS:
     // #1 : Reply converted to a QVarian object

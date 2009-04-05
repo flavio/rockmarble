@@ -82,11 +82,11 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-  foreach (EventModel* event, m_artists.values())
+  foreach (Event* event, m_artists.values())
     delete event;
   m_artists.clear();
 
-  foreach (EventModel* event, m_cities.values())
+  foreach (Event* event, m_cities.values())
     delete event;
   m_cities.clear();
 }
@@ -205,7 +205,8 @@ void MainWindow::slotCurrentArtistRowChanged(int row)
   QString artist = artistList->item(row)->text();
   eventsBox->setTitle(tr("%1 tour dates").arg(artist));
 
-  EventModel* sourceModel = m_artists[artist];
+  EventList events = m_artists.values(artist);
+  EventModel* sourceModel = new EventModel(events);
 
   if (sourceModel->rowCount() != 0) {
     stackedWidget->setCurrentIndex(0);
@@ -232,7 +233,8 @@ void MainWindow::slotCurrentCityRowChanged(int row)
   QString city = citiesList->item(row)->text();
   eventsBox->setTitle(tr("Events near %1").arg(city));
 
-  EventModel* sourceModel = m_cities[city];
+  EventList events = m_cities.values(city);
+  EventModel* sourceModel = new EventModel(events);
 
   if (sourceModel->rowCount() != 0) {
     stackedWidget->setCurrentIndex(0);
@@ -289,15 +291,16 @@ void MainWindow::slotArtistEventConverted(QVariant data, bool successfull, QStri
 
     EventList eventList;
 
-    foreach(QVariant event, events)
-      eventList.push_back(new Event(event));
+    foreach(QVariant event, events) {
+      Event* e = new Event(event);
+      if (m_artists.contains(artist, e))
+        delete e;
+      else
+        m_artists.insertMulti(artist, e);
+    }
 
-    if (!m_artists.contains(artist))
+    if (artistList->findItems(artist, Qt::MatchExactly).isEmpty())
       new QListWidgetItem(artist, artistList);
-    else
-      delete m_artists[artist];
-
-    m_artists.insert(artist, new EventModel(eventList));
 
     m_statusBar->showMessage(tr("Event dates for %1 successfully retrieved").arg(artist), 1200);
   } else {
@@ -352,22 +355,28 @@ void MainWindow::slotEventsNearLocationConverted(QVariant data, bool successfull
     if (!response.contains("error")) {
       response = response["events"].toMap();
       QString city = response["location"].toString();
+      int page = response["page"].toInt();
+      int totalPages = response["totalpages"].toInt();
 
       QVariantList events = response["event"].toList();
 
-      EventList eventList;
+      foreach(QVariant event, events) {
+        Event* e = new Event(event);
+        if (m_cities.contains(city, e))
+          delete e;
+        else
+          m_cities.insertMulti(city, e);
+      }
 
-      foreach(QVariant event, events)
-        eventList.push_back(new Event(event));
-
-      if (!m_cities.contains(city))
+      if (citiesList->findItems(city, Qt::MatchExactly).isEmpty())
         new QListWidgetItem(city, citiesList);
+
+      if (page < totalPages){
+        m_df->getEventsNearLocation(city, ++page);
+        m_statusBar->showMessage(tr("More events near %1 to fetch (we are at page %2/%3)").arg(city).arg(page).arg(totalPages), 1200);
+      }
       else
-        delete m_cities[city];
-
-      m_cities.insert(city, new EventModel(eventList));
-
-      m_statusBar->showMessage(tr("Event dates near %1 successfully retrieved").arg(city), 1200);
+        m_statusBar->showMessage(tr("All event dates near %1 successfully retrieved").arg(city), 1200);
     } else {
       m_statusBar->showMessage(response["message"].toString());
     }

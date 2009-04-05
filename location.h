@@ -35,6 +35,8 @@ class Location
     qreal latitude() { return m_lat; }
     qreal longitude() { return m_long; }
 
+    bool operator==(const Location& l) const;
+
     private:
       QString m_name;
       QString m_city;

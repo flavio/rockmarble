@@ -39,6 +39,8 @@ public:
     QDate date() { return m_date; }
     Location* location() { return m_location; }
 
+    bool operator==(const Event& e) const;
+
     private:
       int m_id;
       QStringList m_artists;

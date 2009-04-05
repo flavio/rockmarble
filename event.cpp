@@ -44,6 +44,35 @@ Event::Event(const QVariant& data)
   m_location = new Location (event["venue"]);
 }
 
+bool Event::operator==(const Event& e) const
+{
+  if (m_artists != e.m_artists)
+    return false;
+
+  if (m_date != e.m_date)
+    return false;
+
+  if (m_description != e.m_description)
+    return false;
+
+  if (m_headliner != e.m_headliner)
+    return false;
+
+  if (m_id != e.m_id)
+    return false;
+
+  if (m_location != e.m_location)
+    return false;
+
+  if (m_time != e.m_time)
+    return false;
+
+  if (m_title != e.m_title)
+    return false;
+
+  return true;
+}
+
 Event::~Event() {
   delete m_location;
   m_location = 0;

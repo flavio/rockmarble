@@ -151,6 +151,10 @@ void MainWindow::slotFilterTextChanged(const QString& text)
   proxyModel->setFilterFixedString(text);
   proxyModel->setFilterKeyColumn(filterComboBox->itemData( filterComboBox->currentIndex()).toInt());
   proxyModel->setFilterCaseSensitivity ( Qt::CaseInsensitive );
+
+  QAbstractItemModel* sourceModel = proxyModel->sourceModel();
+
+  totalLabel->setText(tr("%1/%2 events").arg(proxyModel->rowCount()).arg(sourceModel->rowCount()));
 }
 
 void MainWindow::slotFilterIndexChanged()
@@ -222,6 +226,8 @@ void MainWindow::slotCurrentArtistRowChanged(int row)
     slotFilterTextChanged(filterEdit->text());
 
     connect(eventTable->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(slotCurrentEventChanged(QModelIndex,QModelIndex)));
+
+    totalLabel->setText(tr("%1 events").arg(proxyModel->rowCount()));
   } else {
     stackedWidget->setCurrentIndex(1);
   }
@@ -251,6 +257,8 @@ void MainWindow::slotCurrentCityRowChanged(int row)
     slotFilterTextChanged(filterEdit->text());
 
     connect(eventTable->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(slotCurrentEventChanged(QModelIndex,QModelIndex)));
+
+    totalLabel->setText(tr("%1 events").arg(proxyModel->rowCount()));
   } else {
     stackedWidget->setCurrentIndex(1);
   }

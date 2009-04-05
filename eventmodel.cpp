@@ -30,8 +30,6 @@ EventModel::EventModel(EventList& events, QObject* parent)
 
 EventModel::~EventModel()
 {
-  foreach(Event* event, *m_events)
-    delete event;
   m_events->clear();
   delete m_events;
 }

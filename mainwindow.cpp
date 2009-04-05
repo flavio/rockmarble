@@ -55,11 +55,22 @@ MainWindow::MainWindow(QWidget *parent)
   connect (m_df, SIGNAL(getTopArtistsReady(QString,bool,QString)), this, SLOT(slotTopArtistsReady(QString,bool,QString)));
   connect (m_df, SIGNAL(getEventsNearLocationReady(QString,bool,QString)), this, SLOT (slotEventsNearLocationReady(QString,bool,QString)));
 
+  // filter
+  filterComboBox->addItem(tr("Country"), EventModel::CountryColumn);
+  filterComboBox->addItem(tr("City"), EventModel::CityColumn);
+  filterComboBox->addItem(tr("Location"), EventModel::LocationColumn);
+  filterComboBox->addItem(tr("Artist"), EventModel::ArtistColumn);
+
+  // last filtering rules
+  m_lastArtistFilterRule = EventModel::CountryColumn;
+  m_lastCityFilterRule = EventModel::ArtistColumn;
+
   // gui signals
   connect(addArtistBtn, SIGNAL(clicked()), this, SLOT(slotAddArtist()));
   connect(importLastfmBtn, SIGNAL(clicked()), this, SLOT(slotImportLastfm()));
   connect(addCityBtn, SIGNAL(clicked()), this, SLOT(slotAddCity()));
 
+  connect(tabWidget, SIGNAL(currentChanged(int)), this, SLOT(slotCurrentTabChanged(int)));
   connect(artistList, SIGNAL(currentRowChanged(int)), this, SLOT(slotCurrentArtistRowChanged(int)));
   connect(citiesList, SIGNAL(currentRowChanged(int)), this, SLOT(slotCurrentCityRowChanged(int)));
   connect(filterEdit, SIGNAL(textChanged(QString)), this, SLOT(slotFilterTextChanged(QString)));
@@ -137,7 +148,7 @@ void MainWindow::slotFilterTextChanged(const QString& text)
 {
   EventSortFilterProxyModel* proxyModel = static_cast<EventSortFilterProxyModel*>( eventTable->model());
   proxyModel->setFilterFixedString(text);
-  proxyModel->setFilterKeyColumn(filterComboBox->currentIndex());
+  proxyModel->setFilterKeyColumn(filterComboBox->itemData( filterComboBox->currentIndex()).toInt());
   proxyModel->setFilterCaseSensitivity ( Qt::CaseInsensitive );
 }
 
@@ -145,6 +156,48 @@ void MainWindow::slotFilterIndexChanged()
 {
   slotFilterTextChanged(filterEdit->text());
 }
+#include <QDebug>
+void MainWindow::slotCurrentTabChanged(int index)
+{
+  qDebug() << artistList->currentRow();
+  qDebug() << citiesList->currentRow();
+
+  if (index == 0) {
+    // artist tab
+    if (citiesList->currentRow() >= 0) {
+      m_lastCityFilterRule = filterComboBox->itemData(filterComboBox->currentIndex()).toInt();
+      m_lastCityFilterText = filterEdit->text();
+      m_lastCityTableItem = eventTable->currentIndex();
+    }
+
+    if (artistList->currentRow() >= 0) {
+      slotCurrentArtistRowChanged(artistList->currentRow());
+      eventTable->setCurrentIndex(m_lastArtistTableItem);
+      slotCurrentEventChanged(m_lastArtistTableItem, QModelIndex());
+    } else {
+      stackedWidget->setCurrentIndex(1);
+      eventsBox->setTitle(tr("Tour dates"));
+    }
+  } else if (index == 1) {
+    // cities tab
+
+    if (artistList->currentRow() >= 0) {
+      m_lastArtistFilterRule = filterComboBox->itemData(filterComboBox->currentIndex()).toInt();
+      m_lastArtistFilterText = filterEdit->text();
+      m_lastArtistTableItem = eventTable->currentIndex();
+    }
+
+    if (citiesList->currentRow() >= 0) {
+      slotCurrentCityRowChanged(citiesList->currentRow());
+      eventTable->setCurrentIndex(m_lastCityTableItem);
+      slotCurrentEventChanged(m_lastCityTableItem, QModelIndex());
+    } else {
+      stackedWidget->setCurrentIndex(1);
+      eventsBox->setTitle(tr("Tour dates"));
+    }
+  }
+}
+
 
 void MainWindow::slotCurrentArtistRowChanged(int row)
 {
@@ -159,7 +212,11 @@ void MainWindow::slotCurrentArtistRowChanged(int row)
 
     proxyModel->setSourceModel(sourceModel);
     eventTable->setModel(proxyModel);
+    eventTable->hideColumn(EventModel::ArtistColumn);
+    filterComboBox->removeItem( filterComboBox->findData(EventModel::ArtistColumn));
 
+    filterEdit->setText(m_lastArtistFilterText);
+    filterComboBox->setCurrentIndex( filterComboBox->findData(m_lastArtistFilterRule));
     slotFilterTextChanged(filterEdit->text());
 
     connect(eventTable->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(slotCurrentEventChanged(QModelIndex,QModelIndex)));
@@ -171,25 +228,30 @@ void MainWindow::slotCurrentArtistRowChanged(int row)
 
 void MainWindow::slotCurrentCityRowChanged(int row)
 {
-//  QString city = citiesList->item(row)->text();
-//  eventsBox->setTitle(tr("%Events near %1").arg(city));
-//
-//  LocationModel* sourceModel = m_locations[city];
-//
-//  if (sourceModel->rowCount() != 0) {
-//    stackedWidget->setCurrentIndex(0);
-//    QSortFilterProxyModel* proxyModel = new QSortFilterProxyModel();
-//
-//    proxyModel->setSourceModel(sourceModel);
-//    eventTable->setModel(proxyModel);
-//
-//    slotFilterTextChanged(filterEdit->text());
-//
-//    connect(eventTable->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(slotCurrentEventChanged(QModelIndex,QModelIndex)));
-//  } else {
-//    stackedWidget->setCurrentIndex(1);
-//  }
-//  eventTable->update();
+  QString city = citiesList->item(row)->text();
+  eventsBox->setTitle(tr("Events near %1").arg(city));
+
+  EventModel* sourceModel = m_cities[city];
+
+  if (sourceModel->rowCount() != 0) {
+    stackedWidget->setCurrentIndex(0);
+    QSortFilterProxyModel* proxyModel = new QSortFilterProxyModel();
+
+    proxyModel->setSourceModel(sourceModel);
+    eventTable->setModel(proxyModel);
+    eventTable->showColumn(EventModel::ArtistColumn);
+    if (filterComboBox->findData(EventModel::ArtistColumn) == -1)
+      filterComboBox->addItem(tr("Artist"), EventModel::ArtistColumn);
+
+    filterEdit->setText(m_lastCityFilterText);
+    filterComboBox->setCurrentIndex( filterComboBox->findData(m_lastCityFilterRule));
+    slotFilterTextChanged(filterEdit->text());
+
+    connect(eventTable->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(slotCurrentEventChanged(QModelIndex,QModelIndex)));
+  } else {
+    stackedWidget->setCurrentIndex(1);
+  }
+  eventTable->update();
 }
 
 
@@ -284,22 +346,33 @@ void MainWindow::slotEventsNearLocationReady(QString data, bool successfull, QSt
 }
 
 void MainWindow::slotEventsNearLocationConverted(QVariant data, bool successfull, QString error) {
-//  if (successfull) {
-//    Artist* artist = new Artist (data);
-//
-//    QMap<QString,EventModel*>::iterator match = m_artists.find(artist->name());
-//    if (match != m_artists.end()) {
-//      EventModel* model = match.value();
-//      delete model;
-//      m_artists[artist->name()] = new EventModel(artist);
-//    } else {
-//      m_artists.insert(artist->name(), new EventModel(artist));
-//      new QListWidgetItem(artist->name(), artistList);
-//    }
-//    m_statusBar->showMessage(tr("Event dates for %1 successfully retrieved").arg(artist->name()), 1200);
-//  } else {
-//    m_statusBar->showMessage(error);
-//  }
+  if (successfull) {
+    QVariantMap response = data.toMap();
+    if (!response.contains("error")) {
+      response = response["events"].toMap();
+      QString city = response["location"].toString();
+
+      QVariantList events = response["event"].toList();
+
+      EventList eventList;
+
+      foreach(QVariant event, events)
+        eventList.push_back(new Event(event));
+
+      if (!m_cities.contains(city))
+        new QListWidgetItem(city, citiesList);
+      else
+        delete m_cities[city];
+
+      m_cities.insert(city, new EventModel(eventList));
+
+      m_statusBar->showMessage(tr("Event dates near %1 successfully retrieved").arg(city), 1200);
+    } else {
+      m_statusBar->showMessage(response["message"].toString());
+    }
+  } else {
+    m_statusBar->showMessage(error);
+  }
 }
 
 

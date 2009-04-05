@@ -54,6 +54,7 @@ class MainWindow : public QMainWindow, private Ui::MainWindowClass
     void slotEventsNearLocationReady(QString,bool,QString);
     void slotEventsNearLocationConverted(QVariant, bool, QString);
 
+    void slotCurrentTabChanged(int);
     void slotCurrentArtistRowChanged(int);
     void slotCurrentCityRowChanged(int);
     void slotCurrentEventChanged(const QModelIndex & current, const QModelIndex & previous);
@@ -64,10 +65,17 @@ class MainWindow : public QMainWindow, private Ui::MainWindowClass
     void addArtist(const QString& name);
     void addCity(const QString& name);
 
-
     DataFetcher* m_df;
     QMap<QString, EventModel*> m_artists;
     QMap<QString, EventModel*> m_cities;
+
+    QString m_lastArtistFilterText;
+    int m_lastArtistFilterRule;
+    QModelIndex m_lastArtistTableItem;
+
+    QString m_lastCityFilterText;
+    int m_lastCityFilterRule;
+    QModelIndex m_lastCityTableItem;
 };
 
 #endif // MAINWINDOW_H

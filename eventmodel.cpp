@@ -48,13 +48,8 @@ int EventModel::columnCount ( const QModelIndex & parent) const
 {
   if (parent.isValid())
     return 0;
-  else {
-    // country
-    // city
-    // location
-    // date
-    return 4;
-  }
+  else
+    return 5;
 }
 
 QModelIndex EventModel::index ( int row, int column, const QModelIndex & parent) const
@@ -87,14 +82,16 @@ QVariant EventModel::data ( const QModelIndex & index, int role) const
   Event* event = events->at(index.row());
   switch (index.column())
   {
-    case 0:
+    case CountryColumn:
       return event->location()->country();
-    case 1:
+    case CityColumn:
       return event->location()->city();
-    case 2:
+    case LocationColumn:
       return QString("%1 - %2").arg(event->location()->name()).arg(event->location()->street());
-    case 3:
+    case DateColumn:
       return event->date().toString();
+    case ArtistColumn:
+      return event->artist();
     default:
       return QVariant();
   }
@@ -116,6 +113,8 @@ QVariant EventModel::headerData ( int section, Qt::Orientation orientation, int 
         return tr("Location");
       case DateColumn:
         return tr("Date");
+      case ArtistColumn:
+        return tr("Artist");
       default:
         return QVariant();
     }

@@ -34,7 +34,13 @@ class EventModel : public QAbstractTableModel
     EventModel(EventList& events, QObject* parent = 0);
     virtual ~EventModel();
 
-    enum Columns { CountryColumn, CityColumn, LocationColumn, DateColumn};
+    // artist
+    // country
+    // city
+    // location
+    // date
+    enum Columns { ArtistColumn = 0, CountryColumn = 1, CityColumn = 2,
+                   LocationColumn = 3, DateColumn = 4};
 
     int rowCount ( const QModelIndex & parent = QModelIndex() ) const;
     int columnCount ( const QModelIndex & parent = QModelIndex() ) const;

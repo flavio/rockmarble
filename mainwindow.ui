@@ -191,18 +191,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QComboBox" name="filterComboBox">
-                <item>
-                 <property name="text">
-                  <string>Country</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>City</string>
-                 </property>
-                </item>
-               </widget>
+               <widget class="QComboBox" name="filterComboBox"/>
               </item>
               <item>
                <widget class="LineEdit" name="filterEdit"/>
@@ -226,7 +215,7 @@
             <item>
              <widget class="QLabel" name="label_2">
               <property name="text">
-               <string>Sorry, no tour  dates</string>
+               <string>Sorry, no tour dates</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignCenter</set>
@@ -249,7 +238,7 @@
      <x>0</x>
      <y>0</y>
      <width>1090</width>
-     <height>26</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

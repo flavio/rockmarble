@@ -210,11 +210,11 @@ void MainWindow::slotCurrentArtistRowChanged(int row)
   eventsBox->setTitle(tr("%1 tour dates").arg(artist));
 
   EventList events = m_artists.values(artist);
-  EventModel* sourceModel = new EventModel(events);
+  EventModel* sourceModel = new EventModel(events, this);
 
   if (sourceModel->rowCount() != 0) {
     stackedWidget->setCurrentIndex(0);
-    QSortFilterProxyModel* proxyModel = new QSortFilterProxyModel();
+    QSortFilterProxyModel* proxyModel = new QSortFilterProxyModel(this);
 
     proxyModel->setSourceModel(sourceModel);
     eventTable->setModel(proxyModel);
@@ -240,11 +240,11 @@ void MainWindow::slotCurrentCityRowChanged(int row)
   eventsBox->setTitle(tr("Events near %1").arg(city));
 
   EventList events = m_cities.values(city);
-  EventModel* sourceModel = new EventModel(events);
+  EventModel* sourceModel = new EventModel(events, this);
 
   if (sourceModel->rowCount() != 0) {
     stackedWidget->setCurrentIndex(0);
-    QSortFilterProxyModel* proxyModel = new QSortFilterProxyModel();
+    QSortFilterProxyModel* proxyModel = new QSortFilterProxyModel(this);
 
     proxyModel->setSourceModel(sourceModel);
     eventTable->setModel(proxyModel);

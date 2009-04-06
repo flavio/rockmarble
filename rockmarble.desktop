@@ -9,5 +9,5 @@ Comment=rockmarble - follow your favourite artist all around the world!
 Comment[x-test]=xxrockmarble - follow your favourite artist all around the world!xx
 Icon=rockmarble
 Terminal=false
-Categories=AudioVideo;
+Categories=Network;Qt;News;
 X-DocPath=rockmarble/index.html

@@ -26,8 +26,6 @@
 // QtGui
 #include <QtGui/QApplication>
 
-#include <json_driver.hh>
-
 #include "defines.h"
 
 DataFetcher::DataFetcher(QObject *parent)
@@ -102,6 +100,7 @@ void DataFetcher::getEventsNearLocation(const QString& location, const int page)
 void DataFetcher::doRequest(const QUrl &url, DataFetcher::RequestType requestType, const QString &string)
 {
   qDebug() << Q_FUNC_INFO;
+  qDebug() << "Going to call url" << url;
   QNetworkRequest request;
   QString httpUA = QString("rockmarble/%1 (http://github.com/flavio/rockmarble/tree/master)").arg(ROCKMARBLE_VERSION);
   request.setRawHeader("User-Agent", qPrintable(httpUA));

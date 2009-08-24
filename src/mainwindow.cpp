@@ -26,15 +26,16 @@
 #include "eventmodel.h"
 #include "eventsortfilterproxymodel.h"
 
-#include <jsonconverterthread.h>
-
-#include <QAbstractItemModel>
-#include <MarbleMap.h>
-#include <MarbleModel.h>
-#include <QMessageBox>
-#include <QInputDialog>
-#include <QListWidgetItem>
-#include <QStatusBar>
+#include <qjson/parserrunnable.h>
+#include <QtCore/QAbstractItemModel>
+#include <QtCore/QDebug>
+#include <QtCore/QThreadPool>
+#include <marble/MarbleMap.h>
+#include <marble/MarbleModel.h>
+#include <QtGui/QMessageBox>
+#include <QtGui/QInputDialog>
+#include <QtGui/QListWidgetItem>
+#include <QtGui/QStatusBar>
 
 using namespace Marble;
 
@@ -161,7 +162,7 @@ void MainWindow::slotFilterIndexChanged()
 {
   slotFilterTextChanged(filterEdit->text());
 }
-#include <QDebug>
+
 void MainWindow::slotCurrentTabChanged(int index)
 {
   qDebug() << artistList->currentRow();
@@ -281,9 +282,10 @@ void MainWindow::slotCurrentEventChanged(const QModelIndex & current, const QMod
 
 void MainWindow::slotArtistEventsReady(QString data, bool successfull, QString error) {
   if (successfull) {
-    JSonConverterThread* thread = new JSonConverterThread(data, this);
-    connect(thread, SIGNAL(conversionFinished(QVariant, bool, QString)), this, SLOT(slotArtistEventConverted(QVariant, bool, QString)));
-    thread->start();
+    QJson::ParserRunnable* parserRunnable = new QJson::ParserRunnable();
+    parserRunnable->setData(data.toAscii());
+    connect(parserRunnable, SIGNAL(parsingFinished(QVariant, bool, QString)), this, SLOT(slotArtistEventConverted(QVariant, bool, QString)));
+    QThreadPool::globalInstance()->start(parserRunnable);
   } else {
     m_statusBar->showMessage(error);
   }
@@ -294,6 +296,12 @@ void MainWindow::slotArtistEventConverted(QVariant data, bool successfull, QStri
     QVariantMap response = data.toMap();
     response = response["events"].toMap();
     QString artist = response["artist"].toString();
+
+    if (artist.isEmpty()) {
+      // last.fm changed their reply
+      QVariantMap attr = response["@attr"].toMap();
+      artist = attr["artist"].toString();
+    }
 
     QVariantList events = response["event"].toList();
 
@@ -318,9 +326,10 @@ void MainWindow::slotArtistEventConverted(QVariant data, bool successfull, QStri
 
 void MainWindow::slotTopArtistsReady(QString data, bool successfull, QString error) {
   if (successfull) {
-    JSonConverterThread* thread = new JSonConverterThread (data, this);
-    connect(thread, SIGNAL(conversionFinished(QVariant, bool, QString)), this, SLOT(slotTopArtistConverted(QVariant, bool, QString)));
-    thread->start();
+    QJson::ParserRunnable* parserRunnable = new QJson::ParserRunnable();
+    parserRunnable->setData(data.toAscii());
+    connect(parserRunnable, SIGNAL(parsingFinished(QVariant,bool,QString)), this, SLOT(slotTopArtistConverted(QVariant, bool, QString)));
+    QThreadPool::globalInstance()->start(parserRunnable);
   } else {
     m_statusBar->showMessage(error);
   }
@@ -349,9 +358,10 @@ void MainWindow::slotTopArtistConverted(QVariant data, bool successfull, QString
 
 void MainWindow::slotEventsNearLocationReady(QString data, bool successfull, QString error) {
   if (successfull) {
-    JSonConverterThread* thread = new JSonConverterThread(data, this);
-    connect(thread, SIGNAL(conversionFinished(QVariant, bool, QString)), this, SLOT(slotEventsNearLocationConverted(QVariant,bool,QString)));
-    thread->start();
+    QJson::ParserRunnable* parserRunnable = new QJson::ParserRunnable();
+    parserRunnable->setData(data.toAscii());
+    connect(parserRunnable, SIGNAL(parsingFinished(QVariant,bool,QString)), this, SLOT(slotEventsNearLocationConverted(QVariant, bool, QString)));
+    QThreadPool::globalInstance()->start(parserRunnable);
   } else {
     m_statusBar->showMessage(error);
   }
@@ -365,6 +375,19 @@ void MainWindow::slotEventsNearLocationConverted(QVariant data, bool successfull
       QString city = response["location"].toString();
       int page = response["page"].toInt();
       int totalPages = response["totalpages"].toInt();
+
+      if (response.contains("@attr"))
+      {
+        // last.fm changed the response
+        QVariantMap attr = response["@attr"].toMap();
+        city = attr["location"].toString();
+        page = attr["page"].toInt();
+        totalPages = attr["totalpages"].toInt();
+      } else {
+        city = response["location"].toString();
+        page = response["page"].toInt();
+        totalPages = response["totalpages"].toInt();
+      }
 
       QVariantList events = response["event"].toList();
 

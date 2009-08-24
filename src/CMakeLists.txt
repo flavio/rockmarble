@@ -45,7 +45,7 @@ else(WIN32)
       # No need for this when installing to a bundle
     else (APPLE)
       install (TARGETS rockmarble RUNTIME DESTINATION bin )
-      install( FILES rockmarble.desktop  DESTINATION share/applications)
+      install( FILES ../rockmarble.desktop  DESTINATION share/applications)
       
       set(ICON_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/share/icons)
       install (FILES ../icons/rockmarble_128x128.png DESTINATION ${ICON_INSTALL_DIR}/hicolor/128x128/apps/ RENAME rockmarble.png)

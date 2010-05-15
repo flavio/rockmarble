@@ -46,7 +46,6 @@ MainWindow::MainWindow(QWidget *parent)
 
   marble->setMapThemeId("earth/openstreetmap/openstreetmap.dgml");
   marble->setShowGps(true);
-  marble->setDownloadUrl( "http://download.kde.org/apps/marble/" );
 
   eventTable->setSortingEnabled(true);
 

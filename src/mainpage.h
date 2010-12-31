@@ -28,7 +28,6 @@
 
 class DataFetcher;
 class Event;
-class MList;
 class QStringListModel;
 
 class MainPage : public MApplicationPage
@@ -76,15 +75,14 @@ class MainPage : public MApplicationPage
     QMultiMap<QString, Event*> m_artists;
     QMultiMap<QString, Event*> m_cities;
 
-    QString m_lastArtistFilterText;
-    int m_lastArtistFilterRule;
-    QModelIndex m_lastArtistTableItem;
+//    QString m_lastArtistFilterText;
+//    int m_lastArtistFilterRule;
+//    QModelIndex m_lastArtistTableItem;
 
-    QString m_lastCityFilterText;
-    int m_lastCityFilterRule;
-    QModelIndex m_lastCityTableItem;
+//    QString m_lastCityFilterText;
+//    int m_lastCityFilterRule;
+//    QModelIndex m_lastCityTableItem;
 
-    MList* m_artistList;
     QStringListModel* m_artistModel;
 };
 

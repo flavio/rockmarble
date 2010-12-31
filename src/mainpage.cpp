@@ -42,16 +42,12 @@
 #include <QtCore/QAbstractItemModel>
 #include <QtCore/QDebug>
 #include <QtCore/QThreadPool>
-#include <marble/MarbleMap.h>
-#include <marble/MarbleModel.h>
 #include <QtGui/QGraphicsLinearLayout>
-#include <QtGui/QMessageBox>
-#include <QtGui/QInputDialog>
-#include <QtGui/QListWidgetItem>
-#include <QtGui/QStatusBar>
 #include <QtGui/QStringListModel>
 
-using namespace Marble;
+//#include <marble/MarbleMap.h>
+//#include <marble/MarbleModel.h>
+//using namespace Marble;
 
 MainPage::MainPage(QGraphicsItem *parent)
     : MApplicationPage(parent)
@@ -76,8 +72,8 @@ MainPage::MainPage(QGraphicsItem *parent)
 //  filterComboBox->addItem(tr("Artists"), EventModel::ArtistsColumn);
 
   // last filtering rules
-  m_lastArtistFilterRule = EventModel::CountryColumn;
-  m_lastCityFilterRule = EventModel::HeadlinerColumn;
+//  m_lastArtistFilterRule = EventModel::CountryColumn;
+//  m_lastCityFilterRule = EventModel::HeadlinerColumn;
 
   // gui signals
 //  connect(addArtistBtn, SIGNAL(clicked()), this, SLOT(slotAddArtist()));
@@ -133,17 +129,17 @@ void MainPage::createContent()
   connect(actionAbout, SIGNAL(triggered()), this, SLOT(slotAbout()));
 
   // MList with fast view
-  m_artistList = new MList();
-  m_artistList->setSelectionMode(MList::SingleSelection);
+  MList* artistList = new MList();
+  artistList->setSelectionMode(MList::SingleSelection);
 
   // Content item creator and item model for the list
   ArtistItemCreator *cellCreator = new ArtistItemCreator();
-  m_artistList->setCellCreator(cellCreator);
+  artistList->setCellCreator(cellCreator);
   m_artistModel = new QStringListModel();
-  m_artistList->setItemModel(m_artistModel);
-  policy->addItem(m_artistList);
+  artistList->setItemModel(m_artistModel);
+  policy->addItem(artistList);
 
-  connect (m_artistList, SIGNAL(itemClicked(QModelIndex)),
+  connect (artistList, SIGNAL(itemClicked(QModelIndex)),
            this, SLOT(slotArtistClicked(QModelIndex)));
 }
 
@@ -468,11 +464,7 @@ void MainPage::slotArtistEventConverted(QVariant data, bool successfull, QString
         m_artistModel->setStringList(list);
       }
     }
-
-//    if (artistList->findItems(artist, Qt::MatchExactly).isEmpty())
-//      new QListWidgetItem(artist, artistList);
-
-//    m_statusBar->showMessage(tr("Event dates for %1 successfully retrieved").arg(artist), 1200);
+    //showMessage(QString("Event dates for %1 successfully retrieved").arg(artist));
   } else {
     showMessage(error, true);
   }

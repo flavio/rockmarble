@@ -3,10 +3,9 @@ DEPENDPATH += . \
     src
 INCLUDEPATH += . \
     src
-
 LIBS += -lqjson \
     -lmeegotouchcore
-unix {
+unix { 
     CONFIG += link_pkgconfig
     PKGCONFIG += meegotouchcore
 }
@@ -17,7 +16,6 @@ HEADERS += src/datafetcher.h \
     src/event.h \
     src/eventmodel.h \
     src/eventsortfilterproxymodel.h \
-    src/lineedit.h \
     src/location.h \
     src/mainpage.h \
     src/artistitemcreator.h \
@@ -27,12 +25,10 @@ HEADERS += src/datafetcher.h \
     src/countryitemcreator.h \
     src/eventdetailspage.h
 
-# FORMS += src/mainwindow.ui
 SOURCES += src/datafetcher.cpp \
     src/event.cpp \
     src/eventmodel.cpp \
     src/eventsortfilterproxymodel.cpp \
-    src/lineedit.cpp \
     src/location.cpp \
     src/main.cpp \
     src/mainpage.cpp \

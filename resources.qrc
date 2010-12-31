@@ -1,8 +1,6 @@
 <RCC>
-    <qresource prefix="/" >
-        <file>icons/list-add.png</file>
+    <qresource prefix="/">
         <file>icons/icon_lastfm.gif</file>
-        <file>icons/edit-clear-locationbar-rtl.png</file>
         <file>icons/rockmarble.png</file>
     </qresource>
 </RCC>

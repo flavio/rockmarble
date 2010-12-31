@@ -1,0 +1,22 @@
+Name: rockmarble
+Summary: Follow your favourite artists tour around the world
+Version: 0.6.1
+Release: 1
+Group: Applications/Internet 
+License: GPLv2+
+URL: http://rockmarble.sourceforge.net
+Sources:
+    - "%{name}-%{version}.tar.bz2"
+Description: rockmarble is a simple program that fetches artist tour dates from last.fm and shows the event location using marble
+
+PkgConfigBR:
+    - QtCore >= 4.6.0
+    - QtOpenGL
+    - QtGui
+    - qjson
+Configure: none
+Builder: none
+Files:
+    - "%{_bindir}/rockmarble"
+    - "%{_datadir}/applications/*.desktop"
+    - "%{_datadir}/icons/*.png"

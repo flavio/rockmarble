@@ -15,7 +15,6 @@ HEADERS += src/datafetcher.h \
     src/defines.h \
     src/event.h \
     src/eventmodel.h \
-    src/eventsortfilterproxymodel.h \
     src/location.h \
     src/mainpage.h \
     src/artistitemcreator.h \
@@ -28,7 +27,6 @@ HEADERS += src/datafetcher.h \
 SOURCES += src/datafetcher.cpp \
     src/event.cpp \
     src/eventmodel.cpp \
-    src/eventsortfilterproxymodel.cpp \
     src/location.cpp \
     src/main.cpp \
     src/mainpage.cpp \
@@ -56,9 +54,9 @@ target.path = /usr/bin
 INSTALLS += desktop
 desktop.path = /usr/share/applications
 desktop.files = rockmarble.desktop
-INSTALLS += service
-service.path = /usr/share/dbus-1/services
-service.files = rockmarble.service
+#INSTALLS += service
+#service.path = /usr/share/dbus-1/services
+#service.files = rockmarble.service
 INSTALLS += icon64
 icon64.path = /usr/share/icons/hicolor/64x64/apps
 icon64.files = icons/rockmarble.png

@@ -35,11 +35,9 @@ Event::Event(const QVariant& data)
   m_headliner = artists["headliner"].toString();
 
   m_title = event["title"].toString();
-  m_date = QDate::fromString(event["startDate"].toString(), "ddd, dd MMM yyyy");
-  m_time = QTime::fromString(event["startTime"].toString(), "hh:mm");
+  m_dateTime = QDateTime::fromString(event["startDate"].toString(), "ddd, dd MMM yyyy hh:mm:ss");
 
-//  qDebug() << "start date" << event["startDate"] << "-->" << m_date;
-//  qDebug() << "start time" << event["startTime"] << "-->" << m_time;
+//  qDebug(); << "datetime" << event["startDate"] << "-->" << m_dateTime;
 
   m_location = new Location (event["venue"]);
 }
@@ -49,7 +47,7 @@ bool Event::operator==(const Event& e) const
   if (m_artists != e.m_artists)
     return false;
 
-  if (m_date != e.m_date)
+  if (m_dateTime != e.m_dateTime)
     return false;
 
   if (m_description != e.m_description)
@@ -62,9 +60,6 @@ bool Event::operator==(const Event& e) const
     return false;
 
   if (m_location != e.m_location)
-    return false;
-
-  if (m_time != e.m_time)
     return false;
 
   if (m_title != e.m_title)

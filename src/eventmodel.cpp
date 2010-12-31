@@ -19,7 +19,6 @@
   */
 
 #include "eventmodel.h"
-#include "event.h"
 #include "location.h"
 
 EventModel::EventModel(EventList& events, QObject* parent)
@@ -87,7 +86,7 @@ QVariant EventModel::data ( const QModelIndex & index, int role) const
     case LocationColumn:
       return QString("%1 - %2").arg(event->location()->name()).arg(event->location()->street());
     case DateColumn:
-      return event->date().toString();
+      return event->dateTime().toString();
     case ArtistsColumn:
       return event->artists().join("; ");
     case HeadlinerColumn:
@@ -147,5 +146,18 @@ bool EventModel::getCoordinates(const QModelIndex& index, qreal* latitude, qreal
   *longitude = event->location()->longitude();
 
   return true;
+}
+
+Event* EventModel::getEvent(const QModelIndex& index) const
+{
+  if (!index.isValid())
+    return false;
+
+  EventList* events = static_cast<EventList*>(index.internalPointer());
+
+  if (index.row() > events->size())
+    return 0;
+
+  return events->at(index.row());
 }
 

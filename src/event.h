@@ -21,10 +21,10 @@
 #ifndef EVENT_H
 #define EVENT_H
 
-#include <QDate>
-#include <QStringList>
-#include <QVariant>
-#include <QTime>
+#include <QtCore/QDateTime>
+#include <QtCore/QList>
+#include <QtCore/QStringList>
+#include <QtCore/QVariant>
 
 class Location;
 
@@ -36,7 +36,7 @@ public:
 
     QString headliner() { return m_headliner; }
     QStringList artists() { return m_artists; }
-    QDate date() { return m_date; }
+    QDateTime dateTime() { return m_dateTime; }
     Location* location() { return m_location; }
 
     bool operator==(const Event& e) const;
@@ -47,10 +47,11 @@ public:
       QString m_headliner;
       QString m_title;
       QString m_description;
-      QDate m_date;
-      QTime m_time;
+      QDateTime m_dateTime;
 
       Location* m_location;
 };
+
+#define EventList QList<Event*>
 
 #endif // EVENT_H

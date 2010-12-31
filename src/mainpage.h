@@ -18,31 +18,34 @@
   * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   */
 
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef MAINPAGE_H
+#define MAINPAGE_H
 
-#include <QtGui/QMainWindow>
+#include <MApplicationPage>
 #include <QtCore/QMultiMap>
 #include <QtCore/QModelIndex>
 #include <QVariant>
 
-#include "ui_mainwindow.h"
-
 class DataFetcher;
 class Event;
+class MList;
+class QStringListModel;
 
-class MainWindow : public QMainWindow, private Ui::MainWindowClass
+class MainPage : public MApplicationPage
 {
   Q_OBJECT
 
   public:
-    MainWindow(QWidget *parent = 0);
-    ~MainWindow();
+    MainPage(QGraphicsItem *parent = 0);
+    ~MainPage();
+
+  protected:
+    void createContent();
 
   private slots:
     void slotAddArtist();
     void slotImportLastfm();
-    void slotAddCity();
+//    void slotAddCity();
     void slotAbout();
 
     void slotArtistEventsReady(QString,bool,QString);
@@ -54,16 +57,20 @@ class MainWindow : public QMainWindow, private Ui::MainWindowClass
     void slotEventsNearLocationReady(QString,bool,QString);
     void slotEventsNearLocationConverted(QVariant, bool, QString);
 
-    void slotCurrentTabChanged(int);
-    void slotCurrentArtistRowChanged(int);
-    void slotCurrentCityRowChanged(int);
-    void slotCurrentEventChanged(const QModelIndex & current, const QModelIndex & previous);
-    void slotFilterTextChanged(const QString& text);
-    void slotFilterIndexChanged();
+    void slotArtistClicked(const QModelIndex& index);
+
+//    void slotCurrentTabChanged(int);
+//    void slotCurrentArtistRowChanged(int);
+//    void slotCurrentCityRowChanged(int);
+//    void slotCurrentEventChanged(const QModelIndex & current, const QModelIndex & previous);
+//    void slotFilterTextChanged(const QString& text);
+//    void slotFilterIndexChanged();
 
   private:
     void addArtist(const QString& name);
     void addCity(const QString& name);
+
+    void showMessage(const QString& message, bool error = false);
 
     DataFetcher* m_df;
     QMultiMap<QString, Event*> m_artists;
@@ -76,6 +83,9 @@ class MainWindow : public QMainWindow, private Ui::MainWindowClass
     QString m_lastCityFilterText;
     int m_lastCityFilterRule;
     QModelIndex m_lastCityTableItem;
+
+    MList* m_artistList;
+    QStringListModel* m_artistModel;
 };
 
-#endif // MAINWINDOW_H
+#endif // MAINPAGE_H

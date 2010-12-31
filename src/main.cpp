@@ -18,13 +18,17 @@
   * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   */
 
-#include <QtGui/QApplication>
-#include "mainwindow.h"
+#include <MApplication>
+#include <MApplicationWindow>
+#include "mainpage.h"
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
-    MainWindow w;
-    w.show();
-    return a.exec();
+    MApplication app(argc, argv);
+    MApplicationWindow window;
+    MainPage* mainpage = new MainPage();
+    mainpage->appear(&window);
+    window.show();
+
+    return app.exec();
 }

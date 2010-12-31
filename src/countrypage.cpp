@@ -54,5 +54,5 @@ void CountryPage::slotCountryClicked(const QModelIndex& index)
 {
   QString country= index.data(Qt::DisplayRole).toString();
   EventPage *eventPage = new EventPage(country, m_events.values(country));
-  eventPage->appear(scene(), MSceneWindow::DestroyWhenDismissed);
+  eventPage->appear(MSceneWindow::DestroyWhenDismissed);
 }

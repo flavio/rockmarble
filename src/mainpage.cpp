@@ -150,14 +150,14 @@ void MainPage::createContent()
 void MainPage::showMessage(const QString &message, bool error)
 {
   MBanner* banner = new MBanner();
-  banner->setStyleName("SystemBanner");
+  banner->setObjectName("SystemBanner");
   if (error) {
     banner->setIconID("icon-m-common-error");
-    //banner->setStyleName("InformationBanner");
+    //banner->setObjectName("InformationBanner");
   }
 
   banner->setTitle(message);
-  banner->appear(scene(), MSceneWindow::DestroyWhenDone);
+  banner->appear(MSceneWindow::DestroyWhenDone);
 }
 
 void MainPage::slotAbout()
@@ -173,7 +173,7 @@ void MainPage::slotAbout()
   MLabel *description = new MLabel("Flavio Castelli <flavio@castelli.name>",
                              centralWidget);
 
-  title->setStyleName("CommonTitleInverted");
+  title->setObjectName("CommonTitleInverted");
   MLabel *spacer = new MLabel();
   spacer->setObjectName("CommonSpacer");
 
@@ -196,11 +196,11 @@ void MainPage::slotAddArtist() {
   layout->setSpacing(0);
 
   MLabel *label = new MLabel("Fetch tour dates of", centralWidget);
-  label->setStyleName("CommonTitleInverted");
+  label->setObjectName("CommonTitleInverted");
   MTextEdit *textEdit = new MTextEdit(MTextEditModel::SingleLine,
                                           QString(),
                                           centralWidget);
-  textEdit->setStyleName("CommonSingleInputField");
+  textEdit->setObjectName("CommonSingleInputField");
   MLabel *spacer = new MLabel();
   spacer->setObjectName("CommonSpacer");
 
@@ -247,11 +247,11 @@ void MainPage::slotImportLastfm() {
   layout->setSpacing(0);
 
   MLabel *label = new MLabel("Last.fm username", centralWidget);
-  label->setStyleName("CommonTitleInverted");
+  label->setObjectName("CommonTitleInverted");
   MTextEdit *textEdit = new MTextEdit(MTextEditModel::SingleLine,
                                           QString(),
                                           centralWidget);
-  textEdit->setStyleName("CommonSingleInputField");
+  textEdit->setObjectName("CommonSingleInputField");
   MLabel *spacer = new MLabel();
   spacer->setObjectName("CommonSpacer");
 
@@ -286,7 +286,7 @@ void MainPage::slotArtistClicked(const QModelIndex& index)
 {
   QString artist= index.data(Qt::DisplayRole).toString();
   CountryPage *countryPage = new CountryPage(artist, m_artists.values(artist));
-  countryPage->appear(scene(), MSceneWindow::DestroyWhenDismissed);
+  countryPage->appear(MSceneWindow::DestroyWhenDismissed);
 }
 
 //void MainPage::slotFilterTextChanged(const QString& text)

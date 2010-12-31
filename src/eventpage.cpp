@@ -46,5 +46,5 @@ void EventPage::slotEventClicked(const QModelIndex& index)
 {
   Event* event = m_events.at(index.row());
   EventDetailsPage *eventDetailsPage = new EventDetailsPage(event);
-  eventDetailsPage->appear(scene(), MSceneWindow::DestroyWhenDismissed);
+  eventDetailsPage->appear(MSceneWindow::DestroyWhenDismissed);
 }

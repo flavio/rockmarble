@@ -2,14 +2,16 @@
 
 #include "eventdetailspage.h"
 #include "eventitemcreator.h"
-#include "eventmodel.h"
 
 #include <MLayout>
 #include <MList>
 #include <MLinearLayoutPolicy>
 
-EventPage::EventPage(const QString& country, const EventList& events, QGraphicsItem *parent)
-  : MApplicationPage(parent), m_events(events)
+#include <QtSql/QSqlQuery>
+#include <QtSql/QSqlQueryModel>
+
+EventPage::EventPage(const QString& artist, const QString& country, QGraphicsItem *parent)
+  : MApplicationPage(parent), m_artist(artist), m_country(country)
 {
   setTitle(country);
 }
@@ -27,24 +29,35 @@ void EventPage::createContent()
   MLinearLayoutPolicy *policy = new MLinearLayoutPolicy(layout, Qt::Vertical);
 
   // MList with fast view
-  m_eventList = new MList();
-  m_eventList->setSelectionMode(MList::SingleSelection);
+  MList *eventList = new MList();
+  eventList->setSelectionMode(MList::SingleSelection);
 
   // Content item creator and item model for the list
-  EventModel* eventModel = new EventModel(m_events);
-  EventItemCreator *cellCreator = new EventItemCreator();
-  cellCreator->model = eventModel;
-  m_eventList->setCellCreator(cellCreator);
-  m_eventList->setItemModel(eventModel);
-  policy->addItem(m_eventList);
+  QSqlQueryModel* eventModel = new QSqlQueryModel();
+  QSqlQuery query;
+  query.prepare("SELECT events.id FROM events "
+                "JOIN artists_events ON artists_events.event_id = events.id "
+                "JOIN artists ON artists.id = artists_events.artist_id "
+                "JOIN locations ON locations.id = events.location_id "
+                "WHERE artists.name = ? AND locations.country = ? "
+                "ORDER BY events.start_date ASC");
+  query.addBindValue(m_artist);
+  query.addBindValue(m_country);
+  query.exec();
+  eventModel->setQuery(query);
 
-  connect (m_eventList, SIGNAL(itemClicked(QModelIndex)),
+  EventItemCreator *cellCreator = new EventItemCreator();
+  eventList->setCellCreator(cellCreator);
+  eventList->setItemModel(eventModel);
+  policy->addItem(eventList);
+
+  connect (eventList, SIGNAL(itemClicked(QModelIndex)),
            this, SLOT(slotEventClicked(QModelIndex)));
 }
 
 void EventPage::slotEventClicked(const QModelIndex& index)
 {
-  Event* event = m_events.at(index.row());
-  EventDetailsPage *eventDetailsPage = new EventDetailsPage(event);
+  int event_id = index.data(Qt::DisplayRole).toInt();
+  EventDetailsPage *eventDetailsPage = new EventDetailsPage(event_id);
   eventDetailsPage->appear(MSceneWindow::DestroyWhenDismissed);
 }

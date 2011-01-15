@@ -6,14 +6,12 @@
 
 #include "event.h"
 
-class MList;
-
 class EventPage : public MApplicationPage
 {
   Q_OBJECT
 
   public:
-    EventPage(const QString& country, const EventList& eventList, QGraphicsItem *parent = 0);
+    EventPage(const QString& artist, const QString& country, QGraphicsItem *parent = 0);
     ~EventPage();
 
   protected:
@@ -23,8 +21,8 @@ class EventPage : public MApplicationPage
     void slotEventClicked(const QModelIndex& index);
 
   private:
-    EventList m_events;
-    MList* m_eventList;
+    QString m_artist;
+    QString m_country;
 };
 
 #endif // EVENTPAGE_H

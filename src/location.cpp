@@ -35,6 +35,14 @@ Location::Location(const QVariant& data )
   m_long = geo_point["geo:long"].toDouble();
 }
 
+Location::Location(const QString &name, const QString &city,
+                   const QString &country, const QString &street,
+                   const qreal &latitude, const qreal &longitude)
+  : m_name(name), m_city(city), m_country(country), m_street(street),
+    m_lat(latitude), m_long(longitude)
+{
+}
+
 bool Location::operator==(const Location& l) const
 {
   if (m_city != l.m_city)

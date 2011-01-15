@@ -26,9 +26,8 @@
 #include <QtCore/QModelIndex>
 #include <QVariant>
 
-class DataFetcher;
 class Event;
-class QStringListModel;
+class Lastfm;
 
 class MainPage : public MApplicationPage
 {
@@ -47,15 +46,6 @@ class MainPage : public MApplicationPage
 //    void slotAddCity();
     void slotAbout();
 
-    void slotArtistEventsReady(QString,bool,QString);
-    void slotArtistEventConverted(QVariant, bool, QString);
-
-    void slotTopArtistsReady(QString,bool,QString);
-    void slotTopArtistConverted(QVariant, bool, QString);
-
-    void slotEventsNearLocationReady(QString,bool,QString);
-    void slotEventsNearLocationConverted(QVariant, bool, QString);
-
     void slotArtistClicked(const QModelIndex& index);
 
 //    void slotCurrentTabChanged(int);
@@ -71,7 +61,6 @@ class MainPage : public MApplicationPage
 
     void showMessage(const QString& message, bool error = false);
 
-    DataFetcher* m_df;
     QMultiMap<QString, Event*> m_artists;
     QMultiMap<QString, Event*> m_cities;
 
@@ -83,7 +72,7 @@ class MainPage : public MApplicationPage
 //    int m_lastCityFilterRule;
 //    QModelIndex m_lastCityTableItem;
 
-    QStringListModel* m_artistModel;
+    Lastfm* m_lastfm;
 };
 
 #endif // MAINPAGE_H

@@ -27,13 +27,19 @@ class Location
 {
   public:
     Location(const QVariant& data);
+    Location(const QString& name,
+             const QString& city,
+             const QString& country,
+             const QString& street,
+             const qreal& latitude,
+             const qreal& longitude);
 
-    QString name() { return m_name; }
-    QString city() { return m_city; }
-    QString country() { return m_country; }
-    QString street() { return m_street; }
-    qreal latitude() { return m_lat; }
-    qreal longitude() { return m_long; }
+    QString name() const { return m_name; }
+    QString city() const { return m_city; }
+    QString country() const { return m_country; }
+    QString street() const { return m_street; }
+    qreal latitude() const { return m_lat; }
+    qreal longitude() const { return m_long; }
 
     bool operator==(const Location& l) const;
 

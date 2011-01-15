@@ -3,20 +3,19 @@
 
 #include <MApplicationPage>
 
-class Event;
 
 class EventDetailsPage : public MApplicationPage
 {
   Q_OBJECT
 
   public:
-    EventDetailsPage(Event* event, QGraphicsItem *parent=0);
+    EventDetailsPage(const int& event_id, QGraphicsItem *parent=0);
 
   protected:
   virtual void createContent();
 
   private:
-    Event* m_event;
+    int m_event_id;
 };
 
 #endif // EVENTDETAILSPAGE_H

@@ -14,7 +14,7 @@ class CountryPage : public MApplicationPage
   Q_OBJECT
 
   public:
-    CountryPage(const QString& artist, const EventList& events, QGraphicsItem *parent = 0);
+    CountryPage(const QString& artist, QGraphicsItem *parent = 0);
     ~CountryPage();
 
   protected:
@@ -24,7 +24,7 @@ class CountryPage : public MApplicationPage
     void slotCountryClicked(const QModelIndex& index);
 
   private:
-    QMultiMap<QString, Event*> m_events;
+    QString m_artist;
 };
 
 #endif // COUNTRYPAGE_H

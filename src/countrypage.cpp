@@ -9,15 +9,15 @@
 #include <MLinearLayoutPolicy>
 
 #include <QtGui/QStringListModel>
+#include <QtSql/QSqlQuery>
+#include <QtSql/QSqlQueryModel>
 
-CountryPage::CountryPage(const QString& artist, const EventList& events, QGraphicsItem *parent)
-  : MApplicationPage(parent)
+#include <QDebug>
+
+CountryPage::CountryPage(const QString& artist, QGraphicsItem *parent)
+  : MApplicationPage(parent), m_artist(artist)
 {
-  setTitle(artist);
-  foreach(Event* event,events) {
-    QString country = event->location()->country();
-    m_events.insertMulti(country, event);
-  }
+  setTitle(m_artist);
 }
 
 CountryPage::~CountryPage()
@@ -26,11 +26,18 @@ CountryPage::~CountryPage()
 
 void CountryPage::createContent()
 {
-  QStringListModel* countryModel = new QStringListModel();
-
-  QStringList countries = m_events.uniqueKeys();
-  qSort(countries);
-  countryModel->setStringList(countries);
+  QSqlQueryModel* countryModel = new QSqlQueryModel();
+  QSqlQuery query;
+  query.prepare("SELECT locations.country FROM events "
+                 "JOIN artists_events ON artists_events.event_id = events.id "
+                 "JOIN artists ON artists.id = artists_events.artist_id "
+                 "JOIN locations ON locations.id = events.location_id "
+                 "WHERE artists.name = ? "
+                 "GROUP BY locations.country "
+                 "ORDER BY locations.country ASC");
+  query.addBindValue(m_artist);
+  query.exec();
+  countryModel->setQuery(query);
 
   QGraphicsWidget *panel = centralWidget();
   MLayout *layout = new MLayout(panel);
@@ -38,7 +45,7 @@ void CountryPage::createContent()
   panel->setLayout(layout);
   MLinearLayoutPolicy *policy = new MLinearLayoutPolicy(layout, Qt::Vertical);
 
-  MList* countryList = new MList();
+  MList *countryList = new MList();
   countryList->setSelectionMode(MList::SingleSelection);
 
   CountryItemCreator *cellCreator = new CountryItemCreator();
@@ -53,6 +60,6 @@ void CountryPage::createContent()
 void CountryPage::slotCountryClicked(const QModelIndex& index)
 {
   QString country= index.data(Qt::DisplayRole).toString();
-  EventPage *eventPage = new EventPage(country, m_events.values(country));
+  EventPage *eventPage = new EventPage(m_artist, country);
   eventPage->appear(MSceneWindow::DestroyWhenDismissed);
 }

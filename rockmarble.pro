@@ -9,6 +9,7 @@ unix {
     CONFIG += link_pkgconfig
     PKGCONFIG += meegotouchcore
 }
+QT = sql
 
 # Input
 HEADERS += src/datafetcher.h \
@@ -22,8 +23,9 @@ HEADERS += src/datafetcher.h \
     src/eventitemcreator.h \
     src/countrypage.h \
     src/countryitemcreator.h \
-    src/eventdetailspage.h
-
+    src/eventdetailspage.h \
+    src/lastfm.h \
+    src/dbmanager.h
 SOURCES += src/datafetcher.cpp \
     src/event.cpp \
     src/eventmodel.cpp \
@@ -35,7 +37,9 @@ SOURCES += src/datafetcher.cpp \
     src/eventitemcreator.cpp \
     src/countrypage.cpp \
     src/countryitemcreator.cpp \
-    src/eventdetailspage.cpp
+    src/eventdetailspage.cpp \
+    src/lastfm.cpp \
+    src/dbmanager.cpp
 RESOURCES += resources.qrc
 
 # All generated files goes to the same directory

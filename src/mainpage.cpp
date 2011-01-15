@@ -20,13 +20,13 @@
 
 #include "mainpage.h"
 
-#include "datafetcher.h"
 #include "defines.h"
 #include "artistitemcreator.h"
 #include "countrypage.h"
 #include "event.h"
 #include "eventmodel.h"
 #include "eventsortfilterproxymodel.h"
+#include "lastfm.h"
 
 #include <MAction>
 #include <MBanner>
@@ -38,12 +38,10 @@
 #include <MSceneManager>
 #include <MTextEdit>
 
-#include <qjson/parserrunnable.h>
 #include <QtCore/QAbstractItemModel>
-#include <QtCore/QDebug>
-#include <QtCore/QThreadPool>
 #include <QtGui/QGraphicsLinearLayout>
-#include <QtGui/QStringListModel>
+#include <QtSql/QSqlQueryModel>
+
 
 //#include <marble/MarbleMap.h>
 //#include <marble/MarbleModel.h>
@@ -57,12 +55,6 @@ MainPage::MainPage(QGraphicsItem *parent)
 //  marble->setShowGps(true);
 //
 //  eventTable->setSortingEnabled(true);
-
-  // data fetcher
-  m_df = DataFetcher::instance();
-  connect (m_df, SIGNAL(getArtistEventsReady(QString,bool,QString)), this, SLOT(slotArtistEventsReady(QString,bool,QString)));
-  connect (m_df, SIGNAL(getTopArtistsReady(QString,bool,QString)), this, SLOT(slotTopArtistsReady(QString,bool,QString)));
-  connect (m_df, SIGNAL(getEventsNearLocationReady(QString,bool,QString)), this, SLOT (slotEventsNearLocationReady(QString,bool,QString)));
 
   // filter
 //  filterComboBox->addItem(tr("Country"), EventModel::CountryColumn);
@@ -86,6 +78,8 @@ MainPage::MainPage(QGraphicsItem *parent)
 //  connect(filterEdit, SIGNAL(textChanged(QString)), this, SLOT(slotFilterTextChanged(QString)));
 //  connect(filterComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(slotFilterIndexChanged()));
 //  connect(actionExit, SIGNAL(triggered()), this, SLOT(close()));
+
+  m_lastfm = new Lastfm(this);
 }
 
 MainPage::~MainPage()
@@ -135,8 +129,10 @@ void MainPage::createContent()
   // Content item creator and item model for the list
   ArtistItemCreator *cellCreator = new ArtistItemCreator();
   artistList->setCellCreator(cellCreator);
-  m_artistModel = new QStringListModel();
-  artistList->setItemModel(m_artistModel);
+  QSqlQueryModel* artistsModel = new QSqlQueryModel();
+  artistsModel->setQuery("SELECT name FROM artists WHERE favourite = 1 "
+                         "ORDER BY name ASC");
+  artistList->setItemModel(artistsModel);
   policy->addItem(artistList);
 
   connect (artistList, SIGNAL(itemClicked(QModelIndex)),
@@ -158,7 +154,6 @@ void MainPage::showMessage(const QString &message, bool error)
 
 void MainPage::slotAbout()
 {
-//  QMessageBox::about(this, tr("About rockmarble"), tr("rockmarble version %1\n\nSimple program for tracking tour dates of your favourite artists.\n\nFlavio Castelli <flavio@castelli.name>").arg(ROCKMARBLE_VERSION));
   MWidget *centralWidget = new MWidget;
   QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(Qt::Vertical);
   layout->setContentsMargins(0,0,0,0);
@@ -194,8 +189,7 @@ void MainPage::slotAddArtist() {
   MLabel *label = new MLabel("Fetch tour dates of", centralWidget);
   label->setObjectName("CommonTitleInverted");
   MTextEdit *textEdit = new MTextEdit(MTextEditModel::SingleLine,
-                                          QString(),
-                                          centralWidget);
+                                      QString(), centralWidget);
   textEdit->setObjectName("CommonSingleInputField");
   MLabel *spacer = new MLabel();
   spacer->setObjectName("CommonSpacer");
@@ -231,7 +225,7 @@ void MainPage::slotAddArtist() {
 void MainPage::addArtist(const QString& artist)
 {
   if (!artist.isEmpty()) {
-    m_df->getArtistEvents(artist);
+//    m_df->getArtistEvents(artist);
     //showMessage(QString("retrieving event dates for %1").arg(artist));
   }
 }
@@ -265,7 +259,7 @@ void MainPage::slotImportLastfm() {
   {
     QString user = textEdit->text();
     if (!user.isEmpty())
-      m_df->getTopArtists(user);
+      m_lastfm->getTopArtists(user);
       showMessage(QString("Retrieving top artists for user %1").arg(user));
   }
 }
@@ -273,7 +267,7 @@ void MainPage::slotImportLastfm() {
 void MainPage::addCity(const QString& city)
 {
   if (!city.isEmpty()) {
-    m_df->getEventsNearLocation(city);
+//    m_df->getEventsNearLocation(city);
 //    m_statusBar->showMessage(tr("retrieving event near %1").arg(city));
   }
 }
@@ -281,7 +275,7 @@ void MainPage::addCity(const QString& city)
 void MainPage::slotArtistClicked(const QModelIndex& index)
 {
   QString artist= index.data(Qt::DisplayRole).toString();
-  CountryPage *countryPage = new CountryPage(artist, m_artists.values(artist));
+  CountryPage *countryPage = new CountryPage(artist);
   countryPage->appear(MSceneWindow::DestroyWhenDismissed);
 }
 
@@ -418,151 +412,3 @@ void MainPage::slotArtistClicked(const QModelIndex& index)
 //    marble->update();
 //  }
 //}
-
-void MainPage::slotArtistEventsReady(QString data, bool successfull, QString error) {
-  if (successfull) {
-    QJson::ParserRunnable* parserRunnable = new QJson::ParserRunnable();
-    parserRunnable->setData(data.toAscii());
-    connect(parserRunnable, SIGNAL(parsingFinished(QVariant, bool, QString)), this, SLOT(slotArtistEventConverted(QVariant, bool, QString)));
-    QThreadPool::globalInstance()->start(parserRunnable);
-  } else {
-    //TODO show error
-    showMessage(error, true);
-  }
-}
-
-void MainPage::slotArtistEventConverted(QVariant data, bool successfull, QString error) {
-  if (successfull) {
-    QVariantMap response = data.toMap();
-    response = response["events"].toMap();
-    QString artist = response["artist"].toString();
-
-    if (artist.isEmpty()) {
-      // last.fm changed their reply
-      QVariantMap attr = response["@attr"].toMap();
-      artist = attr["artist"].toString();
-    }
-
-    QVariantList events = response["event"].toList();
-
-    EventList eventList;
-
-    foreach(QVariant event, events) {
-      Event* e = new Event(event);
-      if (m_artists.contains(artist, e))
-        delete e;
-      else
-        m_artists.insertMulti(artist, e);
-    }
-
-    QMapIterator<QString, Event*> iter(m_artists);
-    while (iter.hasNext()) {
-      iter.next();
-      QStringList list = m_artistModel->stringList();
-      if (!list.contains(iter.key())) {
-        list.append(iter.key());
-        m_artistModel->setStringList(list);
-      }
-    }
-    //showMessage(QString("Event dates for %1 successfully retrieved").arg(artist));
-  } else {
-    showMessage(error, true);
-  }
-}
-
-void MainPage::slotTopArtistsReady(QString data, bool successfull, QString error) {
-  if (successfull) {
-    QJson::ParserRunnable* parserRunnable = new QJson::ParserRunnable();
-    parserRunnable->setData(data.toAscii());
-    connect(parserRunnable, SIGNAL(parsingFinished(QVariant,bool,QString)), this, SLOT(slotTopArtistConverted(QVariant, bool, QString)));
-    QThreadPool::globalInstance()->start(parserRunnable);
-  } else {
-    showMessage(error, true);
-  }
-}
-
-void MainPage::slotTopArtistConverted(QVariant data, bool successfull, QString error) {
-  if (successfull) {
-    QVariantMap response = data.toMap();
-    if (!response.contains("error")) {
-      QVariantMap topartists = response["topartists"].toMap();
-      QVariantList artists = topartists["artist"].toList();
-
-      foreach(QVariant entry, artists) {
-        QVariantMap artist = entry.toMap();
-        QString artistName = artist["name"].toString();
-        addArtist(artistName);
-      }
-    }
-    else {
-      showMessage(response["message"].toString(), true);
-    }
-  } else {
-    showMessage(error, true);
-  }
-}
-
-void MainPage::slotEventsNearLocationReady(QString data, bool successfull, QString error) {
-  if (successfull) {
-    QJson::ParserRunnable* parserRunnable = new QJson::ParserRunnable();
-    parserRunnable->setData(data.toAscii());
-    connect(parserRunnable, SIGNAL(parsingFinished(QVariant,bool,QString)), this, SLOT(slotEventsNearLocationConverted(QVariant, bool, QString)));
-    QThreadPool::globalInstance()->start(parserRunnable);
-  } else {
-    showMessage(error, true);
-  }
-}
-
-void MainPage::slotEventsNearLocationConverted(QVariant data, bool successfull, QString error) {
-  if (successfull) {
-    QVariantMap response = data.toMap();
-    if (!response.contains("error")) {
-      response = response["events"].toMap();
-      QString city = response["location"].toString();
-      int page = response["page"].toInt();
-      int totalPages = response["totalpages"].toInt();
-
-      if (response.contains("@attr"))
-      {
-        // last.fm changed the response
-        QVariantMap attr = response["@attr"].toMap();
-        city = attr["location"].toString();
-        page = attr["page"].toInt();
-        totalPages = attr["totalpages"].toInt();
-      } else {
-        city = response["location"].toString();
-        page = response["page"].toInt();
-        totalPages = response["totalpages"].toInt();
-      }
-
-      QVariantList events = response["event"].toList();
-
-      foreach(QVariant event, events) {
-        Event* e = new Event(event);
-        if (m_cities.contains(city, e))
-          delete e;
-        else
-          m_cities.insertMulti(city, e);
-      }
-
-//      if (citiesList->findItems(city, Qt::MatchExactly).isEmpty())
-//        new QListWidgetItem(city, citiesList);
-
-      if (page < totalPages){
-        m_df->getEventsNearLocation(city, ++page);
-//        m_statusBar->showMessage(tr("More events near %1 to fetch (we are at page %2/%3)").arg(city).arg(page).arg(totalPages), 1200);
-
-//        if ((citiesList->currentRow() != -1) && (citiesList->currentItem()->text().compare(city) == 0))
-//          slotCurrentCityRowChanged(citiesList->currentRow());
-      }
-//      else
-//        m_statusBar->showMessage(tr("All event dates near %1 successfully retrieved").arg(city), 1200);
-    } else {
-      showMessage(response["message"].toString(), true);
-    }
-  } else {
-    showMessage(error, true);
-  }
-}
-
-

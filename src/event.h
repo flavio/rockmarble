@@ -32,12 +32,20 @@ class Event
 {
 public:
     Event(const QVariant& data);
+    Event(const QStringList& artists,
+          const QString& title,
+          const QString& description,
+          const QDateTime& dateTime,
+          Location* location);
     ~Event();
 
-    QString headliner() { return m_headliner; }
-    QStringList artists() { return m_artists; }
-    QDateTime dateTime() { return m_dateTime; }
-    Location* location() { return m_location; }
+    int id() const { return m_id; }
+    QString headliner() const { return m_headliner; }
+    QStringList artists() const { return m_artists; }
+    QDateTime dateTime() const { return m_dateTime; }
+    Location* location() const { return m_location; }
+    QString title() const { return m_title; }
+    QString description() const { return m_description; }
 
     bool operator==(const Event& e) const;
 

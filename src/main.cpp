@@ -20,15 +20,21 @@
 
 #include <MApplication>
 #include <MApplicationWindow>
+
+#include "dbmanager.h"
 #include "mainpage.h"
+
 
 int main(int argc, char *argv[])
 {
-    MApplication app(argc, argv);
-    MApplicationWindow window;
-    MainPage* mainpage = new MainPage();
-    mainpage->appear(&window);
-    window.show();
+  // forces db initialization
+  DBManager::instance();
 
-    return app.exec();
+  MApplication app(argc, argv);
+  MApplicationWindow window;
+  MainPage* mainpage = new MainPage();
+  mainpage->appear(&window);
+  window.show();
+
+  return app.exec();
 }

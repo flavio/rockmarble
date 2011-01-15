@@ -42,6 +42,19 @@ Event::Event(const QVariant& data)
   m_location = new Location (event["venue"]);
 }
 
+Event::Event(const QStringList &artists, const QString &title,
+             const QString &description, const QDateTime &dateTime,
+             Location *location)
+  : m_artists(artists), m_title(title), m_description(description),
+    m_dateTime(dateTime), m_location(location)
+{
+}
+
+Event::~Event() {
+  delete m_location;
+  m_location = 0;
+}
+
 bool Event::operator==(const Event& e) const
 {
   if (m_artists != e.m_artists)
@@ -66,10 +79,5 @@ bool Event::operator==(const Event& e) const
     return false;
 
   return true;
-}
-
-Event::~Event() {
-  delete m_location;
-  m_location = 0;
 }
 

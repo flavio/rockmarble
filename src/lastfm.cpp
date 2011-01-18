@@ -24,8 +24,8 @@ void Lastfm::getTopArtists(const QString &user) {
   m_df->getTopArtists(user);
 }
 
-void Lastfm::slotArtistEventsReady(QString data, bool successfull, QString errMsg) {
-  if (successfull) {
+void Lastfm::slotArtistEventsReady(QString data, bool successful, QString errMsg) {
+  if (successful) {
     QJson::ParserRunnable* parserRunnable = new QJson::ParserRunnable();
     parserRunnable->setData(data.toAscii());
     connect(parserRunnable, SIGNAL(parsingFinished(QVariant, bool, QString)),
@@ -36,8 +36,8 @@ void Lastfm::slotArtistEventsReady(QString data, bool successfull, QString errMs
   }
 }
 
-void Lastfm::slotArtistEventConverted(QVariant data, bool successfull, QString errMsg) {
-  if (successfull) {
+void Lastfm::slotArtistEventConverted(QVariant data, bool successful, QString errMsg) {
+  if (successful) {
     DBManager* db = DBManager::instance();
     QVariantMap response = data.toMap();
     response = response["events"].toMap();
@@ -59,8 +59,8 @@ void Lastfm::slotArtistEventConverted(QVariant data, bool successfull, QString e
   }
 }
 
-void Lastfm::slotTopArtistsReady(QString data, bool successfull, QString errMsg) {
-  if (successfull) {
+void Lastfm::slotTopArtistsReady(QString data, bool successful, QString errMsg) {
+  if (successful) {
     QJson::ParserRunnable* parserRunnable = new QJson::ParserRunnable();
     parserRunnable->setData(data.toAscii());
     connect(parserRunnable, SIGNAL(parsingFinished(QVariant,bool,QString)),
@@ -71,8 +71,8 @@ void Lastfm::slotTopArtistsReady(QString data, bool successfull, QString errMsg)
   }
 }
 
-void Lastfm::slotTopArtistConverted(QVariant data, bool successfull, QString errMsg) {
-  if (successfull) {
+void Lastfm::slotTopArtistConverted(QVariant data, bool successful, QString errMsg) {
+  if (successful) {
     DBManager* db = DBManager::instance();
     QVariantMap response = data.toMap();
     if (!response.contains("error")) {
@@ -94,8 +94,8 @@ void Lastfm::slotTopArtistConverted(QVariant data, bool successfull, QString err
   }
 }
 
-void Lastfm::slotEventsNearLocationReady(QString data, bool successfull, QString error) {
-//  if (successfull) {
+void Lastfm::slotEventsNearLocationReady(QString data, bool successful, QString error) {
+//  if (successful) {
 //    QJson::ParserRunnable* parserRunnable = new QJson::ParserRunnable();
 //    parserRunnable->setData(data.toAscii());
 //    connect(parserRunnable, SIGNAL(parsingFinished(QVariant,bool,QString)), this, SLOT(slotEventsNearLocationConverted(QVariant, bool, QString)));
@@ -105,8 +105,8 @@ void Lastfm::slotEventsNearLocationReady(QString data, bool successfull, QString
 //  }
 }
 
-void Lastfm::slotEventsNearLocationConverted(QVariant data, bool successfull, QString error) {
-//  if (successfull) {
+void Lastfm::slotEventsNearLocationConverted(QVariant data, bool successful, QString error) {
+//  if (successful) {
 //    QVariantMap response = data.toMap();
 //    if (!response.contains("error")) {
 //      response = response["events"].toMap();
@@ -148,7 +148,7 @@ void Lastfm::slotEventsNearLocationConverted(QVariant data, bool successfull, QS
 ////          slotCurrentCityRowChanged(citiesList->currentRow());
 //      }
 ////      else
-////        m_statusBar->showMessage(tr("All event dates near %1 successfully retrieved").arg(city), 1200);
+////        m_statusBar->showMessage(tr("All event dates near %1 successfuly retrieved").arg(city), 1200);
 //    } else {
 //      showMessage(response["message"].toString(), true);
 //    }

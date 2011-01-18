@@ -8,6 +8,60 @@
 #include <QtCore/QDebug>
 #include <QtCore/QThreadPool>
 
+class StoreEvents : public QRunnable
+{
+  public:
+    StoreEvents(const QVariant& data) {
+      m_data = data;
+    }
+
+    void run() {
+      DBManager* db = DBManager::instance();
+      QVariantMap response = m_data.toMap();
+      response = response["events"].toMap();
+      QString artist = response["artist"].toString();
+
+      if (artist.isEmpty()) {
+        // last.fm changed their reply
+        QVariantMap attr = response["@attr"].toMap();
+        artist = attr["artist"].toString();
+      }
+
+      QVariantList events = response["event"].toList();
+
+      foreach(QVariant event, events) {
+        db->addEvent(Event(event));
+      }
+    }
+
+  private:
+    QVariant m_data;
+};
+
+class StoreArtist : public QRunnable
+{
+  public:
+    StoreArtist(const QVariantMap& response) {
+      m_response = response;
+    }
+
+    void run() {
+      DBManager* db = DBManager::instance();
+      QVariantMap topartists = m_response["topartists"].toMap();
+      QVariantList artists = topartists["artist"].toList();
+
+      foreach(QVariant entry, artists) {
+        QVariantMap artist = entry.toMap();
+        QString artistName = artist["name"].toString();
+        db->addArtist(artistName, true);
+        DataFetcher::instance()->getArtistEvents(artistName);
+      }
+    }
+
+  private:
+    QVariantMap m_response;
+};
+
 Lastfm::Lastfm(QObject* parent)
   : QObject (parent) {
   // data fetcher
@@ -38,22 +92,8 @@ void Lastfm::slotArtistEventsReady(QString data, bool successful, QString errMsg
 
 void Lastfm::slotArtistEventConverted(QVariant data, bool successful, QString errMsg) {
   if (successful) {
-    DBManager* db = DBManager::instance();
-    QVariantMap response = data.toMap();
-    response = response["events"].toMap();
-    QString artist = response["artist"].toString();
-
-    if (artist.isEmpty()) {
-      // last.fm changed their reply
-      QVariantMap attr = response["@attr"].toMap();
-      artist = attr["artist"].toString();
-    }
-
-    QVariantList events = response["event"].toList();
-
-    foreach(QVariant event, events) {
-      db->addEvent(Event(event));
-    }
+    StoreEvents* storeEvents = new StoreEvents(data);
+    QThreadPool::globalInstance()->start(storeEvents);
   } else {
     emit error(errMsg);
   }
@@ -71,23 +111,16 @@ void Lastfm::slotTopArtistsReady(QString data, bool successful, QString errMsg) 
   }
 }
 
+
 void Lastfm::slotTopArtistConverted(QVariant data, bool successful, QString errMsg) {
   if (successful) {
-    DBManager* db = DBManager::instance();
     QVariantMap response = data.toMap();
     if (!response.contains("error")) {
-      QVariantMap topartists = response["topartists"].toMap();
-      QVariantList artists = topartists["artist"].toList();
-
-      foreach(QVariant entry, artists) {
-        QVariantMap artist = entry.toMap();
-        QString artistName = artist["name"].toString();
-        db->addArtist(artistName, true);
-        m_df->getArtistEvents(artistName);
-      }
+      StoreArtist* storeArtist = new StoreArtist(response);
+      QThreadPool::globalInstance()->start(storeArtist);
     }
     else {
-      emit  error(response["message"].toString());
+      emit error(response["message"].toString());
     }
   } else {
     emit error (errMsg);

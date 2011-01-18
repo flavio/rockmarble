@@ -64,7 +64,7 @@ void DBManager::initDB() {
   qWarning() << "db tables" << tables;
 
   executeQuery("PRAGMA foreign_keys = ON");
-
+qWarning() << "tables" << tables;
   if (!tables.contains("artists")) {
     executeQuery("create table artists ( "
                "id integer primary key autoincrement not null, "
@@ -115,7 +115,9 @@ int DBManager::addArtist(const QString &name, bool favourite)
       q.exec();
       // TODO handle false
       //qWarning() << "created a new artist entry:" << name << favourite;
-      return addArtist(name, favourite);
+      int id = addArtist(name, favourite);
+      emit artistAdded(id);
+      return id;
     }
   } else {
     qWarning() << q.lastError();

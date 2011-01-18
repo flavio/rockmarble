@@ -22,12 +22,11 @@
 #define MAINPAGE_H
 
 #include <MApplicationPage>
-#include <QtCore/QMultiMap>
 #include <QtCore/QModelIndex>
 #include <QVariant>
 
-class Event;
 class Lastfm;
+class QSqlQueryModel;
 
 class MainPage : public MApplicationPage
 {
@@ -47,6 +46,7 @@ class MainPage : public MApplicationPage
     void slotAbout();
 
     void slotArtistClicked(const QModelIndex& index);
+    void slotNewArtistAdded();
 
 //    void slotCurrentTabChanged(int);
 //    void slotCurrentArtistRowChanged(int);
@@ -61,9 +61,6 @@ class MainPage : public MApplicationPage
 
     void showMessage(const QString& message, bool error = false);
 
-    QMultiMap<QString, Event*> m_artists;
-    QMultiMap<QString, Event*> m_cities;
-
 //    QString m_lastArtistFilterText;
 //    int m_lastArtistFilterRule;
 //    QModelIndex m_lastArtistTableItem;
@@ -73,6 +70,7 @@ class MainPage : public MApplicationPage
 //    QModelIndex m_lastCityTableItem;
 
     Lastfm* m_lastfm;
+    QSqlQueryModel* m_artistsModel;
 };
 
 #endif // MAINPAGE_H

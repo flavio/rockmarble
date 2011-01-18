@@ -22,6 +22,7 @@
 
 #include "defines.h"
 #include "artistitemcreator.h"
+#include "dbmanager.h"
 #include "countrypage.h"
 #include "event.h"
 #include "eventmodel.h"
@@ -40,6 +41,7 @@
 
 #include <QtCore/QAbstractItemModel>
 #include <QtGui/QGraphicsLinearLayout>
+#include <QtSql/QSqlQuery>
 #include <QtSql/QSqlQueryModel>
 
 
@@ -84,13 +86,6 @@ MainPage::MainPage(QGraphicsItem *parent)
 
 MainPage::~MainPage()
 {
-  foreach (Event* event, m_artists.values())
-    delete event;
-  m_artists.clear();
-
-  foreach (Event* event, m_cities.values())
-    delete event;
-  m_cities.clear();
 }
 
 void MainPage::createContent()
@@ -102,6 +97,8 @@ void MainPage::createContent()
   layout->setAnimation(NULL);
   panel->setLayout(layout);
   MLinearLayoutPolicy *policy = new MLinearLayoutPolicy(layout, Qt::Vertical);
+  layout->setLandscapePolicy(policy);
+  layout->setPortraitPolicy(policy);
 
   // Actions
   MAction* actionImportLastfm = new MAction(panel);
@@ -129,14 +126,25 @@ void MainPage::createContent()
   // Content item creator and item model for the list
   ArtistItemCreator *cellCreator = new ArtistItemCreator();
   artistList->setCellCreator(cellCreator);
-  QSqlQueryModel* artistsModel = new QSqlQueryModel();
-  artistsModel->setQuery("SELECT name FROM artists WHERE favourite = 1 "
+  m_artistsModel = new QSqlQueryModel();
+  m_artistsModel->setQuery("SELECT name FROM artists WHERE favourite = 1 "
                          "ORDER BY name ASC");
-  artistList->setItemModel(artistsModel);
+  artistList->setItemModel(m_artistsModel);
   policy->addItem(artistList);
 
   connect (artistList, SIGNAL(itemClicked(QModelIndex)),
            this, SLOT(slotArtistClicked(QModelIndex)));
+
+  connect(DBManager::instance(), SIGNAL(artistAdded(int)),
+          this, SLOT(slotNewArtistAdded()));
+}
+#include <QtDebug>
+void MainPage::slotNewArtistAdded()
+{
+  qWarning() << "artist added";
+  QSqlQuery q = m_artistsModel->query();
+  q.exec();
+  m_artistsModel->setQuery(q);
 }
 
 void MainPage::showMessage(const QString &message, bool error)

@@ -66,7 +66,7 @@ Lastfm::Lastfm(QObject* parent)
   // data fetcher
   m_df = DataFetcher::instance();
   connect (m_df, SIGNAL(getArtistEventsReady(QString,bool,QString)),
-           this, SLOT(slotArtistEventsReady(QString,bool,QString)));
+           this, SLOT(slotEventsForArtistReady(QString,bool,QString)));
   connect (m_df, SIGNAL(getTopArtistsReady(QString,bool,QString)),
            this, SLOT(slotTopArtistsReady(QString,bool,QString)));
   connect (m_df, SIGNAL(getEventsNearLocationReady(QString,bool,QString)),
@@ -81,19 +81,19 @@ void Lastfm::getEventsForArtist(const QString &artist) {
   m_df->getArtistEvents(artist);
 }
 
-void Lastfm::slotArtistEventsReady(QString data, bool successful, QString errMsg) {
+void Lastfm::slotEventsForArtistReady(QString data, bool successful, QString errMsg) {
   if (successful) {
     QJson::ParserRunnable* parserRunnable = new QJson::ParserRunnable();
     parserRunnable->setData(data.toAscii());
     connect(parserRunnable, SIGNAL(parsingFinished(QVariant, bool, QString)),
-            this, SLOT(slotArtistEventConverted(QVariant, bool, QString)));
+            this, SLOT(slotEventsForArtistConverted(QVariant, bool, QString)));
     QThreadPool::globalInstance()->start(parserRunnable);
   } else {
     emit error(errMsg);
   }
 }
 
-void Lastfm::slotArtistEventConverted(QVariant data, bool successful, QString errMsg) {
+void Lastfm::slotEventsForArtistConverted(QVariant data, bool successful, QString errMsg) {
   if (successful) {
     StoreEvents* storeEvents = new StoreEvents(data);
     QThreadPool::globalInstance()->start(storeEvents);

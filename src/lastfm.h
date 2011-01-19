@@ -16,8 +16,8 @@ class Lastfm : public QObject
     void getEventsForArtist(const QString& artist);
 
   private slots:
-    void slotArtistEventsReady(QString,bool,QString);
-    void slotArtistEventConverted(QVariant, bool, QString);
+    void slotEventsForArtistReady(QString,bool,QString);
+    void slotEventsForArtistConverted(QVariant, bool, QString);
 
     void slotTopArtistsReady(QString,bool,QString);
     void slotTopArtistConverted(QVariant, bool, QString);

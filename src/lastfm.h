@@ -13,6 +13,7 @@ class Lastfm : public QObject
     Lastfm(QObject* parent = 0);
 
     void getTopArtists(const QString& user);
+    void getEventsForArtist(const QString& artist);
 
   private slots:
     void slotArtistEventsReady(QString,bool,QString);

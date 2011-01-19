@@ -54,7 +54,6 @@ class StoreArtist : public QRunnable
         QVariantMap artist = entry.toMap();
         QString artistName = artist["name"].toString();
         db->addArtist(artistName, true);
-        DataFetcher::instance()->getArtistEvents(artistName);
       }
     }
 
@@ -76,6 +75,10 @@ Lastfm::Lastfm(QObject* parent)
 
 void Lastfm::getTopArtists(const QString &user) {
   m_df->getTopArtists(user);
+}
+
+void Lastfm::getEventsForArtist(const QString &artist) {
+  m_df->getArtistEvents(artist);
 }
 
 void Lastfm::slotArtistEventsReady(QString data, bool successful, QString errMsg) {
@@ -110,7 +113,6 @@ void Lastfm::slotTopArtistsReady(QString data, bool successful, QString errMsg) 
     emit error(errMsg);
   }
 }
-
 
 void Lastfm::slotTopArtistConverted(QVariant data, bool successful, QString errMsg) {
   if (successful) {

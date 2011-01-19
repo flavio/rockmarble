@@ -116,7 +116,7 @@ int DBManager::addArtist(const QString &name, bool favourite)
       // TODO handle false
       //qWarning() << "created a new artist entry:" << name << favourite;
       int id = addArtist(name, favourite);
-      emit artistAdded(id);
+      emit artistAdded(name);
       return id;
     }
   } else {

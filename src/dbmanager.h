@@ -22,7 +22,7 @@ class DBManager : public QObject
     Location* locationFromID(const int& location_id);
 
   signals:
-    void artistAdded(const int id);
+    void artistAdded(const QString& name);
 
   private:
     DBManager(QObject* parent = 0);

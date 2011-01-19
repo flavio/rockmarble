@@ -26,7 +26,9 @@
 #include <QVariant>
 
 class Lastfm;
+class MTextEdit;
 class QSqlQueryModel;
+class QSortFilterProxyModel;
 
 class MainPage : public MApplicationPage
 {
@@ -45,32 +47,26 @@ class MainPage : public MApplicationPage
 //    void slotAddCity();
     void slotAbout();
 
+    void slotArtistAdded(const QString&);
     void slotArtistClicked(const QModelIndex& index);
-    void slotNewArtistAdded();
-
-//    void slotCurrentTabChanged(int);
-//    void slotCurrentArtistRowChanged(int);
-//    void slotCurrentCityRowChanged(int);
-//    void slotCurrentEventChanged(const QModelIndex & current, const QModelIndex & previous);
-//    void slotFilterTextChanged(const QString& text);
-//    void slotFilterIndexChanged();
+    void slotFilterChanged();
+    void slotShowFilter();
+    void slotShowSearch();
 
   private:
     void addArtist(const QString& name);
     void addCity(const QString& name);
+    QString artistsModelQuery() const;
+    void refreshArtistsModel();
 
     void showMessage(const QString& message, bool error = false);
 
-//    QString m_lastArtistFilterText;
-//    int m_lastArtistFilterRule;
-//    QModelIndex m_lastArtistTableItem;
-
-//    QString m_lastCityFilterText;
-//    int m_lastCityFilterRule;
-//    QModelIndex m_lastCityTableItem;
-
+    bool m_filterVisible;
+    bool m_showArtistsWithoutEvents;
     Lastfm* m_lastfm;
+    MTextEdit* m_filter;
     QSqlQueryModel* m_artistsModel;
+    QSortFilterProxyModel *m_proxyModel;
 };
 
 #endif // MAINPAGE_H

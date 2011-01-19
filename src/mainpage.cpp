@@ -31,6 +31,7 @@
 
 #include <MAction>
 #include <MBanner>
+#include <MButton>
 #include <MDialog>
 #include <MLabel>
 #include <MLayout>
@@ -40,7 +41,9 @@
 #include <MTextEdit>
 
 #include <QtCore/QAbstractItemModel>
+#include <QtCore/QPropertyAnimation>
 #include <QtGui/QGraphicsLinearLayout>
+#include <QtGui/QSortFilterProxyModel>
 #include <QtSql/QSqlQuery>
 #include <QtSql/QSqlQueryModel>
 
@@ -55,25 +58,7 @@ MainPage::MainPage(QGraphicsItem *parent)
   setTitle("Rockmarble");
 //  marble->setMapThemeId("earth/openstreetmap/openstreetmap.dgml");
 //  marble->setShowGps(true);
-//
-//  eventTable->setSortingEnabled(true);
 
-  // filter
-//  filterComboBox->addItem(tr("Country"), EventModel::CountryColumn);
-//  filterComboBox->addItem(tr("City"), EventModel::CityColumn);
-//  filterComboBox->addItem(tr("Location"), EventModel::LocationColumn);
-//  filterComboBox->addItem(tr("Headliner"), EventModel::HeadlinerColumn);
-//  filterComboBox->addItem(tr("Artists"), EventModel::ArtistsColumn);
-
-  // last filtering rules
-//  m_lastArtistFilterRule = EventModel::CountryColumn;
-//  m_lastCityFilterRule = EventModel::HeadlinerColumn;
-
-  // gui signals
-//  connect(addArtistBtn, SIGNAL(clicked()), this, SLOT(slotAddArtist()));
-//  connect(importLastfmBtn, SIGNAL(clicked()), this, SLOT(slotImportLastfm()));
-//  connect(addCityBtn, SIGNAL(clicked()), this, SLOT(slotAddCity()));
-//
 //  connect(tabWidget, SIGNAL(currentChanged(int)), this, SLOT(slotCurrentTabChanged(int)));
 //  connect(artistList, SIGNAL(currentRowChanged(int)), this, SLOT(slotCurrentArtistRowChanged(int)));
 //  connect(citiesList, SIGNAL(currentRowChanged(int)), this, SLOT(slotCurrentCityRowChanged(int)));
@@ -82,6 +67,8 @@ MainPage::MainPage(QGraphicsItem *parent)
 //  connect(actionExit, SIGNAL(triggered()), this, SLOT(close()));
 
   m_lastfm = new Lastfm(this);
+  m_filterVisible = false;
+  m_showArtistsWithoutEvents = true;
 }
 
 MainPage::~MainPage()
@@ -100,7 +87,7 @@ void MainPage::createContent()
   layout->setLandscapePolicy(policy);
   layout->setPortraitPolicy(policy);
 
-  // Actions
+  // Menu Actions
   MAction* actionImportLastfm = new MAction(panel);
   actionImportLastfm->setText("Import from Last.fm");
   actionImportLastfm->setLocation(MAction::ApplicationMenuLocation);
@@ -119,6 +106,25 @@ void MainPage::createContent()
   addAction(actionAbout);
   connect(actionAbout, SIGNAL(triggered()), this, SLOT(slotAbout()));
 
+  // Toolbar Actions
+  MAction* actionFilter = new MAction("icon-m-toolbar-filter", "", this);
+  actionFilter->setLocation(MAction::ToolBarLocation);
+  addAction(actionFilter);
+  connect(actionFilter, SIGNAL(triggered()), this, SLOT(slotShowFilter()));
+
+  MAction* actionSearch = new MAction("icon-m-toolbar-search", "", this);
+  actionSearch->setLocation(MAction::ToolBarLocation);
+  addAction(actionSearch);
+  connect(actionSearch, SIGNAL(triggered()), this, SLOT(slotShowSearch()));
+
+  // filtering text box
+  m_filter = new MTextEdit(MTextEditModel::SingleLine, QString(), this);
+  m_filter->setOpacity(0.0);
+  m_filter->setObjectName("CommonSingleInputField");
+  m_filter->setToolTip("Foobar");
+  policy->addItem(m_filter);
+  connect(m_filter, SIGNAL(textChanged()), this, SLOT(slotFilterChanged()));
+
   // MList with fast view
   MList* artistList = new MList();
   artistList->setSelectionMode(MList::SingleSelection);
@@ -127,24 +133,100 @@ void MainPage::createContent()
   ArtistItemCreator *cellCreator = new ArtistItemCreator();
   artistList->setCellCreator(cellCreator);
   m_artistsModel = new QSqlQueryModel();
-  m_artistsModel->setQuery("SELECT name FROM artists WHERE favourite = 1 "
-                         "ORDER BY name ASC");
-  artistList->setItemModel(m_artistsModel);
+  m_artistsModel->setQuery(artistsModelQuery());
+  m_proxyModel = new QSortFilterProxyModel(this);
+  m_proxyModel->setSourceModel(m_artistsModel);
+  artistList->setItemModel(m_proxyModel);
   policy->addItem(artistList);
 
   connect (artistList, SIGNAL(itemClicked(QModelIndex)),
            this, SLOT(slotArtistClicked(QModelIndex)));
 
-  connect(DBManager::instance(), SIGNAL(artistAdded(int)),
-          this, SLOT(slotNewArtistAdded()));
+  connect(DBManager::instance(), SIGNAL(artistAdded(const QString&)),
+          this, SLOT(slotArtistAdded(const QString&)));
+
 }
-#include <QtDebug>
-void MainPage::slotNewArtistAdded()
+
+QString MainPage::artistsModelQuery() const
 {
-  qWarning() << "artist added";
-  QSqlQuery q = m_artistsModel->query();
-  q.exec();
-  m_artistsModel->setQuery(q);
+  QString q = "SELECT distinct artists.name FROM artists ";
+  if (!m_showArtistsWithoutEvents) {
+    q += " JOIN artists_events on artists.id = artists_events.artist_id ";
+  }
+  q += " WHERE artists.favourite = 1 ";
+  q += " ORDER BY artists.name ASC";
+  return q;
+}
+
+void MainPage::slotArtistAdded(const QString& artist)
+{
+  m_lastfm->getEventsForArtist(artist);
+  refreshArtistsModel();
+}
+
+void MainPage::refreshArtistsModel()
+{
+  m_artistsModel->setQuery(artistsModelQuery());
+}
+
+void MainPage::slotFilterChanged()
+{
+  m_proxyModel->setFilterRegExp(m_filter->text());
+}
+
+void MainPage::slotShowSearch()
+{
+  qreal startValue, endValue;
+  if (m_filterVisible) {
+    // let's hide it
+    startValue = 1.0;
+    endValue = 0.0;
+  } else {
+    // let's show it
+    startValue = 0.0;
+    endValue = 1.0;
+  }
+  m_filterVisible = !m_filterVisible;
+
+  QPropertyAnimation *fadeInAnimation = new QPropertyAnimation;
+  fadeInAnimation->setTargetObject(m_filter);
+  fadeInAnimation->setPropertyName("opacity");
+  fadeInAnimation->setStartValue(startValue);
+  fadeInAnimation->setEndValue(endValue);
+  fadeInAnimation->setDuration(1000.0);
+  fadeInAnimation->start(QAbstractAnimation::DeleteWhenStopped);
+}
+
+void MainPage::slotShowFilter()
+{
+  MWidget *centralWidget = new MWidget;
+  QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(Qt::Horizontal);
+  layout->setContentsMargins(0,0,0,0);
+  layout->setSpacing(0);
+
+  MLabel *label = new MLabel("Show artists without tour dates.",
+                             centralWidget);
+  label->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+
+  MButton *artistsWithoutEventsSwitch = new MButton();
+  artistsWithoutEventsSwitch->setViewType(MButton::switchType);
+  artistsWithoutEventsSwitch->setCheckable(true);
+  artistsWithoutEventsSwitch->setChecked(m_showArtistsWithoutEvents);
+
+  centralWidget->setLayout(layout);
+
+  layout->addItem(label);
+  layout->addItem(artistsWithoutEventsSwitch);
+
+  MDialog* dialog = new MDialog("Import from Last.fm",
+                                M::OkButton | M::CancelButton);
+  dialog->setCentralWidget(centralWidget);
+  dialog->appear(MSceneWindow::DestroyWhenDone);
+  if ((dialog->exec() == MDialog::Accepted) &&
+      (m_showArtistsWithoutEvents != artistsWithoutEventsSwitch->isChecked())) {
+    m_showArtistsWithoutEvents = !m_showArtistsWithoutEvents;
+    refreshArtistsModel();
+  }
 }
 
 void MainPage::showMessage(const QString &message, bool error)
@@ -247,8 +329,8 @@ void MainPage::slotImportLastfm() {
   MLabel *label = new MLabel("Last.fm username", centralWidget);
   label->setObjectName("CommonTitleInverted");
   MTextEdit *textEdit = new MTextEdit(MTextEditModel::SingleLine,
-                                          QString(),
-                                          centralWidget);
+                                      QString(),
+                                      centralWidget);
   textEdit->setObjectName("CommonSingleInputField");
   MLabel *spacer = new MLabel();
   spacer->setObjectName("CommonSpacer");
@@ -286,137 +368,3 @@ void MainPage::slotArtistClicked(const QModelIndex& index)
   CountryPage *countryPage = new CountryPage(artist);
   countryPage->appear(MSceneWindow::DestroyWhenDismissed);
 }
-
-//void MainPage::slotFilterTextChanged(const QString& text)
-//{
-//  EventSortFilterProxyModel* proxyModel = static_cast<EventSortFilterProxyModel*>( eventTable->model());
-//  proxyModel->setFilterFixedString(text);
-//  proxyModel->setFilterKeyColumn(filterComboBox->itemData( filterComboBox->currentIndex()).toInt());
-//  proxyModel->setFilterCaseSensitivity ( Qt::CaseInsensitive );
-//
-//  QAbstractItemModel* sourceModel = proxyModel->sourceModel();
-//
-//  totalLabel->setText(tr("%1/%2 events").arg(proxyModel->rowCount()).arg(sourceModel->rowCount()));
-//}
-//
-//void MainPage::slotFilterIndexChanged()
-//{
-//  slotFilterTextChanged(filterEdit->text());
-//}
-//
-//void MainPage::slotCurrentTabChanged(int index)
-//{
-//  qDebug() << artistList->currentRow();
-//  qDebug() << citiesList->currentRow();
-//
-//  if (index == 0) {
-//    // artist tab
-//    if (citiesList->currentRow() >= 0) {
-//      m_lastCityFilterRule = filterComboBox->itemData(filterComboBox->currentIndex()).toInt();
-//      m_lastCityFilterText = filterEdit->text();
-//      m_lastCityTableItem = eventTable->currentIndex();
-//    }
-//
-//    if (artistList->currentRow() >= 0) {
-//      slotCurrentArtistRowChanged(artistList->currentRow());
-//      eventTable->setCurrentIndex(m_lastArtistTableItem);
-//      slotCurrentEventChanged(m_lastArtistTableItem, QModelIndex());
-//    } else {
-//      stackedWidget->setCurrentIndex(1);
-//      eventsBox->setTitle(tr("Tour dates"));
-//    }
-//  } else if (index == 1) {
-//    // cities tab
-//
-//    if (artistList->currentRow() >= 0) {
-//      m_lastArtistFilterRule = filterComboBox->itemData(filterComboBox->currentIndex()).toInt();
-//      m_lastArtistFilterText = filterEdit->text();
-//      m_lastArtistTableItem = eventTable->currentIndex();
-//    }
-//
-//    if (citiesList->currentRow() >= 0) {
-//      slotCurrentCityRowChanged(citiesList->currentRow());
-//      eventTable->setCurrentIndex(m_lastCityTableItem);
-//      slotCurrentEventChanged(m_lastCityTableItem, QModelIndex());
-//    } else {
-//      stackedWidget->setCurrentIndex(1);
-//      eventsBox->setTitle(tr("Tour dates"));
-//    }
-//  }
-//}
-//
-//
-//void MainPage::slotCurrentArtistRowChanged(int row)
-//{
-//  QString artist = artistList->item(row)->text();
-//  eventsBox->setTitle(tr("%1 tour dates").arg(artist));
-//
-//  EventList events = m_artists.values(artist);
-//  EventModel* sourceModel = new EventModel(events, this);
-//
-//  if (sourceModel->rowCount() != 0) {
-//    stackedWidget->setCurrentIndex(0);
-//    QSortFilterProxyModel* proxyModel = new QSortFilterProxyModel(this);
-//
-//    proxyModel->setSourceModel(sourceModel);
-//    eventTable->setModel(proxyModel);
-//    eventTable->hideColumn(EventModel::HeadlinerColumn);
-//    filterComboBox->removeItem( filterComboBox->findData(EventModel::HeadlinerColumn));
-//
-//    filterEdit->setText(m_lastArtistFilterText);
-//    filterComboBox->setCurrentIndex( filterComboBox->findData(m_lastArtistFilterRule));
-//    slotFilterTextChanged(filterEdit->text());
-//
-//    connect(eventTable->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(slotCurrentEventChanged(QModelIndex,QModelIndex)));
-//
-//    totalLabel->setText(tr("%1 events").arg(proxyModel->rowCount()));
-//  } else {
-//    stackedWidget->setCurrentIndex(1);
-//  }
-//  eventTable->update();
-//}
-//
-//void MainPage::slotCurrentCityRowChanged(int row)
-//{
-//  QString city = citiesList->item(row)->text();
-//  eventsBox->setTitle(tr("Events near %1").arg(city));
-//
-//  EventList events = m_cities.values(city);
-//  EventModel* sourceModel = new EventModel(events, this);
-//
-//  if (sourceModel->rowCount() != 0) {
-//    stackedWidget->setCurrentIndex(0);
-//    QSortFilterProxyModel* proxyModel = new QSortFilterProxyModel(this);
-//
-//    proxyModel->setSourceModel(sourceModel);
-//    eventTable->setModel(proxyModel);
-//    eventTable->showColumn(EventModel::HeadlinerColumn);
-//    if (filterComboBox->findData(EventModel::HeadlinerColumn) == -1)
-//      filterComboBox->addItem(tr("Headliner"), EventModel::HeadlinerColumn);
-//
-//    filterEdit->setText(m_lastCityFilterText);
-//    filterComboBox->setCurrentIndex( filterComboBox->findData(m_lastCityFilterRule));
-//    slotFilterTextChanged(filterEdit->text());
-//
-//    connect(eventTable->selectionModel(), SIGNAL(currentRowChanged(QModelIndex,QModelIndex)), this, SLOT(slotCurrentEventChanged(QModelIndex,QModelIndex)));
-//
-//    totalLabel->setText(tr("%1 events").arg(proxyModel->rowCount()));
-//  } else {
-//    stackedWidget->setCurrentIndex(1);
-//  }
-//  eventTable->update();
-//}
-//
-//
-//void MainPage::slotCurrentEventChanged(const QModelIndex & current, const QModelIndex & previous ) {
-//  Q_UNUSED( previous)
-//  QSortFilterProxyModel* proxyModel = static_cast<QSortFilterProxyModel*>(eventTable->model());
-//  EventModel* model = static_cast<EventModel*>(proxyModel->sourceModel());
-//
-//  qreal latitude, longitude;
-//
-//  if (model->getCoordinates(proxyModel->mapToSource(current), &latitude, &longitude)) {
-//    marble->centerOn(longitude, latitude, true);
-//    marble->update();
-//  }
-//}

@@ -59,13 +59,6 @@ MainPage::MainPage(QGraphicsItem *parent)
 //  marble->setMapThemeId("earth/openstreetmap/openstreetmap.dgml");
 //  marble->setShowGps(true);
 
-//  connect(tabWidget, SIGNAL(currentChanged(int)), this, SLOT(slotCurrentTabChanged(int)));
-//  connect(artistList, SIGNAL(currentRowChanged(int)), this, SLOT(slotCurrentArtistRowChanged(int)));
-//  connect(citiesList, SIGNAL(currentRowChanged(int)), this, SLOT(slotCurrentCityRowChanged(int)));
-//  connect(filterEdit, SIGNAL(textChanged(QString)), this, SLOT(slotFilterTextChanged(QString)));
-//  connect(filterComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(slotFilterIndexChanged()));
-//  connect(actionExit, SIGNAL(triggered()), this, SLOT(close()));
-
   m_lastfm = new Lastfm(this);
   m_filterVisible = false;
   m_showArtistsWithoutEvents = true;

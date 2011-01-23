@@ -10,8 +10,8 @@
 #include <QtSql/QSqlQuery>
 #include <QtSql/QSqlQueryModel>
 
-EventPage::EventPage(const QString& artist, const QString& country, QGraphicsItem *parent)
-  : MApplicationPage(parent), m_artist(artist), m_country(country)
+EventPage::EventPage(const int& artistID, const QString& country, QGraphicsItem *parent)
+  : MApplicationPage(parent), m_artistID(artistID), m_country(country)
 {
   setTitle(country);
 }
@@ -37,11 +37,10 @@ void EventPage::createContent()
   QSqlQuery query;
   query.prepare("SELECT events.id FROM events "
                 "JOIN artists_events ON artists_events.event_id = events.id "
-                "JOIN artists ON artists.id = artists_events.artist_id "
                 "JOIN locations ON locations.id = events.location_id "
-                "WHERE artists.name = ? AND locations.country = ? "
+                "WHERE artists_events.artist_id = ? AND locations.country = ? "
                 "ORDER BY events.start_date ASC");
-  query.addBindValue(m_artist);
+  query.addBindValue(m_artistID);
   query.addBindValue(m_country);
   query.exec();
   eventModel->setQuery(query);

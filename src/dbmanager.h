@@ -18,9 +18,12 @@ class DBManager : public QObject
     int addArtist(const QString& name, bool favourite = false);
     void setArtistHasImage(const int& artistID, bool hasImage);
     void addEvent(const Event& event);
-    int eventsWithArtistNum(const QString& artist);
-    Event* eventFromID(const int& event_id);
-    Location* locationFromID(const int& location_id);
+    int eventsWithArtistNum(const int& artistID);
+    QString artistFromID(const int& artistID);
+    bool artistHasImage(const int& artistID);
+
+    Event* eventFromID(const int& eventID);
+    Location* locationFromID(const int& locationID);
 
   signals:
     void artistAdded(const QString& name, bool favourite);
@@ -31,9 +34,9 @@ class DBManager : public QObject
     bool executeQuery(const QString&);
     bool executeQuery(QSqlQuery*);
 
-    void addArtistToEvent(const QString& artist, const int& event_id);
+    void addArtistToEvent(const QString& artist, const int& eventID);
     int addLocation(const Location* location);
-    QStringList artistsFromEvent(const int& event_id);
+    QStringList artistsFromEvent(const int& eventID);
 };
 
 #endif // DBMANAGER_H

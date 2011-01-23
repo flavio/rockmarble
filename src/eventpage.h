@@ -11,7 +11,7 @@ class EventPage : public MApplicationPage
   Q_OBJECT
 
   public:
-    EventPage(const QString& artist, const QString& country, QGraphicsItem *parent = 0);
+    EventPage(const int& artistID, const QString& country, QGraphicsItem *parent = 0);
     ~EventPage();
 
   protected:
@@ -21,7 +21,7 @@ class EventPage : public MApplicationPage
     void slotEventClicked(const QModelIndex& index);
 
   private:
-    QString m_artist;
+    int m_artistID;
     QString m_country;
 };
 

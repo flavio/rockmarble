@@ -1,3 +1,4 @@
+#include "dbmanager.h"
 #include "countrypage.h"
 #include "countryitemcreator.h"
 #include "event.h"
@@ -14,10 +15,10 @@
 
 #include <QDebug>
 
-CountryPage::CountryPage(const QString& artist, QGraphicsItem *parent)
-  : MApplicationPage(parent), m_artist(artist)
+CountryPage::CountryPage(const int& artistID, QGraphicsItem *parent)
+  : MApplicationPage(parent), m_artistID(artistID)
 {
-  setTitle(m_artist);
+  setTitle(DBManager::instance()->artistFromID(artistID));
 }
 
 CountryPage::~CountryPage()
@@ -30,12 +31,11 @@ void CountryPage::createContent()
   QSqlQuery query;
   query.prepare("SELECT locations.country FROM events "
                  "JOIN artists_events ON artists_events.event_id = events.id "
-                 "JOIN artists ON artists.id = artists_events.artist_id "
                  "JOIN locations ON locations.id = events.location_id "
-                 "WHERE artists.name = ? "
+                 "WHERE artists_events.artist_id = ? "
                  "GROUP BY locations.country "
                  "ORDER BY locations.country ASC");
-  query.addBindValue(m_artist);
+  query.addBindValue(m_artistID);
   query.exec();
   countryModel->setQuery(query);
 
@@ -60,6 +60,6 @@ void CountryPage::createContent()
 void CountryPage::slotCountryClicked(const QModelIndex& index)
 {
   QString country= index.data(Qt::DisplayRole).toString();
-  EventPage *eventPage = new EventPage(m_artist, country);
+  EventPage *eventPage = new EventPage(m_artistID, country);
   eventPage->appear(MSceneWindow::DestroyWhenDismissed);
 }

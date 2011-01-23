@@ -218,13 +218,12 @@ int DBManager::addLocation(const Location *location)
     return -1;
 }
 
-int DBManager::eventsWithArtistNum(const QString &artist)
+int DBManager::eventsWithArtistNum(const int &artistID)
 {
   QSqlQuery query ("select count(events.id) as event_num from events "
                    "join artists_events on events.id = artists_events.event_id "
-                   "join artists on artists.id = artists_events.artist_id "
-                   "where artists.name = ?");
-  query.addBindValue(artist);
+                   "where artists_events.artist_id = ?");
+  query.addBindValue(artistID);
   executeQuery(&query);
   if (query.next()) {
     return query.value(query.record().indexOf("event_num")).toInt();
@@ -233,11 +232,37 @@ int DBManager::eventsWithArtistNum(const QString &artist)
   }
 }
 
-QStringList DBManager::artistsFromEvent(const int& event_id)
+QString DBManager::artistFromID(const int &artistID)
+{
+  QString artist;
+  QSqlQuery q ("select name from artists where id = ?");
+  q.addBindValue(artistID);
+  if (executeQuery(&q)) {
+    q.next();
+    artist = q.value(q.record().indexOf("name")).toString();
+  }
+
+  return artist;
+}
+
+bool DBManager::artistHasImage(const int &artistID)
+{
+  bool ret = false;
+  QSqlQuery q ("select has_image from artists where id = ?");
+  q.addBindValue(artistID);
+  if (executeQuery(&q)) {
+    q.next();
+    ret = q.value(q.record().indexOf("has_image")).toBool();
+  }
+
+  return ret;
+}
+
+QStringList DBManager::artistsFromEvent(const int& eventID)
 {
   QStringList artists;
   QSqlQuery query ("select artist_id from artists_events where event_id = ?");
-  query.addBindValue(event_id);
+  query.addBindValue(eventID);
   if (!executeQuery(&query))
     return artists;
 
@@ -250,15 +275,15 @@ QStringList DBManager::artistsFromEvent(const int& event_id)
   return artists;
 }
 
-Event* DBManager::eventFromID(const int &event_id)
+Event* DBManager::eventFromID(const int &eventID)
 {
   QSqlQuery query ("select * from events where id = ?");
-  query.addBindValue(event_id);
+  query.addBindValue(eventID);
   if (!executeQuery(&query))
     return 0;
 
   if (query.next()) {
-    QStringList artists = artistsFromEvent(event_id);
+    QStringList artists = artistsFromEvent(eventID);
     query.value(query.record().indexOf("event_num")).toInt();
     QString title = query.value(query.record().indexOf("title")).toString();
     QString description = query.value(query.record().indexOf("description")).toString();
@@ -271,10 +296,10 @@ Event* DBManager::eventFromID(const int &event_id)
   }
 }
 
-Location* DBManager::locationFromID(const int &location_id)
+Location* DBManager::locationFromID(const int &locationID)
 {
   QSqlQuery query ("select * from locations where id = ? ");
-  query.addBindValue(location_id);
+  query.addBindValue(locationID);
   if (!executeQuery(&query))
     return 0;
 

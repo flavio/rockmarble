@@ -14,7 +14,7 @@ class CountryPage : public MApplicationPage
   Q_OBJECT
 
   public:
-    CountryPage(const QString& artist, QGraphicsItem *parent = 0);
+    CountryPage(const int& artistID, QGraphicsItem *parent = 0);
     ~CountryPage();
 
   protected:
@@ -24,7 +24,7 @@ class CountryPage : public MApplicationPage
     void slotCountryClicked(const QModelIndex& index);
 
   private:
-    QString m_artist;
+    int m_artistID;
 };
 
 #endif // COUNTRYPAGE_H

@@ -142,7 +142,7 @@ void MainPage::createContent()
 
 QString MainPage::artistsModelQuery() const
 {
-  QString q = "SELECT distinct artists.name FROM artists ";
+  QString q = "SELECT distinct artists.id FROM artists ";
   if (!m_showArtistsWithoutEvents) {
     q += " JOIN artists_events on artists.id = artists_events.artist_id ";
   }
@@ -357,7 +357,7 @@ void MainPage::addCity(const QString& city)
 
 void MainPage::slotArtistClicked(const QModelIndex& index)
 {
-  QString artist= index.data(Qt::DisplayRole).toString();
-  CountryPage *countryPage = new CountryPage(artist);
+  int artistID = index.data(Qt::DisplayRole).toInt();
+  CountryPage *countryPage = new CountryPage(artistID);
   countryPage->appear(MSceneWindow::DestroyWhenDismissed);
 }

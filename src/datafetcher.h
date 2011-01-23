@@ -54,7 +54,7 @@ Q_SIGNALS:
   // #1 : Reply converted to a QVarian object
   // #2 : Was the request successful ?
   // #3 : Error Message
-  void getArtistEventsReady(const QString& response,
+  void getEventsForArtistReady(const QString& response,
                             bool  success,
                             const QString& errMsg);
   void getArtistInfoReady(QString, bool, QString);

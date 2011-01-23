@@ -98,7 +98,7 @@ Lastfm::Lastfm(QObject* parent)
   : QObject (parent) {
   // data fetcher
   m_df = DataFetcher::instance();
-  connect (m_df, SIGNAL(getArtistEventsReady(const QString&,
+  connect (m_df, SIGNAL(getEventsForArtistReady(const QString&,
                                              bool, const QString&)),
            this, SLOT(slotEventsForArtistReady(const QString&,
                                                bool, const QString&)));

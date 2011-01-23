@@ -172,13 +172,13 @@ void DataFetcher::requestFinished(QNetworkReply *reply)
       if (reply->error() == QNetworkReply::NoError) {
         QString errorMessage;
         QString response (reply->readAll());
-        emit getArtistEventsReady(response, true, "");
+        emit getEventsForArtistReady(response, true, "");
       } else {
         QString errorText = QString("A network error occured while searching for artist \"%1\" [%2]!").arg(artistName).arg(errorCodeToText(reply->error()));
         qCritical() << errorText;
         qCritical() << "URL requested:" << reply->request().url().toString();
         qCritical() << "URL processed:" << reply->url().toString();
-        emit getArtistEventsReady("", false, errorText);
+        emit getEventsForArtistReady("", false, errorText);
       }
       break;
     }

@@ -55,24 +55,35 @@ DataFetcher* DataFetcher::instance()
   return dataFetcherInstance;
 }
 
-void DataFetcher::getArtistEvents(const QString& artist)
+void DataFetcher::getArtistImage(const QString &artist, const QString &url)
 {
   qDebug() << Q_FUNC_INFO;
 
-  // Cleanup
-  clearArtistData(artist);
+  QUrl urlEL(url);
+  doRequest(urlEL, DataFetcher::ArtistImageRequest, artist);
+}
+
+void DataFetcher::getArtistEvents(const QString& artist)
+{
+  qDebug() << Q_FUNC_INFO;
 
   QUrl urlEL(QString("http://ws.audioscrobbler.com/2.0/?method=artist.getevents&api_key=%1&format=json").arg(API_KEY));
   urlEL.addQueryItem("artist", artist);
   doRequest(urlEL, DataFetcher::ArtistEventsRequest, artist);
 }
 
-void DataFetcher::getTopArtists(const QString& user)
+void DataFetcher::getArtistInfo(const QString& artist)
 {
   qDebug() << Q_FUNC_INFO;
 
-  // Cleanup
-  clearUserData(user);
+  QUrl urlEL(QString("http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&api_key=%1&format=json").arg(API_KEY));
+  urlEL.addQueryItem("artist", artist);
+  doRequest(urlEL, DataFetcher::ArtistInfoRequest, artist);
+}
+
+void DataFetcher::getTopArtists(const QString& user)
+{
+  qDebug() << Q_FUNC_INFO;
 
   QUrl urlEL(QString("http://ws.audioscrobbler.com/2.0/?method=user.gettopartists&api_key=%1&format=json").arg(API_KEY));
   urlEL.addQueryItem("user", user);
@@ -84,9 +95,6 @@ void DataFetcher::getEventsNearLocation(const QString& location, const int page)
 {
   qDebug() << Q_FUNC_INFO;
 
-  // Cleanup
-  clearLocationData(location);
-
   QUrl urlEL(QString("http://ws.audioscrobbler.com/2.0/?method=geo.getevents&api_key=%1&format=json").arg(API_KEY));
   urlEL.addQueryItem("location", location);
   if (page != -1) {
@@ -97,26 +105,40 @@ void DataFetcher::getEventsNearLocation(const QString& location, const int page)
   doRequest(urlEL, DataFetcher::EventsNearLocationRequest, location);
 }
 
-void DataFetcher::doRequest(const QUrl &url, DataFetcher::RequestType requestType, const QString &string)
+void DataFetcher::doRequest(const QUrl &url,
+                            DataFetcher::RequestType requestType,
+                            const QString &string)
 {
   qDebug() << Q_FUNC_INFO;
   qDebug() << "Going to call url" << url;
   QNetworkRequest request;
-  QString httpUA = QString("rockmarble/%1 (http://github.com/flavio/rockmarble/tree/master)").arg(ROCKMARBLE_VERSION);
+  QString httpUA = QString("rockmarble/%1 "
+                           "(http://github.com/flavio/rockmarble/tree/master)")\
+                          .arg(ROCKMARBLE_VERSION);
   request.setRawHeader("User-Agent", qPrintable(httpUA));
   request.setUrl(url);
 
   // Set some attributes
   // Request Type
-  request.setAttribute(QNetworkRequest::Attribute(RequestTypeAttribute), QVariant((int)requestType));
+  request.setAttribute(QNetworkRequest::Attribute(RequestTypeAttribute),
+                       QVariant((int)requestType));
 
-  if (requestType == EventsNearLocationRequest) {
-    request.setAttribute(QNetworkRequest::Attribute(EventsNearLocationAttribute), QVariant(string));
-  } else {
-    // Artist name
-    request.setAttribute(QNetworkRequest::Attribute(ArtistNameAttribute), QVariant(string));
+  switch(requestType) {
+    case EventsNearLocationRequest:
+      request.setAttribute(QNetworkRequest::Attribute(EventsNearLocationAttribute),
+                           QVariant(string));
+      break;
+    case TopArtistsRequest:
+      request.setAttribute(QNetworkRequest::Attribute(UserNameAttribute),
+                           QVariant(string));
+      break;
+    case ArtistEventsRequest:
+    case ArtistInfoRequest:
+    case ArtistImageRequest:
+      request.setAttribute(QNetworkRequest::Attribute(ArtistNameAttribute),
+                           QVariant(string));
+      break;
   }
-
   m_nam->get(request);
 } // doRequest()
 
@@ -126,6 +148,24 @@ void DataFetcher::requestFinished(QNetworkReply *reply)
   DataFetcher::RequestType requestType = DataFetcher::RequestType(reply->request().attribute(QNetworkRequest::Attribute(RequestTypeAttribute)).toInt());
 
   switch(requestType) {
+  case DataFetcher::ArtistImageRequest:
+    {
+      QString artistName = reply->request().attribute(QNetworkRequest::Attribute(ArtistNameAttribute)).toString();
+      if (reply->error() == QNetworkReply::NoError) {
+        QString errorMessage;
+        QByteArray response (reply->readAll());
+        emit getArtistImageReady(artistName, response, true, "");
+      } else {
+        QString errorText = QString("A network error occured while fetching "
+                                    "raw data [%1]!").\
+                                    arg(errorCodeToText(reply->error()));
+        qCritical() << errorText;
+        qCritical() << "URL requested:" << reply->request().url().toString();
+        qCritical() << "URL processed:" << reply->url().toString();
+        emit getArtistImageReady(artistName, "", false, errorText);
+      }
+      break;
+    }
   case DataFetcher::ArtistEventsRequest:
     {
       QString artistName = reply->request().attribute(QNetworkRequest::Attribute(ArtistNameAttribute)).toString();
@@ -139,6 +179,22 @@ void DataFetcher::requestFinished(QNetworkReply *reply)
         qCritical() << "URL requested:" << reply->request().url().toString();
         qCritical() << "URL processed:" << reply->url().toString();
         emit getArtistEventsReady("", false, errorText);
+      }
+      break;
+    }
+  case DataFetcher::ArtistInfoRequest:
+    {
+      QString artistName = reply->request().attribute(QNetworkRequest::Attribute(ArtistNameAttribute)).toString();
+      if (reply->error() == QNetworkReply::NoError) {
+        QString errorMessage;
+        QString response (reply->readAll());
+        emit getArtistInfoReady(response, true, "");
+      } else {
+        QString errorText = QString("A network error occured while fetching artist details \"%1\" [%2]!").arg(artistName).arg(errorCodeToText(reply->error()));
+        qCritical() << errorText;
+        qCritical() << "URL requested:" << reply->request().url().toString();
+        qCritical() << "URL processed:" << reply->url().toString();
+        emit getArtistInfoReady("", false, errorText);
       }
       break;
     }
@@ -196,25 +252,3 @@ QString DataFetcher::errorCodeToText(QNetworkReply::NetworkError errorCode)
 
   return errorName;
 } // errorCodeToText()
-
-void DataFetcher::clearArtistData(const QString& artistName)
-{
-  qDebug() << Q_FUNC_INFO;
-  m_artistEventsHash.remove(artistName);
-  m_artistEventsError.remove(artistName);
-}
-
-void DataFetcher::clearUserData(const QString& userName)
-{
-  qDebug() << Q_FUNC_INFO;
-  m_topArtistsHash.remove(userName);
-  m_topArtistsError.remove(userName);
-}
-
-void DataFetcher::clearLocationData(const QString& locationName)
-{
-  qDebug() << Q_FUNC_INFO;
-  m_eventsNearLocationHash.remove(locationName);
-  m_eventsNearLocationError.remove(locationName);
-}
-

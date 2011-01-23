@@ -142,8 +142,8 @@ void MainPage::createContent()
   connect (artistList, SIGNAL(itemClicked(QModelIndex)),
            this, SLOT(slotArtistClicked(QModelIndex)));
 
-  connect(DBManager::instance(), SIGNAL(artistAdded(const QString&)),
-          this, SLOT(slotArtistAdded(const QString&)));
+  connect(DBManager::instance(), SIGNAL(artistAdded(const QString&, bool)),
+          this, SLOT(slotArtistAdded(const QString&, bool)));
 
 }
 
@@ -158,10 +158,14 @@ QString MainPage::artistsModelQuery() const
   return q;
 }
 
-void MainPage::slotArtistAdded(const QString& artist)
+void MainPage::slotArtistAdded(const QString& artist, bool favourite)
 {
-  m_lastfm->getEventsForArtist(artist);
-  refreshArtistsModel();
+  if (favourite) {
+    m_lastfm->getArtistImage(artist);
+    if (!m_manuallyAddedArtists.contains(artist,Qt::CaseInsensitive))
+      m_lastfm->getEventsForArtist(artist);
+    refreshArtistsModel();
+  }
 }
 
 void MainPage::refreshArtistsModel()
@@ -297,8 +301,12 @@ void MainPage::slotAddArtist() {
   if (dialog->exec() == MDialog::Accepted)
   {
     QString artist = textEdit->text();
-    if (!artist.isEmpty())
-      addArtist(artist);
+    if (!artist.isEmpty()) {
+      m_manuallyAddedArtists << artist;
+      m_lastfm->getEventsForArtist(artist);
+      showMessage(QString("retrieving event dates for %1").arg(artist));
+    }
+
   }
 }
 
@@ -311,14 +319,6 @@ void MainPage::slotAddArtist() {
 //    addCity(city);
 //  }
 //}
-
-void MainPage::addArtist(const QString& artist)
-{
-  if (!artist.isEmpty()) {
-//    m_df->getArtistEvents(artist);
-    //showMessage(QString("retrieving event dates for %1").arg(artist));
-  }
-}
 
 void MainPage::slotImportLastfm() {
   MWidget *centralWidget = new MWidget;

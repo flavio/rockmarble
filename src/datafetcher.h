@@ -42,58 +42,55 @@ class DataFetcher  : public QObject
 {
   Q_OBJECT
 
-  public:
-    static DataFetcher* instance();
-    void getArtistEvents(const QString& artist);
-    void getTopArtists(const QString& user);
-    void getEventsNearLocation(const QString& location, const int page = -1);
+public:
+  static DataFetcher* instance();
+  void getArtistImage(const QString& artist, const QString& url);
+  void getArtistEvents(const QString& artist);
+  void getArtistInfo(const QString& artist);
+  void getTopArtists(const QString& user);
+  void getEventsNearLocation(const QString& location, const int page = -1);
 
-  Q_SIGNALS:
-    // #1 : Reply converted to a QVarian object
-    // #2 : Was the request successful ?
-    // #3 : Error Message
-    void getArtistEventsReady(QString, bool, QString);
-    void getTopArtistsReady(QString, bool, QString);
-    void getEventsNearLocationReady(QString, bool, QString);
+Q_SIGNALS:
+  // #1 : Reply converted to a QVarian object
+  // #2 : Was the request successful ?
+  // #3 : Error Message
+  void getArtistEventsReady(const QString& response,
+                            bool  success,
+                            const QString& errMsg);
+  void getArtistInfoReady(QString, bool, QString);
+  void getTopArtistsReady(QString, bool, QString);
+  void getArtistImageReady(const QString&, const QByteArray&, bool, QString);
+  void getEventsNearLocationReady(QString, bool, QString);
 
-  private Q_SLOTS:
-    void requestFinished(QNetworkReply *);
+private Q_SLOTS:
+  void requestFinished(QNetworkReply *);
 
-  private:
-    enum RequestType {
-       ArtistEventsRequest,
-       TopArtistsRequest,
-       EventsNearLocationRequest
-    };
-    enum CustomAttribute {
-       RequestTypeAttribute = int(QNetworkRequest::User),
-       ArtistNameAttribute = int(QNetworkRequest::User+1),
-       UserNameAttribute = int(QNetworkRequest::User+2),
-       EventsNearLocationAttribute = int(QNetworkRequest::User+3)
-    };
+private:
+  enum RequestType {
+    ArtistEventsRequest,
+    ArtistImageRequest,
+    ArtistInfoRequest,
+    TopArtistsRequest,
+    EventsNearLocationRequest
+  };
+  enum CustomAttribute {
+    RequestTypeAttribute = int(QNetworkRequest::User),
+    ArtistNameAttribute = int(QNetworkRequest::User+1),
+    UserNameAttribute = int(QNetworkRequest::User+2),
+    EventsNearLocationAttribute = int(QNetworkRequest::User+3)
+  };
 
-    DataFetcher(QObject *parent = 0);
-    DataFetcher(const DataFetcher &);
-    DataFetcher * operator=(DataFetcher const &);
-    ~DataFetcher();
+  DataFetcher(QObject *parent = 0);
+  DataFetcher(const DataFetcher &);
+  DataFetcher * operator=(DataFetcher const &);
+  ~DataFetcher();
 
-    void doRequest(const QUrl &url, RequestType requestType, const QString& string = "");
+  void doRequest(const QUrl &url, RequestType requestType, const QString& string = "");
 
-    // Convert NetworkError code to QString
-    QString errorCodeToText(QNetworkReply::NetworkError errorCode);
+  // Convert NetworkError code to QString
+  QString errorCodeToText(QNetworkReply::NetworkError errorCode);
 
-    void clearArtistData(const QString& artistName);
-    void clearUserData(const QString& userName);
-    void clearLocationData(const QString& locationName);
-
-    QNetworkAccessManager* m_nam;
-
-    QHash<QString, QVariant> m_artistEventsHash;
-    QHash<QString, QString>  m_artistEventsError;
-    QHash<QString, QVariant> m_topArtistsHash;
-    QHash<QString, QString>  m_topArtistsError;
-    QHash<QString, QVariant> m_eventsNearLocationHash;
-    QHash<QString, QString>  m_eventsNearLocationError;
+  QNetworkAccessManager* m_nam;
 };
 
 #endif // DATAFETCHER_H

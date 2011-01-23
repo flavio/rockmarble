@@ -16,13 +16,14 @@ class DBManager : public QObject
     static DBManager* instance();
 
     int addArtist(const QString& name, bool favourite = false);
+    void setArtistHasImage(const int& artistID, bool hasImage);
     void addEvent(const Event& event);
     int eventsWithArtistNum(const QString& artist);
     Event* eventFromID(const int& event_id);
     Location* locationFromID(const int& location_id);
 
   signals:
-    void artistAdded(const QString& name);
+    void artistAdded(const QString& name, bool favourite);
 
   private:
     DBManager(QObject* parent = 0);

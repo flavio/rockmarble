@@ -13,11 +13,20 @@ class Lastfm : public QObject
     Lastfm(QObject* parent = 0);
 
     void getTopArtists(const QString& user);
+    void getArtistImage(const QString& artist);
     void getEventsForArtist(const QString& artist);
 
   private slots:
-    void slotEventsForArtistReady(QString,bool,QString);
+    void slotEventsForArtistReady(const QString&, bool, const QString&);
     void slotEventsForArtistConverted(QVariant, bool, QString);
+
+    void slotArtistInfoReady(QString,bool,QString);
+    void slotArtistInfoConverted(QVariant, bool, QString);
+
+    void slotArtistImageReady(const QString& artist,
+                              const QByteArray& data,
+                              bool  error,
+                              const QString& errMsg);
 
     void slotTopArtistsReady(QString,bool,QString);
     void slotTopArtistConverted(QVariant, bool, QString);

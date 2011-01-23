@@ -6,6 +6,8 @@
 
 #include <qjson/parserrunnable.h>
 #include <QtCore/QDebug>
+#include <QtCore/QDir>
+#include <QtCore/QFile>
 #include <QtCore/QThreadPool>
 
 class StoreEvents : public QRunnable
@@ -27,6 +29,8 @@ class StoreEvents : public QRunnable
         artist = attr["artist"].toString();
       }
 
+      db->addArtist(artist, true);
+
       QVariantList events = response["event"].toList();
 
       foreach(QVariant event, events) {
@@ -36,6 +40,35 @@ class StoreEvents : public QRunnable
 
   private:
     QVariant m_data;
+};
+
+class WriteArtistImage : public QRunnable
+{
+  public:
+    WriteArtistImage(const QString& artist, const QByteArray& data) {
+      m_data = data;
+      m_artist = artist;
+    }
+
+    void run() {
+      QDir dir;
+      QString imagesDir = QDir::homePath() + "/.rockmarble/images/";
+      if (!dir.exists(imagesDir))
+        dir.mkpath(imagesDir);
+
+      DBManager* db = DBManager::instance();
+      int artistID = db->addArtist(m_artist);
+      QFile file (QString("%1/%2").arg(imagesDir).arg(artistID));
+      if (file.open(QFile::WriteOnly)) {
+        file.write(m_data);
+        file.close();
+        db->setArtistHasImage(artistID, true);
+      }
+    }
+
+  private:
+    QString m_artist;
+    QByteArray m_data;
 };
 
 class StoreArtist : public QRunnable
@@ -65,10 +98,16 @@ Lastfm::Lastfm(QObject* parent)
   : QObject (parent) {
   // data fetcher
   m_df = DataFetcher::instance();
-  connect (m_df, SIGNAL(getArtistEventsReady(QString,bool,QString)),
-           this, SLOT(slotEventsForArtistReady(QString,bool,QString)));
+  connect (m_df, SIGNAL(getArtistEventsReady(const QString&,
+                                             bool, const QString&)),
+           this, SLOT(slotEventsForArtistReady(const QString&,
+                                               bool, const QString&)));
+  connect (m_df, SIGNAL(getArtistInfoReady(QString,bool,QString)),
+           this, SLOT(slotArtistInfoReady(QString,bool,QString)));
   connect (m_df, SIGNAL(getTopArtistsReady(QString,bool,QString)),
            this, SLOT(slotTopArtistsReady(QString,bool,QString)));
+  connect (m_df, SIGNAL(getArtistImageReady(QString,QByteArray,bool,QString)),
+           this, SLOT (slotArtistImageReady(QString,QByteArray,bool,QString)));
   connect (m_df, SIGNAL(getEventsNearLocationReady(QString,bool,QString)),
            this, SLOT (slotEventsNearLocationReady(QString,bool,QString)));
 }
@@ -81,7 +120,12 @@ void Lastfm::getEventsForArtist(const QString &artist) {
   m_df->getArtistEvents(artist);
 }
 
-void Lastfm::slotEventsForArtistReady(QString data, bool successful, QString errMsg) {
+void Lastfm::getArtistImage(const QString &artist) {
+  m_df->getArtistInfo(artist);
+}
+
+void Lastfm::slotEventsForArtistReady(const QString& data, bool successful,
+                                      const QString& errMsg) {
   if (successful) {
     QJson::ParserRunnable* parserRunnable = new QJson::ParserRunnable();
     parserRunnable->setData(data.toAscii());
@@ -97,6 +141,49 @@ void Lastfm::slotEventsForArtistConverted(QVariant data, bool successful, QStrin
   if (successful) {
     StoreEvents* storeEvents = new StoreEvents(data);
     QThreadPool::globalInstance()->start(storeEvents);
+  } else {
+    emit error(errMsg);
+  }
+}
+
+void Lastfm::slotArtistInfoReady(QString data, bool successful, QString errMsg) {
+  if (successful) {
+    QJson::ParserRunnable* parserRunnable = new QJson::ParserRunnable();
+    parserRunnable->setData(data.toAscii());
+    connect(parserRunnable, SIGNAL(parsingFinished(QVariant, bool, QString)),
+            this, SLOT(slotArtistInfoConverted(QVariant, bool, QString)));
+    QThreadPool::globalInstance()->start(parserRunnable);
+  } else {
+    emit error(errMsg);
+  }
+}
+
+void Lastfm::slotArtistInfoConverted(QVariant data, bool successful, QString errMsg) {
+  if (successful) {
+    QString url;
+    QVariantMap artist = data.toMap().value("artist").toMap();
+    QString artistName = artist.value("name").toString();
+    QVariantList images = artist.value("image").toList();
+    foreach (QVariant image, images) {
+      if (image.toMap().value("size") == "medium") {
+        url = image.toMap().value("#text").toString();
+        break;
+      }
+    }
+    if (!url.isEmpty())
+      m_df->getArtistImage(artistName, url);
+  } else {
+    emit error(errMsg);
+  }
+}
+
+void Lastfm::slotArtistImageReady(const QString& artist, const QByteArray& data,
+                                  bool successful, const QString& errMsg)
+{
+  if (successful) {
+    WriteArtistImage* writer = new WriteArtistImage(artist, data);
+    QThreadPool::globalInstance()->start(writer);
+    getArtistImage(artist);
   } else {
     emit error(errMsg);
   }

@@ -47,14 +47,13 @@ class MainPage : public MApplicationPage
 //    void slotAddCity();
     void slotAbout();
 
-    void slotArtistAdded(const QString&);
+    void slotArtistAdded(const QString&, bool);
     void slotArtistClicked(const QModelIndex& index);
     void slotFilterChanged();
     void slotShowFilter();
     void slotShowSearch();
 
   private:
-    void addArtist(const QString& name);
     void addCity(const QString& name);
     QString artistsModelQuery() const;
     void refreshArtistsModel();
@@ -67,6 +66,7 @@ class MainPage : public MApplicationPage
     MTextEdit* m_filter;
     QSqlQueryModel* m_artistsModel;
     QSortFilterProxyModel *m_proxyModel;
+    QStringList m_manuallyAddedArtists;
 };
 
 #endif // MAINPAGE_H

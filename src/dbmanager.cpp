@@ -64,11 +64,12 @@ void DBManager::initDB() {
   qWarning() << "db tables" << tables;
 
   executeQuery("PRAGMA foreign_keys = ON");
-qWarning() << "tables" << tables;
+
   if (!tables.contains("artists")) {
     executeQuery("create table artists ( "
                "id integer primary key autoincrement not null, "
                "name varchar(30) NOT NULL UNIQUE, "
+               "has_image boolean NOT NULL DEFAULT 0, "
                "favourite boolean NOT NULL DEFAULT 0)");
   }
   if (!tables.contains("locations")) {
@@ -104,7 +105,7 @@ int DBManager::addArtist(const QString &name, bool favourite)
   QSqlQuery q;
   q.prepare("SELECT id FROM artists WHERE name = ?");
   q.addBindValue(name);
-  if (q.exec()) {
+  if (executeQuery(&q)) {
     if (q.next()) {
       //qWarning() << name << "already exists";
       return q.value(q.record().indexOf("id")).toInt();
@@ -112,17 +113,27 @@ int DBManager::addArtist(const QString &name, bool favourite)
       q.prepare("INSERT INTO artists (name, favourite) VALUES (?,?)");
       q.addBindValue(name);
       q.addBindValue((int) favourite);
-      q.exec();
-      // TODO handle false
-      //qWarning() << "created a new artist entry:" << name << favourite;
-      int id = addArtist(name, favourite);
-      emit artistAdded(name);
-      return id;
+      if (executeQuery(&q)) {
+        // TODO handle false
+        //qWarning() << "created a new artist entry:" << name << favourite;
+        int id = addArtist(name, favourite);
+        emit artistAdded(name, favourite);
+        return id;
+      } else
+        return -1;
     }
   } else {
-    qWarning() << q.lastError();
     return -1;
   }
+}
+
+void DBManager::setArtistHasImage(const int &artistID, bool hasImage)
+{
+  QSqlQuery q;
+  q.prepare("UPDATE artists SET has_image = ? WHERE id = ?");
+  q.addBindValue((int) hasImage);
+  q.addBindValue(artistID);
+  executeQuery(&q);
 }
 
 void DBManager::addEvent(const Event& event)
@@ -132,21 +143,22 @@ void DBManager::addEvent(const Event& event)
   QSqlQuery q;
   q.prepare("SELECT id FROM events WHERE id = ?");
   q.addBindValue(event.id());
-  q.exec();
-  if (!q.next()) {
-    q.prepare("INSERT INTO events (id, title, description, start_date, "
-              " location_id) VALUES (?,?,?,?,?)");
-    q.addBindValue(event.id());
-    q.addBindValue(event.title());
-    q.addBindValue(event.description());
-    q.addBindValue(event.dateTime());
-    q.addBindValue(location_id);
-    executeQuery(&q);
-  }
+  if (executeQuery(&q)) {
+    if (!q.next()) {
+      q.prepare("INSERT INTO events (id, title, description, start_date, "
+                " location_id) VALUES (?,?,?,?,?)");
+      q.addBindValue(event.id());
+      q.addBindValue(event.title());
+      q.addBindValue(event.description());
+      q.addBindValue(event.dateTime());
+      q.addBindValue(location_id);
+      executeQuery(&q);
+    }
 
-  addArtistToEvent(event.headliner(), event.id());
-  foreach (QString artist, event.artists()) {
-    addArtistToEvent(artist, event.id());
+    addArtistToEvent(event.headliner(), event.id());
+    foreach (QString artist, event.artists()) {
+      addArtistToEvent(artist, event.id());
+    }
   }
 }
 
@@ -184,22 +196,26 @@ int DBManager::addLocation(const Location *location)
   q.addBindValue(location->latitude());
   q.addBindValue(location->longitude());
   q.addBindValue(location->street());
-  q.exec();
-  if (q.next()) {
-    return q.value(q.record().indexOf("id")).toInt();
-  } else {
-    q.prepare("INSERT INTO locations (name, city, country, "
-              "latitude, longitude, street) VALUES (?,?,?,?,?,?)");
-    q.addBindValue(location->name());
-    q.addBindValue(location->city());
-    q.addBindValue(location->country());
-    q.addBindValue(location->latitude());
-    q.addBindValue(location->longitude());
-    q.addBindValue(location->street());
-    q.exec();
-    //qWarning() << "created a new location";
-    return addLocation(location);
-  }
+  if (executeQuery(&q)) {
+    if (q.next()) {
+      return q.value(q.record().indexOf("id")).toInt();
+    } else {
+      q.prepare("INSERT INTO locations (name, city, country, "
+                "latitude, longitude, street) VALUES (?,?,?,?,?,?)");
+      q.addBindValue(location->name());
+      q.addBindValue(location->city());
+      q.addBindValue(location->country());
+      q.addBindValue(location->latitude());
+      q.addBindValue(location->longitude());
+      q.addBindValue(location->street());
+      if (executeQuery(&q)) {
+        //qWarning() << "created a new location";
+        return addLocation(location);
+      } else
+        return -1;
+    }
+  } else
+    return -1;
 }
 
 int DBManager::eventsWithArtistNum(const QString &artist)

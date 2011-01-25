@@ -22,13 +22,8 @@
 #define MAINPAGE_H
 
 #include <MApplicationPage>
+#include <QtCore/QMap>
 #include <QtCore/QModelIndex>
-#include <QVariant>
-
-class Lastfm;
-class MTextEdit;
-class QSqlQueryModel;
-class QSortFilterProxyModel;
 
 class MainPage : public MApplicationPage
 {
@@ -38,35 +33,21 @@ class MainPage : public MApplicationPage
     MainPage(QGraphicsItem *parent = 0);
     ~MainPage();
 
+    enum PageType {
+      ByArtist,
+      ByLocation,
+      ByCurrentLocation
+    };
+
   protected:
     void createContent();
 
   private slots:
-    void slotAddArtist();
-    void slotImportLastfm();
-//    void slotAddCity();
     void slotAbout();
-
-    void slotArtistAdded(const QString&, bool);
-    void slotArtistClicked(const QModelIndex& index);
-    void slotFilterChanged();
-    void slotShowFilter();
-    void slotShowSearch();
+    void slotItemClicked(QModelIndex);
 
   private:
-    void addCity(const QString& name);
-    QString artistsModelQuery() const;
-    void refreshArtistsModel();
-
-    void showMessage(const QString& message, bool error = false);
-
-    bool m_filterVisible;
-    bool m_showArtistsWithoutEvents;
-    Lastfm* m_lastfm;
-    MTextEdit* m_filter;
-    QSqlQueryModel* m_artistsModel;
-    QSortFilterProxyModel *m_proxyModel;
-    QStringList m_manuallyAddedArtists;
+    QMap<PageType, QString> m_pages;
 };
 
 #endif // MAINPAGE_H

@@ -18,50 +18,30 @@
   * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   */
 
-#include "mainpage.h"
-
+#include "artistpage.h"
 #include "defines.h"
-#include "artistitemcreator.h"
-#include "dbmanager.h"
-#include "countrypage.h"
-#include "event.h"
-#include "eventmodel.h"
-#include "eventsortfilterproxymodel.h"
-#include "lastfm.h"
+#include "mainpage.h"
+#include "pageitemcreator.h"
+#include "pagesmodel.h"
 
 #include <MAction>
-#include <MBanner>
-#include <MButton>
 #include <MDialog>
 #include <MLabel>
 #include <MLayout>
 #include <MLinearLayoutPolicy>
 #include <MList>
 #include <MSceneManager>
-#include <MTextEdit>
 
-#include <QtCore/QAbstractItemModel>
-#include <QtCore/QPropertyAnimation>
 #include <QtGui/QGraphicsLinearLayout>
-#include <QtGui/QSortFilterProxyModel>
-#include <QtSql/QSqlQuery>
-#include <QtSql/QSqlQueryModel>
-
-
-//#include <marble/MarbleMap.h>
-//#include <marble/MarbleModel.h>
-//using namespace Marble;
 
 MainPage::MainPage(QGraphicsItem *parent)
     : MApplicationPage(parent)
 {
   setTitle("Rockmarble");
-//  marble->setMapThemeId("earth/openstreetmap/openstreetmap.dgml");
-//  marble->setShowGps(true);
 
-  m_lastfm = new Lastfm(this);
-  m_filterVisible = false;
-  m_showArtistsWithoutEvents = true;
+  m_pages.insert(ByArtist, "By artist");
+  m_pages.insert(ByLocation, "By location");
+  m_pages.insert(ByCurrentLocation, "By current location");
 }
 
 MainPage::~MainPage()
@@ -70,8 +50,6 @@ MainPage::~MainPage()
 
 void MainPage::createContent()
 {
-  MApplicationPage::createContent();
-
   QGraphicsWidget *panel = centralWidget();
   MLayout *layout = new MLayout(panel);
   layout->setAnimation(NULL);
@@ -81,162 +59,27 @@ void MainPage::createContent()
   layout->setPortraitPolicy(policy);
 
   // Menu Actions
-  MAction* actionImportLastfm = new MAction(panel);
-  actionImportLastfm->setText("Import from Last.fm");
-  actionImportLastfm->setLocation(MAction::ApplicationMenuLocation);
-  addAction(actionImportLastfm);
-  connect(actionImportLastfm, SIGNAL(triggered()), this, SLOT(slotImportLastfm()));
-
-  MAction* actionAddArtist = new MAction(panel);
-  actionAddArtist->setText("Add artist");
-  actionAddArtist->setLocation(MAction::ApplicationMenuLocation);
-  addAction(actionAddArtist);
-  connect(actionAddArtist, SIGNAL(triggered()), this, SLOT(slotAddArtist()));
-
   MAction* actionAbout = new MAction(panel);
   actionAbout->setText("About");
   actionAbout->setLocation(MAction::ApplicationMenuLocation);
   addAction(actionAbout);
   connect(actionAbout, SIGNAL(triggered()), this, SLOT(slotAbout()));
 
-  // Toolbar Actions
-  MAction* actionFilter = new MAction("icon-m-toolbar-filter", "", this);
-  actionFilter->setLocation(MAction::ToolBarLocation);
-  addAction(actionFilter);
-  connect(actionFilter, SIGNAL(triggered()), this, SLOT(slotShowFilter()));
-
-  MAction* actionSearch = new MAction("icon-m-toolbar-search", "", this);
-  actionSearch->setLocation(MAction::ToolBarLocation);
-  addAction(actionSearch);
-  connect(actionSearch, SIGNAL(triggered()), this, SLOT(slotShowSearch()));
-
-  // filtering text box
-  m_filter = new MTextEdit(MTextEditModel::SingleLine, QString(), this);
-  m_filter->setOpacity(0.0);
-  m_filter->setObjectName("CommonSingleInputField");
-  m_filter->setToolTip("Foobar");
-  policy->addItem(m_filter);
-  connect(m_filter, SIGNAL(textChanged()), this, SLOT(slotFilterChanged()));
-
   // MList with fast view
-  MList* artistList = new MList();
-  artistList->setSelectionMode(MList::SingleSelection);
+  MList* pagesList = new MList();
+  pagesList->setSelectionMode(MList::SingleSelection);
 
   // Content item creator and item model for the list
-  ArtistItemCreator *cellCreator = new ArtistItemCreator();
-  artistList->setCellCreator(cellCreator);
-  m_artistsModel = new QSqlQueryModel();
-  m_artistsModel->setQuery(artistsModelQuery());
-  m_proxyModel = new QSortFilterProxyModel(this);
-  m_proxyModel->setSourceModel(m_artistsModel);
-  artistList->setItemModel(m_proxyModel);
-  policy->addItem(artistList);
+  PageItemCreator *cellCreator = new PageItemCreator();
+  cellCreator->pages = m_pages;
+  pagesList->setCellCreator(cellCreator);
 
-  connect (artistList, SIGNAL(itemClicked(QModelIndex)),
-           this, SLOT(slotArtistClicked(QModelIndex)));
+  pagesList->setItemModel(new PagesModel(m_pages));
+  //m_pages.values()
+  policy->addItem(pagesList);
 
-  connect(DBManager::instance(), SIGNAL(artistAdded(const QString&, bool)),
-          this, SLOT(slotArtistAdded(const QString&, bool)));
-
-}
-
-QString MainPage::artistsModelQuery() const
-{
-  QString q = "SELECT distinct artists.id FROM artists ";
-  if (!m_showArtistsWithoutEvents) {
-    q += " JOIN artists_events on artists.id = artists_events.artist_id ";
-  }
-  q += " WHERE artists.favourite = 1 ";
-  q += " ORDER BY artists.name ASC";
-  return q;
-}
-
-void MainPage::slotArtistAdded(const QString& artist, bool favourite)
-{
-  if (favourite) {
-    m_lastfm->getArtistImage(artist);
-    if (!m_manuallyAddedArtists.contains(artist,Qt::CaseInsensitive))
-      m_lastfm->getEventsForArtist(artist);
-    refreshArtistsModel();
-  }
-}
-
-void MainPage::refreshArtistsModel()
-{
-  m_artistsModel->setQuery(artistsModelQuery());
-}
-
-void MainPage::slotFilterChanged()
-{
-  m_proxyModel->setFilterRegExp(m_filter->text());
-}
-
-void MainPage::slotShowSearch()
-{
-  qreal startValue, endValue;
-  if (m_filterVisible) {
-    // let's hide it
-    startValue = 1.0;
-    endValue = 0.0;
-  } else {
-    // let's show it
-    startValue = 0.0;
-    endValue = 1.0;
-  }
-  m_filterVisible = !m_filterVisible;
-
-  QPropertyAnimation *fadeInAnimation = new QPropertyAnimation;
-  fadeInAnimation->setTargetObject(m_filter);
-  fadeInAnimation->setPropertyName("opacity");
-  fadeInAnimation->setStartValue(startValue);
-  fadeInAnimation->setEndValue(endValue);
-  fadeInAnimation->setDuration(1000.0);
-  fadeInAnimation->start(QAbstractAnimation::DeleteWhenStopped);
-}
-
-void MainPage::slotShowFilter()
-{
-  MWidget *centralWidget = new MWidget;
-  QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(Qt::Horizontal);
-  layout->setContentsMargins(0,0,0,0);
-  layout->setSpacing(0);
-
-  MLabel *label = new MLabel("Show artists without tour dates.",
-                             centralWidget);
-  label->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-
-  MButton *artistsWithoutEventsSwitch = new MButton();
-  artistsWithoutEventsSwitch->setViewType(MButton::switchType);
-  artistsWithoutEventsSwitch->setCheckable(true);
-  artistsWithoutEventsSwitch->setChecked(m_showArtistsWithoutEvents);
-
-  centralWidget->setLayout(layout);
-
-  layout->addItem(label);
-  layout->addItem(artistsWithoutEventsSwitch);
-
-  MDialog* dialog = new MDialog("Import from Last.fm",
-                                M::OkButton | M::CancelButton);
-  dialog->setCentralWidget(centralWidget);
-  dialog->appear(MSceneWindow::DestroyWhenDone);
-  if ((dialog->exec() == MDialog::Accepted) &&
-      (m_showArtistsWithoutEvents != artistsWithoutEventsSwitch->isChecked())) {
-    m_showArtistsWithoutEvents = !m_showArtistsWithoutEvents;
-    refreshArtistsModel();
-  }
-}
-
-void MainPage::showMessage(const QString &message, bool error)
-{
-  MBanner* banner = new MBanner();
-  banner->setObjectName("SystemBanner");
-  if (error) {
-    banner->setIconID("icon-m-common-error");
-    //banner->setObjectName("InformationBanner");
-  }
-
-  banner->setTitle(message);
-  banner->appear(MSceneWindow::DestroyWhenDone);
+  connect (pagesList, SIGNAL(itemClicked(QModelIndex)),
+           this, SLOT(slotItemClicked(QModelIndex)));
 }
 
 void MainPage::slotAbout()
@@ -266,98 +109,20 @@ void MainPage::slotAbout()
   dialog->appear(MSceneWindow::DestroyWhenDone);
 }
 
-void MainPage::slotAddArtist() {
-
-  MWidget *centralWidget = new MWidget;
-  QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(Qt::Vertical);
-  layout->setContentsMargins(0,0,0,0);
-  layout->setSpacing(0);
-
-  MLabel *label = new MLabel("Fetch tour dates of", centralWidget);
-  label->setObjectName("CommonTitleInverted");
-  MTextEdit *textEdit = new MTextEdit(MTextEditModel::SingleLine,
-                                      QString(), centralWidget);
-  textEdit->setObjectName("CommonSingleInputField");
-  MLabel *spacer = new MLabel();
-  spacer->setObjectName("CommonSpacer");
-
-  centralWidget->setLayout(layout);
-
-  layout->addItem(label);
-  layout->addItem(textEdit);
-  layout->addItem(spacer);
-
-  MDialog* dialog = new MDialog("Add artist",
-                                M::OkButton | M::CancelButton);
-  dialog->setCentralWidget(centralWidget);
-  dialog->appear(MSceneWindow::DestroyWhenDone);
-  if (dialog->exec() == MDialog::Accepted)
-  {
-    QString artist = textEdit->text();
-    if (!artist.isEmpty()) {
-      m_manuallyAddedArtists << artist;
-      m_lastfm->getEventsForArtist(artist);
-      showMessage(QString("retrieving event dates for %1").arg(artist));
-    }
-
-  }
-}
-
-//void MainPage::slotAddCity() {
-//  bool ok;
-//  QString city = QInputDialog::getText(this, tr("Find events near"),
-//                                          tr("City name:"), QLineEdit::Normal,
-//                                          "", &ok);
-//  if (ok && !city.isEmpty()) {
-//    addCity(city);
-//  }
-//}
-
-void MainPage::slotImportLastfm() {
-  MWidget *centralWidget = new MWidget;
-  QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(Qt::Vertical);
-  layout->setContentsMargins(0,0,0,0);
-  layout->setSpacing(0);
-
-  MLabel *label = new MLabel("Last.fm username", centralWidget);
-  label->setObjectName("CommonTitleInverted");
-  MTextEdit *textEdit = new MTextEdit(MTextEditModel::SingleLine,
-                                      QString(),
-                                      centralWidget);
-  textEdit->setObjectName("CommonSingleInputField");
-  MLabel *spacer = new MLabel();
-  spacer->setObjectName("CommonSpacer");
-
-  centralWidget->setLayout(layout);
-
-  layout->addItem(label);
-  layout->addItem(textEdit);
-  layout->addItem(spacer);
-
-  MDialog* dialog = new MDialog("Import from Last.fm",
-                                M::OkButton | M::CancelButton);
-  dialog->setCentralWidget(centralWidget);
-  dialog->appear(MSceneWindow::DestroyWhenDone);
-  if (dialog->exec() == MDialog::Accepted)
-  {
-    QString user = textEdit->text();
-    if (!user.isEmpty())
-      m_lastfm->getTopArtists(user);
-      showMessage(QString("Retrieving top artists for user %1").arg(user));
-  }
-}
-
-void MainPage::addCity(const QString& city)
+void MainPage::slotItemClicked(QModelIndex index)
 {
-  if (!city.isEmpty()) {
-//    m_df->getEventsNearLocation(city);
-//    m_statusBar->showMessage(tr("retrieving event near %1").arg(city));
-  }
-}
+  MApplicationPage* page;
+  PageType pageType = (PageType) index.data(Qt::DisplayRole).toInt();
 
-void MainPage::slotArtistClicked(const QModelIndex& index)
-{
-  int artistID = index.data(Qt::DisplayRole).toInt();
-  CountryPage *countryPage = new CountryPage(artistID);
-  countryPage->appear(MSceneWindow::DestroyWhenDismissed);
+  switch (pageType) {
+    case ByArtist:
+      page = new ArtistPage();
+      break;
+    default:
+      //"This shouldn't happen";
+      return;
+      break;
+  }
+
+  page->appear(MSceneWindow::DestroyWhenDismissed);
 }

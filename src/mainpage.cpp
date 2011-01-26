@@ -40,9 +40,9 @@ MainPage::MainPage(QGraphicsItem *parent)
 {
   setTitle("Rockmarble");
 
-  m_pages.insert(ByArtist, "By artist");
-  m_pages.insert(ByLocation, "By location");
-  m_pages.insert(ByCurrentLocation, "By current location");
+  m_pages.insert(ByArtist, "Artist");
+  m_pages.insert(ByLocation, "Location");
+  m_pages.insert(ByCurrentLocation, "Your current location");
 }
 
 MainPage::~MainPage()
@@ -66,6 +66,9 @@ void MainPage::createContent()
   addAction(actionAbout);
   connect(actionAbout, SIGNAL(triggered()), this, SLOT(slotAbout()));
 
+  // Label
+  MLabel* label = new MLabel("Find events by:");
+
   // MList with fast view
   MList* pagesList = new MList();
   pagesList->setSelectionMode(MList::SingleSelection);
@@ -77,6 +80,7 @@ void MainPage::createContent()
 
   pagesList->setItemModel(new PagesModel(m_pages));
   //m_pages.values()
+  policy->addItem(label);
   policy->addItem(pagesList);
 
   connect (pagesList, SIGNAL(itemClicked(QModelIndex)),

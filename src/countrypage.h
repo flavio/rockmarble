@@ -6,6 +6,7 @@
 #include <MApplicationPage>
 #include <QtCore/QModelIndex>
 #include <QtCore/QMultiMap>
+#include <QtSql/QSqlQuery>
 
 class MList;
 
@@ -14,6 +15,7 @@ class CountryPage : public MApplicationPage
   Q_OBJECT
 
   public:
+    CountryPage(QGraphicsItem *parent = 0);
     CountryPage(const int& artistID, QGraphicsItem *parent = 0);
     ~CountryPage();
 
@@ -24,6 +26,8 @@ class CountryPage : public MApplicationPage
     void slotCountryClicked(const QModelIndex& index);
 
   private:
+    QSqlQuery getQuery();
+
     int m_artistID;
 };
 

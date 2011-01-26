@@ -232,6 +232,24 @@ int DBManager::eventsWithArtistNum(const int &artistID)
   }
 }
 
+int DBManager::eventsWithArtistInCountryNum(const int &artistID,
+                                            const QString &country)
+{
+  QSqlQuery query ("select count(events.id) as event_num from events "
+                   "join artists_events on events.id = artists_events.event_id "
+                   "join locations on events.location_id = locations.id "
+                   "where artists_events.artist_id = ?"
+                   "and locations.country = ?");
+  query.addBindValue(artistID);
+  query.addBindValue(country);
+  executeQuery(&query);
+  if (query.next()) {
+    return query.value(query.record().indexOf("event_num")).toInt();
+  } else {
+    return 0;
+  }
+}
+
 QString DBManager::artistFromID(const int &artistID)
 {
   QString artist;

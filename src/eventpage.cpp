@@ -1,5 +1,5 @@
+#include "dbmanager.h"
 #include "eventpage.h"
-
 #include "eventdetailspage.h"
 #include "eventitemcreator.h"
 
@@ -13,7 +13,7 @@
 EventPage::EventPage(const int& artistID, const QString& country, QGraphicsItem *parent)
   : MApplicationPage(parent), m_artistID(artistID), m_country(country)
 {
-  setTitle(country);
+  setTitle(DBManager::instance()->artistFromID(artistID) + " - " + country);
 }
 
 EventPage::~EventPage()

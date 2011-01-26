@@ -19,6 +19,7 @@
   */
 
 #include "artistpage.h"
+#include "countrypage.h"
 #include "defines.h"
 #include "mainpage.h"
 #include "pageitemcreator.h"
@@ -117,6 +118,9 @@ void MainPage::slotItemClicked(QModelIndex index)
   switch (pageType) {
     case ByArtist:
       page = new ArtistPage();
+      break;
+    case ByLocation:
+      page = new CountryPage();
       break;
     default:
       //"This shouldn't happen";

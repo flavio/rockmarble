@@ -5,6 +5,12 @@
 #include <QtCore/QFile>
 #include <QtGui/QImage>
 
+ArtistItemCreator::ArtistItemCreator(const ArtistPage::PageMode &pageMode,
+                                     const QString &country)
+  : m_pageMode(pageMode), m_country(country)
+{
+}
+
 void ArtistItemCreator::updateCell(const QModelIndex &index, MWidget *cell) const
 {
   MContentItem *contentItem = qobject_cast<MContentItem *>(cell);
@@ -16,7 +22,12 @@ void ArtistItemCreator::updateCell(const QModelIndex &index, MWidget *cell) cons
   contentItem->setTitle(artist);
   contentItem->boundingRect();
 
-  int eventsNum = db->eventsWithArtistNum(artistID);
+  int eventsNum;
+  if (m_pageMode == ArtistPage::ALL_ARTISTS)
+    eventsNum = db->eventsWithArtistNum(artistID);
+  else
+    eventsNum = db->eventsWithArtistInCountryNum(artistID, m_country);
+
   if (eventsNum > 1)
     contentItem->setSubtitle(QString("%1 concerts").arg(eventsNum));
   else if (eventsNum == 1)

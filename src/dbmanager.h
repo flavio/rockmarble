@@ -19,6 +19,8 @@ class DBManager : public QObject
     void setArtistHasImage(const int& artistID, bool hasImage);
     void addEvent(const Event& event);
     int eventsWithArtistNum(const int& artistID);
+    int eventsWithArtistInCountryNum(const int& artistID,
+                                     const QString& country);
     QString artistFromID(const int& artistID);
     bool artistHasImage(const int& artistID);
 

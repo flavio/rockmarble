@@ -1,3 +1,4 @@
+#include "artistpage.h"
 #include "dbmanager.h"
 #include "countrypage.h"
 #include "countryitemcreator.h"
@@ -15,6 +16,13 @@
 
 #include <QDebug>
 
+CountryPage::CountryPage(QGraphicsItem *parent)
+  : MApplicationPage(parent)
+{
+  setTitle("Countries");
+  m_artistID = -1;
+}
+
 CountryPage::CountryPage(const int& artistID, QGraphicsItem *parent)
   : MApplicationPage(parent), m_artistID(artistID)
 {
@@ -25,19 +33,38 @@ CountryPage::~CountryPage()
 {
 }
 
+QSqlQuery CountryPage::getQuery()
+{
+  QString q;
+  QSqlQuery query;
+  if (m_artistID != -1) {
+    q = "SELECT locations.country FROM events "
+        "JOIN artists_events ON artists_events.event_id = events.id "
+        "JOIN locations ON locations.id = events.location_id "
+        "WHERE artists_events.artist_id = ? "
+        "GROUP BY locations.country "
+        "ORDER BY locations.country ASC";
+    query.prepare(q);
+    query.addBindValue(m_artistID);
+  } else {
+    q = "SELECT locations.country FROM events "
+        "JOIN artists_events ON artists_events.event_id = events.id "
+        "JOIN artists ON artists.id = artists_events.artist_id "
+        "JOIN locations ON locations.id = events.location_id "
+        "WHERE artists.favourite = ? "
+        "GROUP BY locations.country "
+        "ORDER BY locations.country ASC";
+    query.prepare(q);
+    query.addBindValue(1);
+  }
+  query.exec();
+  return query;
+}
+
 void CountryPage::createContent()
 {
   QSqlQueryModel* countryModel = new QSqlQueryModel();
-  QSqlQuery query;
-  query.prepare("SELECT locations.country FROM events "
-                 "JOIN artists_events ON artists_events.event_id = events.id "
-                 "JOIN locations ON locations.id = events.location_id "
-                 "WHERE artists_events.artist_id = ? "
-                 "GROUP BY locations.country "
-                 "ORDER BY locations.country ASC");
-  query.addBindValue(m_artistID);
-  query.exec();
-  countryModel->setQuery(query);
+  countryModel->setQuery(getQuery());
 
   QGraphicsWidget *panel = centralWidget();
   MLayout *layout = new MLayout(panel);
@@ -60,6 +87,11 @@ void CountryPage::createContent()
 void CountryPage::slotCountryClicked(const QModelIndex& index)
 {
   QString country= index.data(Qt::DisplayRole).toString();
-  EventPage *eventPage = new EventPage(m_artistID, country);
-  eventPage->appear(MSceneWindow::DestroyWhenDismissed);
+  MApplicationPage* page;
+  if (m_artistID != -1)
+    page = new EventPage(m_artistID, country);
+  else
+    page = new ArtistPage(country);
+
+  page->appear(MSceneWindow::DestroyWhenDismissed);
 }

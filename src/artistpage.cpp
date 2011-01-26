@@ -25,9 +25,7 @@
 #include "artistitemcreator.h"
 #include "dbmanager.h"
 #include "countrypage.h"
-#include "event.h"
-#include "eventmodel.h"
-#include "eventsortfilterproxymodel.h"
+#include "eventpage.h"
 #include "lastfm.h"
 
 #include <MAction>
@@ -45,8 +43,18 @@
 #include <QtCore/QPropertyAnimation>
 #include <QtGui/QGraphicsLinearLayout>
 #include <QtGui/QSortFilterProxyModel>
-#include <QtSql/QSqlQuery>
 #include <QtSql/QSqlQueryModel>
+
+ArtistPage::ArtistPage(const QString& country, QGraphicsItem *parent)
+    : MApplicationPage(parent), m_country(country)
+{
+  setTitle("Artists playing in " + m_country);
+
+  m_lastfm = new Lastfm(this);
+  m_filterVisible = false;
+  m_showArtistsWithoutEvents = true;
+  m_pageMode = ARTISTS_BY_COUNTRY;
+}
 
 ArtistPage::ArtistPage(QGraphicsItem *parent)
     : MApplicationPage(parent)
@@ -56,6 +64,8 @@ ArtistPage::ArtistPage(QGraphicsItem *parent)
   m_lastfm = new Lastfm(this);
   m_filterVisible = false;
   m_showArtistsWithoutEvents = true;
+
+  m_pageMode = ALL_ARTISTS;
 }
 
 ArtistPage::~ArtistPage()
@@ -74,24 +84,26 @@ void ArtistPage::createContent()
   layout->setLandscapePolicy(policy);
   layout->setPortraitPolicy(policy);
 
-  // Menu Actions
-  MAction* actionImportLastfm = new MAction(panel);
-  actionImportLastfm->setText("Import from Last.fm");
-  actionImportLastfm->setLocation(MAction::ApplicationMenuLocation);
-  addAction(actionImportLastfm);
-  connect(actionImportLastfm, SIGNAL(triggered()), this, SLOT(slotImportLastfm()));
+  if (m_pageMode == ALL_ARTISTS) {
+    // Menu Actions
+    MAction* actionImportLastfm = new MAction(panel);
+    actionImportLastfm->setText("Import from Last.fm");
+    actionImportLastfm->setLocation(MAction::ApplicationMenuLocation);
+    addAction(actionImportLastfm);
+    connect(actionImportLastfm, SIGNAL(triggered()), this, SLOT(slotImportLastfm()));
 
-  MAction* actionAddArtist = new MAction(panel);
-  actionAddArtist->setText("Add artist");
-  actionAddArtist->setLocation(MAction::ApplicationMenuLocation);
-  addAction(actionAddArtist);
-  connect(actionAddArtist, SIGNAL(triggered()), this, SLOT(slotAddArtist()));
+    MAction* actionAddArtist = new MAction(panel);
+    actionAddArtist->setText("Add artist");
+    actionAddArtist->setLocation(MAction::ApplicationMenuLocation);
+    addAction(actionAddArtist);
+    connect(actionAddArtist, SIGNAL(triggered()), this, SLOT(slotAddArtist()));
 
-  // Toolbar Actions
-  MAction* actionFilter = new MAction("icon-m-toolbar-filter", "", this);
-  actionFilter->setLocation(MAction::ToolBarLocation);
-  addAction(actionFilter);
-  connect(actionFilter, SIGNAL(triggered()), this, SLOT(slotShowFilter()));
+    // Toolbar Actions
+    MAction* actionFilter = new MAction("icon-m-toolbar-filter", "", this);
+    actionFilter->setLocation(MAction::ToolBarLocation);
+    addAction(actionFilter);
+    connect(actionFilter, SIGNAL(triggered()), this, SLOT(slotShowFilter()));
+  }
 
   MAction* actionSearch = new MAction("icon-m-toolbar-search", "", this);
   actionSearch->setLocation(MAction::ToolBarLocation);
@@ -111,7 +123,7 @@ void ArtistPage::createContent()
   artistList->setSelectionMode(MList::SingleSelection);
 
   // Content item creator and item model for the list
-  ArtistItemCreator *cellCreator = new ArtistItemCreator();
+  ArtistItemCreator *cellCreator = new ArtistItemCreator(m_pageMode, m_country);
   artistList->setCellCreator(cellCreator);
   m_artistsModel = new QSqlQueryModel();
   m_artistsModel->setQuery(artistsModelQuery());
@@ -128,15 +140,32 @@ void ArtistPage::createContent()
 
 }
 
-QString ArtistPage::artistsModelQuery() const
+QSqlQuery ArtistPage::artistsModelQuery() const
 {
-  QString q = "SELECT distinct artists.id FROM artists ";
-  if (!m_showArtistsWithoutEvents) {
+  QSqlQuery query;
+  QString q;
+  if (m_pageMode == ALL_ARTISTS) {
+    q = "SELECT distinct artists.id FROM artists ";
+    if (!m_showArtistsWithoutEvents) {
+      q += " JOIN artists_events on artists.id = artists_events.artist_id ";
+    }
+    q += " WHERE artists.favourite = 1 ";
+    q += " ORDER BY artists.name ASC";
+    query.prepare(q);
+  } else if (m_pageMode == ARTISTS_BY_COUNTRY) {
+    q = "SELECT distinct artists.id FROM artists ";
     q += " JOIN artists_events on artists.id = artists_events.artist_id ";
+    q += " JOIN events on events.id = artists_events.event_id ";
+    q += " JOIN locations on locations.id = events.location_id ";
+    q += " WHERE artists.favourite = 1 ";
+    q += " AND locations.country = ? ";
+    q += " ORDER BY artists.name ASC";
+    query.prepare(q);
+    query.addBindValue(m_country);
   }
-  q += " WHERE artists.favourite = 1 ";
-  q += " ORDER BY artists.name ASC";
-  return q;
+
+  query.exec();
+  return query;
 }
 
 void ArtistPage::slotArtistAdded(const QString& artist, bool favourite)
@@ -301,6 +330,10 @@ void ArtistPage::slotImportLastfm() {
 void ArtistPage::slotArtistClicked(const QModelIndex& index)
 {
   int artistID = index.data(Qt::DisplayRole).toInt();
-  CountryPage *countryPage = new CountryPage(artistID);
-  countryPage->appear(MSceneWindow::DestroyWhenDismissed);
+  MApplicationPage* page;
+  if (m_pageMode == ALL_ARTISTS)
+    page = new CountryPage(artistID);
+  else
+    page = new EventPage(artistID, m_country);
+  page->appear(MSceneWindow::DestroyWhenDismissed);
 }

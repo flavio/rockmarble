@@ -19,7 +19,7 @@
 CountryPage::CountryPage(QGraphicsItem *parent)
   : MApplicationPage(parent)
 {
-  setTitle("Countries");
+  setTitle(tr("Countries"));
   m_pageMode = ALL_COUNTRIES;
 }
 

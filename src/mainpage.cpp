@@ -41,10 +41,10 @@ MainPage::MainPage(QGraphicsItem *parent)
 {
   setTitle("Rockmarble");
 
-  m_pages.insert(ByArtist, "Artist");
-  m_pages.insert(ByLocation, "Location");
-  m_pages.insert(ByStar, "Starred");
-  m_pages.insert(ByCurrentLocation, "Your current location");
+  m_pages.insert(ByArtist, tr("Artist"));
+  m_pages.insert(ByLocation, tr("Location"));
+  m_pages.insert(ByStar, tr("Starred"));
+  m_pages.insert(ByCurrentLocation, tr("Your current location"));
 }
 
 MainPage::~MainPage()
@@ -63,13 +63,13 @@ void MainPage::createContent()
 
   // Menu Actions
   MAction* actionAbout = new MAction(panel);
-  actionAbout->setText("About");
+  actionAbout->setText(tr("About"));
   actionAbout->setLocation(MAction::ApplicationMenuLocation);
   addAction(actionAbout);
   connect(actionAbout, SIGNAL(triggered()), this, SLOT(slotAbout()));
 
   // Label
-  MLabel* label = new MLabel("Find events by:");
+  MLabel* label = new MLabel(tr("Find events by:"));
 
   // MList with fast view
   MList* pagesList = new MList();
@@ -95,7 +95,7 @@ void MainPage::slotAbout()
   layout->setContentsMargins(0,0,0,0);
   layout->setSpacing(0);
 
-  MLabel *title = new MLabel(QString("rockmarble version %1").arg(ROCKMARBLE_VERSION),
+  MLabel *title = new MLabel(tr("rockmarble version %1").arg(ROCKMARBLE_VERSION),
                              centralWidget);
   MLabel *description = new MLabel("Flavio Castelli <flavio@castelli.name>",
                              centralWidget);
@@ -110,7 +110,7 @@ void MainPage::slotAbout()
   layout->addItem(spacer);
   layout->addItem(description);
 
-  MDialog* dialog = new MDialog("About rockmarble", M::OkButton);
+  MDialog* dialog = new MDialog(tr("About rockmarble"), M::OkButton);
   dialog->setCentralWidget(centralWidget);
   dialog->appear(MSceneWindow::DestroyWhenDone);
 }

@@ -13,7 +13,7 @@ EventPage::EventPage(QGraphicsItem *parent)
   : MApplicationPage(parent)
 {
   m_pageMode = STARRED;
-  setTitle("Starrred events");
+  setTitle(tr("Starrred events"));
 }
 
 EventPage::EventPage(const int& artistID, const QString& country, QGraphicsItem *parent)

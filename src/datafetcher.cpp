@@ -156,7 +156,7 @@ void DataFetcher::requestFinished(QNetworkReply *reply)
         QByteArray response (reply->readAll());
         emit getArtistImageReady(artistName, response, true, "");
       } else {
-        QString errorText = QString("A network error occured while fetching "
+        QString errorText = tr("A network error occured while fetching "
                                     "raw data [%1]!").\
                                     arg(errorCodeToText(reply->error()));
         qCritical() << errorText;
@@ -174,7 +174,9 @@ void DataFetcher::requestFinished(QNetworkReply *reply)
         QString response (reply->readAll());
         emit getEventsForArtistReady(response, true, "");
       } else {
-        QString errorText = QString("A network error occured while searching for artist \"%1\" [%2]!").arg(artistName).arg(errorCodeToText(reply->error()));
+        QString errorText = tr("A network error occured while searching for artist \"%1\" [%2]!")\
+                            .arg(artistName)\
+                            .arg(errorCodeToText(reply->error()));
         qCritical() << errorText;
         qCritical() << "URL requested:" << reply->request().url().toString();
         qCritical() << "URL processed:" << reply->url().toString();
@@ -190,7 +192,9 @@ void DataFetcher::requestFinished(QNetworkReply *reply)
         QString response (reply->readAll());
         emit getArtistInfoReady(response, true, "");
       } else {
-        QString errorText = QString("A network error occured while fetching artist details \"%1\" [%2]!").arg(artistName).arg(errorCodeToText(reply->error()));
+        QString errorText = tr("A network error occured while fetching artist details \"%1\" [%2]!")\
+                            .arg(artistName)\
+                            .arg(errorCodeToText(reply->error()));
         qCritical() << errorText;
         qCritical() << "URL requested:" << reply->request().url().toString();
         qCritical() << "URL processed:" << reply->url().toString();
@@ -206,7 +210,9 @@ void DataFetcher::requestFinished(QNetworkReply *reply)
         QString response (reply->readAll());
         emit getTopArtistsReady(response, true, "");
       } else {
-        QString errorText = QString("A network error occured while searching for top artists of user \"%1\" [%2]!").arg(userName).arg(errorCodeToText(reply->error()));
+        QString errorText = tr("A network error occured while searching for top artists of user \"%1\" [%2]!")\
+                            .arg(userName)\
+                            .arg(errorCodeToText(reply->error()));
         qCritical() << errorText;
         qCritical() << "URL requested:" << reply->request().url().toString();
         qCritical() << "URL processed:" << reply->url().toString();
@@ -222,7 +228,9 @@ void DataFetcher::requestFinished(QNetworkReply *reply)
         QString response (reply->readAll());
         emit getEventsNearLocationReady(response, true, "");
       } else {
-        QString errorText = QString("A network error occured while searching for events near \"%1\" [%2]!").arg(locationName).arg(errorCodeToText(reply->error()));
+        QString errorText = tr("A network error occured while searching for events near \"%1\" [%2]!")\
+                            .arg(locationName)\
+                            .arg(errorCodeToText(reply->error()));
         qCritical() << errorText;
         qCritical() << "URL requested:" << reply->request().url().toString();
         qCritical() << "URL processed:" << reply->url().toString();

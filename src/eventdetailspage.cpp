@@ -29,19 +29,23 @@ void EventDetailsPage::createContent()
 //  infoLayout->addItem(new MLabel("<strong>Headliner</strong>"));
 //  infoLayout->addItem(new MLabel(event.headliner()));
 
-  infoLayout->addItem(new MLabel("<strong>Where</strong>"));
+  infoLayout->addItem(new MLabel("<strong>" + tr("Where") + "</strong>"));
   QString locationString ("<ul>");
-  locationString += QString("<li><em>Name: </em>%1</li>").arg(location->name());
-  locationString += QString("<li><em>Street: </em>%1</li>").arg(location->street());
-  locationString += QString("<li><em>City: </em>%1</li>").arg(location->city());
-  locationString += QString("<li><em>Country: </em>%1</li>").arg(location->country());
+  locationString += QString("<li><em>" + tr("Name") + ": </em>%1</li>")\
+                            .arg(location->name());
+  locationString += QString("<li><em>" + tr("Street") + ": </em>%1</li>")\
+                            .arg(location->street());
+  locationString += QString("<li><em>" + tr("City") + ": </em>%1</li>")\
+                            .arg(location->city());
+  locationString += QString("<li><em>" + tr("Country") + ": </em>%1</li>")\
+                            .arg(location->country());
   locationString += "</ul>";
   infoLayout->addItem(new MLabel(locationString));
 
-  infoLayout->addItem(new MLabel("<strong>When</strong>"));
+  infoLayout->addItem(new MLabel("<strong>" + tr("When") + "</strong>"));
   infoLayout->addItem(new MLabel(event->dateTime().toString(Qt::TextDate)));
 
-  infoLayout->addItem(new MLabel("<strong>Artists</strong>"));
+  infoLayout->addItem(new MLabel("<strong>" + tr("Artists") + "</strong>"));
   QString artistsString ("<ul>");
   foreach(QString artist, event->artists()){
     artistsString += QString("<li>%1</li>").arg(artist);

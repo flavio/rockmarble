@@ -48,7 +48,7 @@
 ArtistPage::ArtistPage(const QString& country, QGraphicsItem *parent)
     : MApplicationPage(parent), m_country(country)
 {
-  setTitle("Artists playing in " + m_country);
+  setTitle(tr("Artists playing in %1").arg(m_country));
 
   m_lastfm = new Lastfm(this);
   m_filterVisible = false;
@@ -59,7 +59,7 @@ ArtistPage::ArtistPage(const QString& country, QGraphicsItem *parent)
 ArtistPage::ArtistPage(QGraphicsItem *parent)
     : MApplicationPage(parent)
 {
-  setTitle("Artists");
+  setTitle(tr("Artists"));
 
   m_lastfm = new Lastfm(this);
   m_filterVisible = false;
@@ -87,13 +87,13 @@ void ArtistPage::createContent()
   if (m_pageMode == ALL_ARTISTS) {
     // Menu Actions
     MAction* actionImportLastfm = new MAction(panel);
-    actionImportLastfm->setText("Import from Last.fm");
+    actionImportLastfm->setText(tr("Import from Last.fm"));
     actionImportLastfm->setLocation(MAction::ApplicationMenuLocation);
     addAction(actionImportLastfm);
     connect(actionImportLastfm, SIGNAL(triggered()), this, SLOT(slotImportLastfm()));
 
     MAction* actionAddArtist = new MAction(panel);
-    actionAddArtist->setText("Add artist");
+    actionAddArtist->setText(tr("Add artist"));
     actionAddArtist->setLocation(MAction::ApplicationMenuLocation);
     addAction(actionAddArtist);
     connect(actionAddArtist, SIGNAL(triggered()), this, SLOT(slotAddArtist()));
@@ -218,7 +218,7 @@ void ArtistPage::slotShowFilter()
   layout->setContentsMargins(0,0,0,0);
   layout->setSpacing(0);
 
-  MLabel *label = new MLabel("Show artists without tour dates.",
+  MLabel *label = new MLabel(tr("Show artists without tour dates."),
                              centralWidget);
   label->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 
@@ -232,7 +232,7 @@ void ArtistPage::slotShowFilter()
   layout->addItem(label);
   layout->addItem(artistsWithoutEventsSwitch);
 
-  MDialog* dialog = new MDialog("Import from Last.fm",
+  MDialog* dialog = new MDialog(tr("Import from Last.fm"),
                                 M::OkButton | M::CancelButton);
   dialog->setCentralWidget(centralWidget);
   dialog->appear(MSceneWindow::DestroyWhenDone);
@@ -263,7 +263,7 @@ void ArtistPage::slotAddArtist() {
   layout->setContentsMargins(0,0,0,0);
   layout->setSpacing(0);
 
-  MLabel *label = new MLabel("Fetch tour dates of", centralWidget);
+  MLabel *label = new MLabel(tr("Fetch tour dates of"), centralWidget);
   label->setObjectName("CommonTitleInverted");
   MTextEdit *textEdit = new MTextEdit(MTextEditModel::SingleLine,
                                       QString(), centralWidget);
@@ -277,7 +277,7 @@ void ArtistPage::slotAddArtist() {
   layout->addItem(textEdit);
   layout->addItem(spacer);
 
-  MDialog* dialog = new MDialog("Add artist",
+  MDialog* dialog = new MDialog(tr("Add artist"),
                                 M::OkButton | M::CancelButton);
   dialog->setCentralWidget(centralWidget);
   dialog->appear(MSceneWindow::DestroyWhenDone);
@@ -287,7 +287,7 @@ void ArtistPage::slotAddArtist() {
     if (!artist.isEmpty()) {
       m_manuallyAddedArtists << artist;
       m_lastfm->getEventsForArtist(artist);
-      showMessage(QString("retrieving event dates for %1").arg(artist));
+      showMessage(tr("Retrieving event dates for %1").arg(artist));
     }
 
   }
@@ -299,7 +299,7 @@ void ArtistPage::slotImportLastfm() {
   layout->setContentsMargins(0,0,0,0);
   layout->setSpacing(0);
 
-  MLabel *label = new MLabel("Last.fm username", centralWidget);
+  MLabel *label = new MLabel(tr("Last.fm username"), centralWidget);
   label->setObjectName("CommonTitleInverted");
   MTextEdit *textEdit = new MTextEdit(MTextEditModel::SingleLine,
                                       QString(),
@@ -314,7 +314,7 @@ void ArtistPage::slotImportLastfm() {
   layout->addItem(textEdit);
   layout->addItem(spacer);
 
-  MDialog* dialog = new MDialog("Import from Last.fm",
+  MDialog* dialog = new MDialog(tr("Import from Last.fm"),
                                 M::OkButton | M::CancelButton);
   dialog->setCentralWidget(centralWidget);
   dialog->appear(MSceneWindow::DestroyWhenDone);
@@ -323,7 +323,7 @@ void ArtistPage::slotImportLastfm() {
     QString user = textEdit->text();
     if (!user.isEmpty())
       m_lastfm->getTopArtists(user);
-      showMessage(QString("Retrieving top artists for user %1").arg(user));
+      showMessage(tr("Retrieving top artists for user %1").arg(user));
   }
 }
 

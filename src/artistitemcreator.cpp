@@ -3,6 +3,7 @@
 
 #include <QtCore/QDir>
 #include <QtCore/QFile>
+#include <QtCore/QObject>
 #include <QtGui/QImage>
 
 ArtistItemCreator::ArtistItemCreator(const ArtistPage::PageMode &pageMode,
@@ -29,13 +30,13 @@ void ArtistItemCreator::updateCell(const QModelIndex &index, MWidget *cell) cons
     eventsNum = db->eventsWithArtistInCountryNum(artistID, m_country);
 
   if (eventsNum > 1)
-    contentItem->setSubtitle(QString("%1 concerts").arg(eventsNum));
+    contentItem->setSubtitle(QObject::tr("%1 concerts").arg(eventsNum));
   else if (eventsNum == 1)
-    contentItem->setSubtitle("1 event");
+    contentItem->setSubtitle(QObject::tr("1 event"));
   else if (eventsNum == 0)
-    contentItem->setSubtitle("No events yet.");
+    contentItem->setSubtitle(QObject::tr("No events yet."));
   else
-    contentItem->setSubtitle("Error while retrieving data.");
+    contentItem->setSubtitle(QObject::tr("Error while retrieving data."));
 
   if (db->artistHasImage(artistID)) {
     QString imagePath = QString("%1/.rockmarble/%2/%3").arg(QDir::homePath())\

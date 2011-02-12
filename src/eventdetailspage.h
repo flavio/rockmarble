@@ -19,6 +19,8 @@ class EventDetailsPage : public MApplicationPage
     void slotChangeStar();
 
   private:
+    void updateStarredAction();
+
     MAction* m_actionStar;
     int  m_eventID;
     bool m_starred;

@@ -61,14 +61,10 @@ void EventDetailsPage::createContent()
 
   // Toolbar Actions
   m_actionStar = new MAction(this);
-  if (m_starred)
-    m_actionStar->setIconID("icon-m-toolbar-favorite-mark");
-  else
-    m_actionStar->setIconID("icon-m-toolbar-favorite-unmark");
-
   m_actionStar->setLocation(MAction::ToolBarLocation);
   addAction(m_actionStar);
   connect(m_actionStar, SIGNAL(triggered()), this, SLOT(slotChangeStar()));
+  updateStarredAction();
 
   delete event;
 }
@@ -77,8 +73,14 @@ void EventDetailsPage::slotChangeStar()
 {
   m_starred = !m_starred;
   DBManager::instance()->setEventStarred(m_eventID, m_starred);
-  if (m_starred)
+  updateStarredAction();
+}
+
+void EventDetailsPage::updateStarredAction()
+{
+  if (m_starred) {
     m_actionStar->setIconID("icon-m-toolbar-favorite-mark");
-  else
+  } else {
     m_actionStar->setIconID("icon-m-toolbar-favorite-unmark");
+  }
 }

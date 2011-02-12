@@ -36,7 +36,8 @@ class MainPage : public MApplicationPage
     enum PageType {
       ByArtist,
       ByLocation,
-      ByCurrentLocation
+      ByCurrentLocation,
+      ByStar
     };
 
   protected:

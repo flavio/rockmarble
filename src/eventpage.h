@@ -3,6 +3,7 @@
 
 #include <MApplicationPage>
 #include <QtCore/QModelIndex>
+#include <QtSql/QSqlQuery>
 
 #include "event.h"
 
@@ -11,7 +12,12 @@ class EventPage : public MApplicationPage
   Q_OBJECT
 
   public:
-    EventPage(const int& artistID, const QString& country, QGraphicsItem *parent = 0);
+    enum PageMode {STARRED, ARTIST_BY_COUNTRY};
+
+    // This constructor is used to show all the starred events
+    EventPage(QGraphicsItem *parent = 0);
+    EventPage(const int& artistID, const QString& country,
+              QGraphicsItem *parent = 0);
     ~EventPage();
 
   protected:
@@ -21,6 +27,9 @@ class EventPage : public MApplicationPage
     void slotEventClicked(const QModelIndex& index);
 
   private:
+    QSqlQuery getQuery();
+
+    PageMode m_pageMode;
     int m_artistID;
     QString m_country;
 };

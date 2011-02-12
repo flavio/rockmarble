@@ -20,6 +20,7 @@
 
 #include "artistpage.h"
 #include "countrypage.h"
+#include "eventpage.h"
 #include "defines.h"
 #include "mainpage.h"
 #include "pageitemcreator.h"
@@ -42,6 +43,7 @@ MainPage::MainPage(QGraphicsItem *parent)
 
   m_pages.insert(ByArtist, "Artist");
   m_pages.insert(ByLocation, "Location");
+  m_pages.insert(ByStar, "Starred");
   m_pages.insert(ByCurrentLocation, "Your current location");
 }
 
@@ -125,6 +127,9 @@ void MainPage::slotItemClicked(QModelIndex index)
     case ByLocation:
       page = new CountryPage();
       break;
+  case ByStar:
+    page = new EventPage();
+    break;
     default:
       //"This shouldn't happen";
       return;

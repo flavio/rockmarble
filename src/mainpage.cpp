@@ -79,7 +79,6 @@ void MainPage::createContent()
   pagesList->setCellCreator(cellCreator);
 
   pagesList->setItemModel(new PagesModel(m_pages));
-  //m_pages.values()
   policy->addItem(label);
   policy->addItem(pagesList);
 

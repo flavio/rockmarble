@@ -15,6 +15,8 @@ class CountryPage : public MApplicationPage
   Q_OBJECT
 
   public:
+    enum PageMode {ALL_COUNTRIES, BY_ARTIST};
+
     CountryPage(QGraphicsItem *parent = 0);
     CountryPage(const int& artistID, QGraphicsItem *parent = 0);
     ~CountryPage();
@@ -29,6 +31,7 @@ class CountryPage : public MApplicationPage
     QSqlQuery getQuery();
 
     int m_artistID;
+    PageMode m_pageMode;
 };
 
 #endif // COUNTRYPAGE_H

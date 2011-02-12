@@ -20,13 +20,14 @@ CountryPage::CountryPage(QGraphicsItem *parent)
   : MApplicationPage(parent)
 {
   setTitle("Countries");
-  m_artistID = -1;
+  m_pageMode = ALL_COUNTRIES;
 }
 
 CountryPage::CountryPage(const int& artistID, QGraphicsItem *parent)
   : MApplicationPage(parent), m_artistID(artistID)
 {
   setTitle(DBManager::instance()->artistFromID(artistID));
+  m_pageMode = BY_ARTIST;
 }
 
 CountryPage::~CountryPage()
@@ -37,7 +38,7 @@ QSqlQuery CountryPage::getQuery()
 {
   QString q;
   QSqlQuery query;
-  if (m_artistID != -1) {
+  if (m_pageMode == BY_ARTIST) {
     q = "SELECT locations.country FROM events "
         "JOIN artists_events ON artists_events.event_id = events.id "
         "JOIN locations ON locations.id = events.location_id "
@@ -46,7 +47,7 @@ QSqlQuery CountryPage::getQuery()
         "ORDER BY locations.country ASC";
     query.prepare(q);
     query.addBindValue(m_artistID);
-  } else {
+  } else if (m_pageMode == ALL_COUNTRIES) {
     q = "SELECT locations.country FROM events "
         "JOIN artists_events ON artists_events.event_id = events.id "
         "JOIN artists ON artists.id = artists_events.artist_id "
@@ -88,9 +89,9 @@ void CountryPage::slotCountryClicked(const QModelIndex& index)
 {
   QString country= index.data(Qt::DisplayRole).toString();
   MApplicationPage* page;
-  if (m_artistID != -1)
+  if (m_pageMode == BY_ARTIST)
     page = new EventPage(m_artistID, country);
-  else
+  else if (m_pageMode == ALL_COUNTRIES)
     page = new ArtistPage(country);
 
   page->appear(MSceneWindow::DestroyWhenDismissed);

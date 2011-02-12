@@ -22,6 +22,7 @@
 #include "location.h"
 
 Event::Event(const QVariant& data)
+  : m_starred(false)
 {
   QVariantMap event = data.toMap();
 
@@ -44,9 +45,9 @@ Event::Event(const QVariant& data)
 
 Event::Event(const QStringList &artists, const QString &title,
              const QString &description, const QDateTime &dateTime,
-             Location *location)
+             const bool &starred, Location *location)
   : m_artists(artists), m_title(title), m_description(description),
-    m_dateTime(dateTime), m_location(location)
+    m_dateTime(dateTime), m_starred(starred), m_location(location)
 {
 }
 
@@ -76,6 +77,9 @@ bool Event::operator==(const Event& e) const
     return false;
 
   if (m_title != e.m_title)
+    return false;
+
+  if (m_starred != e.m_starred)
     return false;
 
   return true;

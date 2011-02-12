@@ -3,6 +3,7 @@
 
 #include <MApplicationPage>
 
+class MAction;
 
 class EventDetailsPage : public MApplicationPage
 {
@@ -12,10 +13,15 @@ class EventDetailsPage : public MApplicationPage
     EventDetailsPage(const int& event_id, QGraphicsItem *parent=0);
 
   protected:
-  virtual void createContent();
+    virtual void createContent();
+
+  private slots:
+    void slotChangeStar();
 
   private:
-    int m_event_id;
+    MAction* m_actionStar;
+    int  m_eventID;
+    bool m_starred;
 };
 
 #endif // EVENTDETAILSPAGE_H

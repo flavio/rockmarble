@@ -36,6 +36,7 @@ public:
           const QString& title,
           const QString& description,
           const QDateTime& dateTime,
+          const bool& starred,
           Location* location);
     ~Event();
 
@@ -46,6 +47,7 @@ public:
     Location* location() const { return m_location; }
     QString title() const { return m_title; }
     QString description() const { return m_description; }
+    bool starred() const { return m_starred; }
 
     bool operator==(const Event& e) const;
 
@@ -56,6 +58,7 @@ public:
       QString m_title;
       QString m_description;
       QDateTime m_dateTime;
+      bool m_starred;
 
       Location* m_location;
 };

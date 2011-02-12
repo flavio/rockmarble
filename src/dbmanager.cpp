@@ -88,6 +88,7 @@ void DBManager::initDB() {
                "location_id integer NOT NULL, "
                "title varchar(30), "
                "description varchar(30), "
+               "starred boolean NOT NULL DEFAULT 0, "
                "start_date datetime NOT NULL, "
                "FOREIGN KEY(location_id) REFERENCES locations(id)) ");
   }
@@ -136,6 +137,15 @@ void DBManager::setArtistHasImage(const int &artistID, bool hasImage)
   executeQuery(&q);
 }
 
+void DBManager::setEventStarred(const int &eventID, const bool &starred)
+{
+  QSqlQuery q;
+  q.prepare("UPDATE events SET starred = ? WHERE id = ?");
+  q.addBindValue((int) starred);
+  q.addBindValue(eventID);
+  executeQuery(&q);
+}
+
 void DBManager::addEvent(const Event& event)
 {
   int location_id = addLocation(event.location());
@@ -146,11 +156,12 @@ void DBManager::addEvent(const Event& event)
   if (executeQuery(&q)) {
     if (!q.next()) {
       q.prepare("INSERT INTO events (id, title, description, start_date, "
-                " location_id) VALUES (?,?,?,?,?)");
+                " starred, location_id) VALUES (?,?,?,?,?,?)");
       q.addBindValue(event.id());
       q.addBindValue(event.title());
       q.addBindValue(event.description());
       q.addBindValue(event.dateTime());
+      q.addBindValue((int) event.starred());
       q.addBindValue(location_id);
       executeQuery(&q);
     }
@@ -306,9 +317,10 @@ Event* DBManager::eventFromID(const int &eventID)
     QString title = query.value(query.record().indexOf("title")).toString();
     QString description = query.value(query.record().indexOf("description")).toString();
     QDateTime dateTime = query.value(query.record().indexOf("start_date")).toDateTime();
+    bool starred = query.value(query.record().indexOf("starred")).toBool();
 
     Location* location = locationFromID(query.value(query.record().indexOf("location_id")).toInt());
-    return new Event (artists, title, description, dateTime, location);
+    return new Event (artists, title, description, dateTime, starred, location);
   } else {
     return 0;
   }

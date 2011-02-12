@@ -18,6 +18,7 @@ class DBManager : public QObject
     int addArtist(const QString& name, bool favourite = false);
     void setArtistHasImage(const int& artistID, bool hasImage);
     void addEvent(const Event& event);
+    void setEventStarred(const int& eventID, const bool& starred);
     int eventsWithArtistNum(const int& artistID);
     int eventsWithArtistInCountryNum(const int& artistID,
                                      const QString& country);

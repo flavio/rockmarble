@@ -1,5 +1,6 @@
 #include "eventdetailspage.h"
 
+#include <MAction>
 #include <MLayout>
 #include <MLabel>
 #include <MLinearLayoutPolicy>
@@ -10,7 +11,7 @@
 #include "location.h"
 
 EventDetailsPage::EventDetailsPage(const int& event_id, QGraphicsItem *parent)
-  : MApplicationPage(parent), m_event_id (event_id)
+  : MApplicationPage(parent), m_eventID (event_id)
 {
 }
 
@@ -19,7 +20,8 @@ void EventDetailsPage::createContent()
   MLayout *layout = new MLayout;
   centralWidget()->setLayout(layout);
 
-  Event* event = DBManager::instance()->eventFromID(m_event_id);
+  Event* event = DBManager::instance()->eventFromID(m_eventID);
+  m_starred = event->starred();
   Location* location = event->location();
 
   // Build a vertical layout that will hold all the informations.
@@ -57,5 +59,26 @@ void EventDetailsPage::createContent()
   portraitPolicy->addItem(infoLayout);
   layout->setPortraitPolicy(portraitPolicy);
 
+  // Toolbar Actions
+  m_actionStar = new MAction(this);
+  if (m_starred)
+    m_actionStar->setIconID("icon-m-toolbar-favorite-mark");
+  else
+    m_actionStar->setIconID("icon-m-toolbar-favorite-unmark");
+
+  m_actionStar->setLocation(MAction::ToolBarLocation);
+  addAction(m_actionStar);
+  connect(m_actionStar, SIGNAL(triggered()), this, SLOT(slotChangeStar()));
+
   delete event;
+}
+
+void EventDetailsPage::slotChangeStar()
+{
+  m_starred = !m_starred;
+  DBManager::instance()->setEventStarred(m_eventID, m_starred);
+  if (m_starred)
+    m_actionStar->setIconID("icon-m-toolbar-favorite-mark");
+  else
+    m_actionStar->setIconID("icon-m-toolbar-favorite-unmark");
 }

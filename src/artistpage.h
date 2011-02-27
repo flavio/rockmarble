@@ -10,8 +10,6 @@ class Lastfm;
 class MLabel;
 class MLinearLayoutPolicy;
 class MTextEdit;
-class QSortFilterProxyModel;
-
 class QSqlQueryModel;
 
 class ArtistPage : public MApplicationPage
@@ -54,7 +52,6 @@ class ArtistPage : public MApplicationPage
     MLabel* m_noArtistLabel;
     MLinearLayoutPolicy *m_policy;
     QSqlQueryModel* m_artistsModel;
-    QSortFilterProxyModel *m_proxyModel;
     QStringList m_manuallyAddedArtists;
 };
 

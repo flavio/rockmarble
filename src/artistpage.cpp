@@ -42,7 +42,6 @@
 #include <QtCore/QAbstractItemModel>
 #include <QtCore/QPropertyAnimation>
 #include <QtGui/QGraphicsLinearLayout>
-#include <QtGui/QSortFilterProxyModel>
 #include <QtSql/QSqlQueryModel>
 
 ArtistPage::ArtistPage(const QString& country, QGraphicsItem *parent)
@@ -132,9 +131,7 @@ void ArtistPage::createContent()
   // Content item creator and item model for the list
   ArtistItemCreator *cellCreator = new ArtistItemCreator(m_pageMode, m_country);
   artistsList->setCellCreator(cellCreator);
-  m_proxyModel = new QSortFilterProxyModel(this);
-  m_proxyModel->setSourceModel(m_artistsModel);
-  artistsList->setItemModel(m_proxyModel);
+  artistsList->setItemModel(m_artistsModel);
   m_policy->addItem(artistsList);
 
   connect (artistsList, SIGNAL(itemClicked(QModelIndex)),
@@ -154,8 +151,16 @@ QSqlQuery ArtistPage::artistsModelQuery() const
       q += " JOIN artists_events on artists.id = artists_events.artist_id ";
     }
     q += " WHERE artists.favourite = 1 ";
+    if (m_filterVisible && !m_filter->text().isEmpty()) {
+      q += " AND artists.name LIKE ? ";
+    }
     q += " ORDER BY artists.name ASC";
     query.prepare(q);
+    if (m_filterVisible && !m_filter->text().isEmpty()) {
+      QString name('%');
+      name += m_filter->text() + '%';
+      query.addBindValue(name);
+    }
   } else if (m_pageMode == ARTISTS_BY_COUNTRY) {
     q = "SELECT distinct artists.id FROM artists ";
     q += " JOIN artists_events on artists.id = artists_events.artist_id ";
@@ -163,9 +168,17 @@ QSqlQuery ArtistPage::artistsModelQuery() const
     q += " JOIN locations on locations.id = events.location_id ";
     q += " WHERE artists.favourite = 1 ";
     q += " AND locations.country = ? ";
+    if (m_filterVisible && !m_filter->text().isEmpty()) {
+      q += " AND artists.name LIKE ? ";
+    }
     q += " ORDER BY artists.name ASC";
     query.prepare(q);
     query.addBindValue(m_country);
+    if (m_filterVisible && !m_filter->text().isEmpty()) {
+      QString name('%');
+      name += m_filter->text() + '%';
+      query.addBindValue(name);
+    }
   }
 
   query.exec();
@@ -191,7 +204,7 @@ void ArtistPage::refreshArtistsModel()
 
 void ArtistPage::slotFilterChanged()
 {
-  m_proxyModel->setFilterRegExp(m_filter->text());
+  m_artistsModel->setQuery(artistsModelQuery());
 }
 
 void ArtistPage::slotShowSearch()

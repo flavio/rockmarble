@@ -7,6 +7,8 @@
 #include <QtSql/QSqlQuery>
 
 class Lastfm;
+class MLabel;
+class MLinearLayoutPolicy;
 class MTextEdit;
 class QSortFilterProxyModel;
 
@@ -35,6 +37,7 @@ class ArtistPage : public MApplicationPage
     void slotFilterChanged();
     void slotShowFilter();
     void slotShowSearch();
+    void slotFilterAnimationFinished();
 
   private:
     QSqlQuery artistsModelQuery() const;
@@ -48,6 +51,8 @@ class ArtistPage : public MApplicationPage
     bool m_showArtistsWithoutEvents;
     Lastfm* m_lastfm;
     MTextEdit* m_filter;
+    MLabel* m_noArtistLabel;
+    MLinearLayoutPolicy *m_policy;
     QSqlQueryModel* m_artistsModel;
     QSortFilterProxyModel *m_proxyModel;
     QStringList m_manuallyAddedArtists;

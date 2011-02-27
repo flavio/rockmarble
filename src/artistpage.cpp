@@ -77,12 +77,12 @@ void ArtistPage::createContent()
   MApplicationPage::createContent();
 
   QGraphicsWidget *panel = centralWidget();
-  MLayout *layout = new MLayout(panel);
+  MLayout* layout = new MLayout(panel);
+  m_policy = new MLinearLayoutPolicy(layout, Qt::Vertical);
   layout->setAnimation(NULL);
   panel->setLayout(layout);
-  MLinearLayoutPolicy *policy = new MLinearLayoutPolicy(layout, Qt::Vertical);
-  layout->setLandscapePolicy(policy);
-  layout->setPortraitPolicy(policy);
+  layout->setLandscapePolicy(m_policy);
+  layout->setPortraitPolicy(m_policy);
 
   if (m_pageMode == ALL_ARTISTS) {
     // Menu Actions
@@ -110,34 +110,38 @@ void ArtistPage::createContent()
   addAction(actionSearch);
   connect(actionSearch, SIGNAL(triggered()), this, SLOT(slotShowSearch()));
 
+  // setup model
+  m_artistsModel = new QSqlQueryModel();
+  m_artistsModel->setQuery(artistsModelQuery());
+
   // filtering text box
-  m_filter = new MTextEdit(MTextEditModel::SingleLine, QString(), this);
-  m_filter->setOpacity(0.0);
+  m_filter = new MTextEdit(MTextEditModel::SingleLine, QString());
   m_filter->setObjectName("CommonSingleInputField");
-  m_filter->setToolTip("Foobar");
-  policy->addItem(m_filter);
   connect(m_filter, SIGNAL(textChanged()), this, SLOT(slotFilterChanged()));
 
+  // No artist found label
+  m_noArtistLabel = new MLabel(tr("No artist available."));
+  m_noArtistLabel->setAlignment(Qt::AlignCenter);
+  if (m_artistsModel->rowCount() == 0)
+    m_policy->addItem(m_noArtistLabel);
+
   // MList with fast view
-  MList* artistList = new MList();
-  artistList->setSelectionMode(MList::SingleSelection);
+  MList* artistsList = new MList();
+  artistsList->setSelectionMode(MList::SingleSelection);
 
   // Content item creator and item model for the list
   ArtistItemCreator *cellCreator = new ArtistItemCreator(m_pageMode, m_country);
-  artistList->setCellCreator(cellCreator);
-  m_artistsModel = new QSqlQueryModel();
-  m_artistsModel->setQuery(artistsModelQuery());
+  artistsList->setCellCreator(cellCreator);
   m_proxyModel = new QSortFilterProxyModel(this);
   m_proxyModel->setSourceModel(m_artistsModel);
-  artistList->setItemModel(m_proxyModel);
-  policy->addItem(artistList);
+  artistsList->setItemModel(m_proxyModel);
+  m_policy->addItem(artistsList);
 
-  connect (artistList, SIGNAL(itemClicked(QModelIndex)),
+  connect (artistsList, SIGNAL(itemClicked(QModelIndex)),
            this, SLOT(slotArtistClicked(QModelIndex)));
 
   connect(DBManager::instance(), SIGNAL(artistAdded(const QString&, bool)),
           this, SLOT(slotArtistAdded(const QString&, bool)));
-
 }
 
 QSqlQuery ArtistPage::artistsModelQuery() const
@@ -171,6 +175,8 @@ QSqlQuery ArtistPage::artistsModelQuery() const
 void ArtistPage::slotArtistAdded(const QString& artist, bool favourite)
 {
   if (favourite) {
+    m_policy->removeItem(m_noArtistLabel);
+
     m_lastfm->getArtistImage(artist);
     if (!m_manuallyAddedArtists.contains(artist,Qt::CaseInsensitive))
       m_lastfm->getEventsForArtist(artist);
@@ -197,10 +203,11 @@ void ArtistPage::slotShowSearch()
     endValue = 0.0;
   } else {
     // let's show it
+    m_filter->setOpacity(0.0); // ensure it's not visible
+    m_policy->insertItem(0, m_filter, Qt::AlignCenter);
     startValue = 0.0;
     endValue = 1.0;
   }
-  m_filterVisible = !m_filterVisible;
 
   QPropertyAnimation *fadeInAnimation = new QPropertyAnimation;
   fadeInAnimation->setTargetObject(m_filter);
@@ -209,6 +216,17 @@ void ArtistPage::slotShowSearch()
   fadeInAnimation->setEndValue(endValue);
   fadeInAnimation->setDuration(1000.0);
   fadeInAnimation->start(QAbstractAnimation::DeleteWhenStopped);
+  connect(fadeInAnimation, SIGNAL(finished()), this,
+          SLOT(slotFilterAnimationFinished()));
+
+  m_filterVisible = !m_filterVisible;
+}
+
+void ArtistPage::slotFilterAnimationFinished()
+{
+  if (!m_filterVisible) {
+    m_policy->removeItem(m_filter);
+  }
 }
 
 void ArtistPage::slotShowFilter()

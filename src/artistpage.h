@@ -6,11 +6,11 @@
 #include <QtCore/QVariant>
 #include <QtSql/QSqlQuery>
 
+class ArtistModel;
 class Lastfm;
 class MLabel;
 class MLinearLayoutPolicy;
 class MTextEdit;
-class QSqlQueryModel;
 
 class ArtistPage : public MApplicationPage
 {
@@ -30,16 +30,16 @@ class ArtistPage : public MApplicationPage
     void slotAddArtist();
     void slotImportLastfm();
 
-    void slotArtistAdded(const QString&, bool);
+    void slotArtistAdded(const int, bool);
     void slotArtistClicked(const QModelIndex& index);
     void slotFilterChanged();
     void slotShowFilter();
     void slotShowSearch();
     void slotFilterAnimationFinished();
+    void slotRefreshArtistsModel();
 
   private:
-    QSqlQuery artistsModelQuery() const;
-    void refreshArtistsModel();
+    QSqlQuery artistsModelQuery();
 
     void showMessage(const QString& message, bool error = false);
 
@@ -51,7 +51,7 @@ class ArtistPage : public MApplicationPage
     MTextEdit* m_filter;
     MLabel* m_noArtistLabel;
     MLinearLayoutPolicy *m_policy;
-    QSqlQueryModel* m_artistsModel;
+    ArtistModel* m_artistsModel;
     QStringList m_manuallyAddedArtists;
 };
 

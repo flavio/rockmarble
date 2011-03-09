@@ -23,6 +23,7 @@
 #include "artistpage.h"
 
 #include "artistitemcreator.h"
+#include "artistmodel.h"
 #include "dbmanager.h"
 #include "countrypage.h"
 #include "eventpage.h"
@@ -42,7 +43,6 @@
 #include <QtCore/QAbstractItemModel>
 #include <QtCore/QPropertyAnimation>
 #include <QtGui/QGraphicsLinearLayout>
-#include <QtSql/QSqlQueryModel>
 
 ArtistPage::ArtistPage(const QString& country, QGraphicsItem *parent)
     : MApplicationPage(parent), m_country(country)
@@ -110,8 +110,7 @@ void ArtistPage::createContent()
   connect(actionSearch, SIGNAL(triggered()), this, SLOT(slotShowSearch()));
 
   // setup model
-  m_artistsModel = new QSqlQueryModel();
-  m_artistsModel->setQuery(artistsModelQuery());
+  m_artistsModel = new ArtistModel(artistsModelQuery());
 
   // filtering text box
   m_filter = new MTextEdit(MTextEditModel::SingleLine, QString());
@@ -129,19 +128,17 @@ void ArtistPage::createContent()
   artistsList->setSelectionMode(MList::SingleSelection);
 
   // Content item creator and item model for the list
-  ArtistItemCreator *cellCreator = new ArtistItemCreator(m_pageMode, m_country);
-  artistsList->setCellCreator(cellCreator);
+  artistsList->setCellCreator(new ArtistItemCreator(m_pageMode, m_country));
   artistsList->setItemModel(m_artistsModel);
   m_policy->addItem(artistsList);
 
-  connect (artistsList, SIGNAL(itemClicked(QModelIndex)),
+  connect(artistsList, SIGNAL(itemClicked(QModelIndex)),
            this, SLOT(slotArtistClicked(QModelIndex)));
-
-  connect(DBManager::instance(), SIGNAL(artistAdded(const QString&, bool)),
-          this, SLOT(slotArtistAdded(const QString&, bool)));
+  connect(DBManager::instance(), SIGNAL(artistAdded(int,bool)),
+           this, SLOT(slotArtistAdded(int,bool)));
 }
 
-QSqlQuery ArtistPage::artistsModelQuery() const
+QSqlQuery ArtistPage::artistsModelQuery()
 {
   QSqlQuery query;
   QString q;
@@ -185,19 +182,19 @@ QSqlQuery ArtistPage::artistsModelQuery() const
   return query;
 }
 
-void ArtistPage::slotArtistAdded(const QString& artist, bool favourite)
+void ArtistPage::slotArtistAdded(const int artistID, bool favourite)
 {
   if (favourite) {
     m_policy->removeItem(m_noArtistLabel);
 
+    QString artist = DBManager::instance()->artistNameFromID(artistID);
     m_lastfm->getArtistImage(artist);
     if (!m_manuallyAddedArtists.contains(artist,Qt::CaseInsensitive))
       m_lastfm->getEventsForArtist(artist);
-    refreshArtistsModel();
   }
 }
 
-void ArtistPage::refreshArtistsModel()
+void ArtistPage::slotRefreshArtistsModel()
 {
   m_artistsModel->setQuery(artistsModelQuery());
 }
@@ -270,7 +267,7 @@ void ArtistPage::slotShowFilter()
   if ((dialog->exec() == MDialog::Accepted) &&
       (m_showArtistsWithoutEvents != artistsWithoutEventsSwitch->isChecked())) {
     m_showArtistsWithoutEvents = !m_showArtistsWithoutEvents;
-    refreshArtistsModel();
+    slotRefreshArtistsModel();
   }
 }
 

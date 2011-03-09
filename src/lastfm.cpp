@@ -29,13 +29,14 @@ class StoreEvents : public QRunnable
         artist = attr["artist"].toString();
       }
 
-      db->addArtist(artist, true);
+      int artistID = db->addArtist(artist, true);
 
       QVariantList events = response["event"].toList();
 
       foreach(QVariant event, events) {
         db->addEvent(Event(event));
       }
+      db->setArtistAllDataFetched(artistID, true);
     }
 
   private:

@@ -12,13 +12,30 @@ ArtistItemCreator::ArtistItemCreator(const ArtistPage::PageMode &pageMode,
 {
 }
 
+MWidget* ArtistItemCreator::createCell(const QModelIndex &index,
+                                           MWidgetRecycler &recycler) const
+{
+  QVariant data = index.data(Qt::DisplayRole);
+  int artistID = data.toInt();
+  QString recycledID = QString("%1%2").arg(MContentItem::staticMetaObject.className())\
+                                      .arg(artistID);
+  MContentItem* cell = qobject_cast<MContentItem*>(recycler.take(recycledID));
+  if(cell == NULL)
+    cell = new MContentItem();
+
+  updateCell(index, cell);
+
+  return cell;
+}
+
 void ArtistItemCreator::updateCell(const QModelIndex &index, MWidget *cell) const
 {
   MContentItem *contentItem = qobject_cast<MContentItem *>(cell);
+
   DBManager* db = DBManager::instance();
   QVariant data = index.data(Qt::DisplayRole);
   int artistID = data.toInt();
-  QString artist = db->artistFromID(artistID);
+  QString artist = db->artistNameFromID(artistID);
 
   contentItem->setTitle(artist);
   contentItem->boundingRect();
@@ -29,14 +46,25 @@ void ArtistItemCreator::updateCell(const QModelIndex &index, MWidget *cell) cons
   else
     eventsNum = db->eventsWithArtistInCountryNum(artistID, m_country);
 
-  if (eventsNum > 1)
-    contentItem->setSubtitle(QObject::tr("%1 concerts").arg(eventsNum));
-  else if (eventsNum == 1)
-    contentItem->setSubtitle(QObject::tr("1 event"));
-  else if (eventsNum == 0)
-    contentItem->setSubtitle(QObject::tr("No events yet."));
-  else
-    contentItem->setSubtitle(QObject::tr("Error while retrieving data."));
+  if (db->artistHasAllData(artistID)) {
+    if (eventsNum > 1)
+      contentItem->setSubtitle(QObject::tr("%1 concerts.").arg(eventsNum));
+    else if (eventsNum == 1)
+      contentItem->setSubtitle(QObject::tr("1 event."));
+    else if (eventsNum == 0)
+      contentItem->setSubtitle(QObject::tr("No events."));
+    else
+      contentItem->setSubtitle(QObject::tr("Error while retrieving data."));
+  } else {
+    if (eventsNum > 1)
+      contentItem->setSubtitle(QObject::tr("Downloading. %1 concerts found...").arg(eventsNum));
+    else if (eventsNum == 1)
+      contentItem->setSubtitle(QObject::tr("Downloading, 1 event found..."));
+    else if (eventsNum == 0)
+      contentItem->setSubtitle(QObject::tr("Downloading, no events yet..."));
+    else
+      contentItem->setSubtitle(QObject::tr("Error while retrieving data."));
+  }
 
   if (db->artistHasImage(artistID)) {
     QString imagePath = QString("%1/.rockmarble/%2/%3").arg(QDir::homePath())\

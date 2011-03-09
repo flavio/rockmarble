@@ -69,6 +69,7 @@ void DBManager::initDB() {
     executeQuery("create table artists ( "
                "id integer primary key autoincrement not null, "
                "name varchar(30) NOT NULL UNIQUE, "
+               "all_data_fetched boolean NOT NULL DEFAULT 0, "
                "has_image boolean NOT NULL DEFAULT 0, "
                "favourite boolean NOT NULL DEFAULT 0)");
   }
@@ -101,30 +102,55 @@ void DBManager::initDB() {
   }
 }
 
-int DBManager::addArtist(const QString &name, bool favourite)
+int DBManager::artistIDFromName(const QString& artistName)
 {
   QSqlQuery q;
   q.prepare("SELECT id FROM artists WHERE name = ?");
-  q.addBindValue(name);
+  q.addBindValue(artistName);
   if (executeQuery(&q)) {
     if (q.next()) {
-      //qWarning() << name << "already exists";
+      //qWarning() << artistName << "already exists";
       return q.value(q.record().indexOf("id")).toInt();
-    } else {
-      q.prepare("INSERT INTO artists (name, favourite) VALUES (?,?)");
-      q.addBindValue(name);
-      q.addBindValue((int) favourite);
-      if (executeQuery(&q)) {
-        // TODO handle false
-        //qWarning() << "created a new artist entry:" << name << favourite;
-        int id = addArtist(name, favourite);
-        emit artistAdded(name, favourite);
-        return id;
-      } else
-        return -1;
-    }
-  } else {
+    } else
+      return -1;
+  } else
     return -1;
+}
+
+bool DBManager::isArtistFavourite(const int& artistID)
+{
+  QSqlQuery q;
+  q.prepare("SELECT id FROM artists WHERE id = ? AND favourite = ?");
+  q.addBindValue(artistID);
+  q.addBindValue((int)true);
+  if (executeQuery(&q)) {
+    if (!q.next())
+      return false;
+    else
+      return true;
+  } else
+    return false;
+}
+
+int DBManager::addArtist(const QString &name, bool favourite)
+{
+  int artistID = artistIDFromName(name);
+
+  if (artistID != -1) {
+    return artistID;
+  } else {
+    QSqlQuery q;
+    q.prepare("INSERT INTO artists (name, favourite) VALUES (?,?)");
+    q.addBindValue(name);
+    q.addBindValue((int) favourite);
+    if (executeQuery(&q)) {
+      // TODO handle false
+      //qWarning() << "created a new artist entry:" << name << favourite;
+      artistID = addArtist(name, favourite);
+      emit artistAdded(artistID, favourite);
+      return artistID;
+    } else
+      return -1;
   }
 }
 
@@ -135,7 +161,19 @@ void DBManager::setArtistHasImage(const int &artistID, bool hasImage)
   q.addBindValue((int) hasImage);
   q.addBindValue(artistID);
   executeQuery(&q);
+  emit artistUpdated(artistID);
 }
+
+void DBManager::setArtistAllDataFetched(const int& artistID, bool done)
+{
+  QSqlQuery q;
+  q.prepare("UPDATE artists SET all_data_fetched = ? WHERE id = ?");
+  q.addBindValue((int) done);
+  q.addBindValue(artistID);
+  executeQuery(&q);
+  emit artistUpdated(artistID);
+}
+
 
 void DBManager::setEventStarred(const int &eventID, const bool &starred)
 {
@@ -173,23 +211,25 @@ void DBManager::addEvent(const Event& event)
   }
 }
 
-void DBManager::addArtistToEvent(const QString& artist, const int& event_id)
+void DBManager::addArtistToEvent(const QString& artist, const int& eventID)
 {
-  int artist_id = addArtist(artist, false);
+  int artistID = addArtist(artist, false);
 
   QSqlQuery q;
   q.prepare("SELECT * FROM artists_events WHERE artist_id = ? AND "
             "event_id = ?");
-  q.addBindValue(artist_id);
-  q.addBindValue(event_id);
+  q.addBindValue(artistID);
+  q.addBindValue(eventID);
   if (executeQuery(&q)) {
     if (!q.next()) {
       q.prepare("INSERT INTO artists_events (artist_id, event_id) VALUES (?,?)");
-      q.addBindValue(artist_id);
-      q.addBindValue(event_id);
+      q.addBindValue(artistID);
+      q.addBindValue(eventID);
       executeQuery(&q);
     }
   }
+  if (isArtistFavourite(artistID))
+    emit artistAddedToEvent(artistID, eventID);
 }
 
 int DBManager::addLocation(const Location *location)
@@ -261,7 +301,7 @@ int DBManager::eventsWithArtistInCountryNum(const int &artistID,
   }
 }
 
-QString DBManager::artistFromID(const int &artistID)
+QString DBManager::artistNameFromID(const int &artistID)
 {
   QString artist;
   QSqlQuery q ("select name from artists where id = ?");
@@ -286,6 +326,20 @@ bool DBManager::artistHasImage(const int &artistID)
 
   return ret;
 }
+
+bool DBManager::artistHasAllData(const int &artistID)
+{
+  bool ret = false;
+  QSqlQuery q ("select all_data_fetched from artists where id = ?");
+  q.addBindValue(artistID);
+  if (executeQuery(&q)) {
+    q.next();
+    ret = q.value(q.record().indexOf("all_data_fetched")).toBool();
+  }
+
+  return ret;
+}
+
 
 QStringList DBManager::artistsFromEvent(const int& eventID)
 {

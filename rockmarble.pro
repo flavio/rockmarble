@@ -28,7 +28,8 @@ HEADERS += src/datafetcher.h \
     src/dbmanager.h \
     src/artistpage.h \
     src/pageitemcreator.h \
-    src/pagesmodel.h
+    src/pagesmodel.h \
+    src/artistmodel.h
 SOURCES += src/datafetcher.cpp \
     src/event.cpp \
     src/eventmodel.cpp \
@@ -45,7 +46,8 @@ SOURCES += src/datafetcher.cpp \
     src/dbmanager.cpp \
     src/artistpage.cpp \
     src/pageitemcreator.cpp \
-    src/pagesmodel.cpp
+    src/pagesmodel.cpp \
+    src/artistmodel.cpp
 RESOURCES += resources.qrc
 
 # All generated files goes to the same directory

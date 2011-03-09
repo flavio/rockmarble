@@ -20,7 +20,7 @@ EventPage::EventPage(const int& artistID, const QString& country, QGraphicsItem 
   : MApplicationPage(parent), m_artistID(artistID), m_country(country)
 {
   m_pageMode = ARTIST_BY_COUNTRY;
-  setTitle(DBManager::instance()->artistFromID(artistID) + " - " + country);
+  setTitle(DBManager::instance()->artistNameFromID(artistID) + " - " + country);
 }
 
 EventPage::~EventPage()

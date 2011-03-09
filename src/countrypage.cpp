@@ -26,7 +26,7 @@ CountryPage::CountryPage(QGraphicsItem *parent)
 CountryPage::CountryPage(const int& artistID, QGraphicsItem *parent)
   : MApplicationPage(parent), m_artistID(artistID)
 {
-  setTitle(DBManager::instance()->artistFromID(artistID));
+  setTitle(DBManager::instance()->artistNameFromID(artistID));
   m_pageMode = BY_ARTIST;
 }
 

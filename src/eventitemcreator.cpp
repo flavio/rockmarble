@@ -1,33 +1,20 @@
 #include "eventitemcreator.h"
-
-#include <QtCore/QDateTime>
-#include <QtSql/QSqlQuery>
-#include <QtSql/QSqlRecord>
+#include "dbmanager.h"
+#include "event.h"
+#include "location.h"
 
 void EventItemCreator::updateCell(const QModelIndex &index, MWidget *cell) const
 {
-  QSqlQuery q;
   MContentItem *contentItem = qobject_cast<MContentItem *>(cell);
   QVariant data = index.data(Qt::DisplayRole);
-  int event_id = data.toInt();
+  int eventID = data.toInt();
+  Event* event = DBManager::instance()->eventFromID(eventID);
 
-  // fetch start time
-  q.prepare("SELECT start_date FROM events WHERE id = ?");
-  q.addBindValue(event_id);
-  q.exec();
-  q.next();
-  QDateTime startDate = q.value(q.record().indexOf("start_date")).toDateTime();
+  QDateTime startDate = event->dateTime();
 
-  // fetch city
-  q.prepare("SELECT locations.city AS city, locations.name AS name "
-            "FROM locations "
-            "JOIN events on locations.id = events.location_id "
-            "WHERE events.id = ?");
-  q.addBindValue(event_id);
-  q.exec();
-  q.next();
-  QString city = q.value(q.record().indexOf("city")).toString();
-  QString location_name = q.value(q.record().indexOf("name")).toString();
+  Location* location = event->location();
+  QString city = location->city();
+  QString location_name = location->name();
 
   contentItem->setTitle(QString("%1 - %2").arg(city).arg(location_name));
   contentItem->setSubtitle(startDate.toString(Qt::TextDate));
@@ -39,4 +26,12 @@ void EventItemCreator::updateCell(const QModelIndex &index, MWidget *cell) const
       contentItem->setItemMode(MContentItem::SingleColumnCenter);
   else
       contentItem->setItemMode(MContentItem::SingleColumnBottom);
+
+//  if (event->starred()) {
+//    contentItem->setOptionalImageID("icon-m-toolbar-favorite-mark");
+//  } else {
+//    contentItem->setOptionalImageID("icon-m-toolbar-favorite-unmark");
+//  }
+
+  delete event;
 }

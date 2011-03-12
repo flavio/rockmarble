@@ -9,7 +9,9 @@ unix {
     CONFIG += link_pkgconfig
     PKGCONFIG += meegotouchcore
 }
-QT = sql
+QT = sql network
+CONFIG += mobility
+MOBILITY = location bearer
 
 # Input
 HEADERS += src/datafetcher.h \
@@ -29,7 +31,8 @@ HEADERS += src/datafetcher.h \
     src/artistpage.h \
     src/pageitemcreator.h \
     src/pagesmodel.h \
-    src/artistmodel.h
+    src/artistmodel.h \
+    src/mapwidget.h
 SOURCES += src/datafetcher.cpp \
     src/event.cpp \
     src/eventmodel.cpp \
@@ -47,7 +50,8 @@ SOURCES += src/datafetcher.cpp \
     src/artistpage.cpp \
     src/pageitemcreator.cpp \
     src/pagesmodel.cpp \
-    src/artistmodel.cpp
+    src/artistmodel.cpp \
+    src/mapwidget.cpp
 RESOURCES += resources.qrc
 
 # All generated files goes to the same directory

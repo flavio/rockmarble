@@ -1,66 +1,140 @@
 #include "eventdetailspage.h"
 
 #include <MAction>
+#include <MComboBox>
+#include <MContainer>
 #include <MLayout>
 #include <MLabel>
 #include <MLinearLayoutPolicy>
+#include <MSlider>
+#include <MTheme>
+#include <MWidgetAction>
 #include <QtGui/QGraphicsLinearLayout>
+#include <QtCore/QUrl>
+#include <QtNetwork/QAbstractSocket>
+#include <QtNetwork/QNetworkProxy>
+
+// QtMobility
+#include <QGeoServiceProvider>
+#include <QGeoMappingManager>
+#include <QGeoRoutingManager>
+#include <QGeoMapPixmapObject>
+#include <QProcessEnvironment>
+#include <QNetworkConfiguration>
+#include <QNetworkConfigurationManager>
+#include <QNetworkSession>
 
 #include "dbmanager.h"
 #include "event.h"
 #include "location.h"
+#include "mapwidget.h"
+
+using namespace QtMobility;
 
 EventDetailsPage::EventDetailsPage(const int& event_id, QGraphicsItem *parent)
-  : MApplicationPage(parent), m_eventID (event_id)
+  : MApplicationPage(parent),
+    m_serviceProvider(0),
+    m_mapWidget(0)
 {
+  m_eventID = event_id;
+  // Set Internet Access Point
+  QNetworkConfigurationManager manager;
+  const bool canStartIAP = (manager.capabilities()
+                            & QNetworkConfigurationManager::CanStartAndStopInterfaces);
+  // Is there default access point, use it
+  QNetworkConfiguration cfg = manager.defaultConfiguration();
+  if (!cfg.isValid() || (!canStartIAP && cfg.state() != QNetworkConfiguration::Active)) {
+    //TODO handle
+    return;
+  }
+
+  m_session = new QNetworkSession(cfg, this);
+  connect(m_session, SIGNAL(opened()), this, SLOT(networkSessionOpened()));
+  //  connect(m_session,
+  //          SIGNAL(error(QNetworkSession::SessionError)),
+  //          this,
+  //          SLOT(error(QNetworkSession::SessionError)));
+}
+
+void EventDetailsPage::networkSessionOpened()
+{
+  QString urlEnv = QProcessEnvironment::systemEnvironment().value("http_proxy");
+  if (!urlEnv.isEmpty()) {
+    QUrl url = QUrl(urlEnv, QUrl::TolerantMode);
+    QNetworkProxy proxy;
+    proxy.setType(QNetworkProxy::HttpProxy);
+    proxy.setHostName(url.host());
+    proxy.setPort(url.port(8080));
+    QNetworkProxy::setApplicationProxy(proxy);
+  } else
+    QNetworkProxyFactory::setUseSystemConfiguration(true);
+  setProvider("nokia");
+
+  createMap();
+}
+
+void EventDetailsPage::setProvider(QString providerId)
+{
+  if (m_serviceProvider)
+    delete m_serviceProvider;
+  m_serviceProvider = new QGeoServiceProvider(providerId);
+  if (m_serviceProvider->error() != QGeoServiceProvider::NoError) {
+    //TODO: handle
+    return;
+  }
+
+  m_mapManager = m_serviceProvider->mappingManager();
+  m_routingManager = m_serviceProvider->routingManager();
+  m_searchManager = m_serviceProvider->searchManager();
 }
 
 void EventDetailsPage::createContent()
 {
   MLayout *layout = new MLayout;
-  centralWidget()->setLayout(layout);
+  QGraphicsWidget *panel = centralWidget();
+  panel->setLayout(layout);
 
   Event* event = DBManager::instance()->eventFromID(m_eventID);
   m_starred = event->starred();
   Location* location = event->location();
 
   // Build a vertical layout that will hold all the informations.
-  QGraphicsLinearLayout*infoLayout = new QGraphicsLinearLayout(Qt::Vertical);
-//  infoLayout->addItem(new MLabel("<strong>Headliner</strong>"));
-//  infoLayout->addItem(new MLabel(event.headliner()));
+  m_infoLayout = new QGraphicsLinearLayout(Qt::Vertical);
+  //  infoLayout->addItem(new MLabel("<strong>Headliner</strong>"));
+  //  infoLayout->addItem(new MLabel(event.headliner()));
 
-  infoLayout->addItem(new MLabel("<strong>" + tr("Where") + "</strong>"));
-  QString locationString ("<ul>");
-  locationString += QString("<li><em>" + tr("Name") + ": </em>%1</li>")\
-                            .arg(location->name());
-  locationString += QString("<li><em>" + tr("Street") + ": </em>%1</li>")\
-                            .arg(location->street());
-  locationString += QString("<li><em>" + tr("City") + ": </em>%1</li>")\
-                            .arg(location->city());
-  locationString += QString("<li><em>" + tr("Country") + ": </em>%1</li>")\
-                            .arg(location->country());
-  locationString += "</ul>";
-  infoLayout->addItem(new MLabel(locationString));
+  m_infoLayout->addItem(new MLabel("<strong>" + tr("When") + "</strong>"));
+  m_infoLayout->addItem(new MLabel(event->dateTime().toString(Qt::TextDate)));
 
-  infoLayout->addItem(new MLabel("<strong>" + tr("When") + "</strong>"));
-  infoLayout->addItem(new MLabel(event->dateTime().toString(Qt::TextDate)));
-
-  infoLayout->addItem(new MLabel("<strong>" + tr("Artists") + "</strong>"));
+  m_infoLayout->addItem(new MLabel("<strong>" + tr("Artists") + "</strong>"));
   QString artistsString ("<ul>");
   foreach(QString artist, event->artists()){
     artistsString += QString("<li>%1</li>").arg(artist);
   }
   artistsString += "</ul>";
-  infoLayout->addItem(new MLabel(artistsString));
+  m_infoLayout->addItem(new MLabel(artistsString));
+
+  m_infoLayout->addItem(new MLabel("<strong>" + tr("Where") + "</strong>"));
+  QString locationString ("<ul>");
+  locationString += QString("<li><em>" + tr("Name") + ": </em>%1</li>")\
+      .arg(location->name());
+  locationString += QString("<li><em>" + tr("Street") + ": </em>%1</li>")\
+      .arg(location->street());
+  locationString += QString("<li><em>" + tr("City") + ": </em>%1</li>")\
+      .arg(location->city());
+  locationString += QString("<li><em>" + tr("Country") + ": </em>%1</li>")\
+      .arg(location->country());
+  locationString += "</ul>";
+  m_infoLayout->addItem(new MLabel(locationString));
 
   // Landscape orientation
   MLinearLayoutPolicy *landscapePolicy = new MLinearLayoutPolicy(layout, Qt::Horizontal);
-  landscapePolicy->addItem(infoLayout);
+  landscapePolicy->addItem(m_infoLayout);
   layout->setLandscapePolicy(landscapePolicy);
 
   // Portrait orientation
   MLinearLayoutPolicy *portraitPolicy = new MLinearLayoutPolicy(layout, Qt::Vertical);
-  portraitPolicy->addItem(infoLayout);
+  portraitPolicy->addItem(m_infoLayout);
   layout->setPortraitPolicy(portraitPolicy);
 
   // Toolbar Actions
@@ -70,7 +144,102 @@ void EventDetailsPage::createContent()
   connect(m_actionStar, SIGNAL(triggered()), this, SLOT(slotChangeStar()));
   updateStarredAction();
 
+  // trigger creation of the map widget
+  m_session->open();
+
   delete event;
+}
+
+void EventDetailsPage::createMap()
+{
+  Event* event = DBManager::instance()->eventFromID(m_eventID);
+  m_starred = event->starred();
+  Location* location = event->location();
+  QGeoCoordinate eventCoordinates (location->latitude(), location->longitude());
+  delete event;
+
+  m_mapWidget = new MapWidget(m_mapManager);
+  m_mapWidget->setCenter(eventCoordinates);
+  QGeoMapPixmapObject *marker = new QGeoMapPixmapObject(eventCoordinates,
+                                      QPoint(0,0),
+                                      *MTheme::pixmap("icon-m-common-location"));
+  m_mapWidget->addMapObject(marker);
+  m_mapWidget->setZoomLevel(m_mapWidget->maximumZoomLevel());
+
+  MContainer* mapContainer =new MContainer;
+  MLayout *layout = new MLayout;
+
+  MLinearLayoutPolicy *layoutPolicy = new MLinearLayoutPolicy(layout,
+                                                              Qt::Horizontal);
+  layoutPolicy->setSpacing(0);
+  layoutPolicy->setContentsMargins(0, 0, 0, 0);
+
+  layout->setLandscapePolicy(layoutPolicy);
+  layout->setPortraitPolicy(layoutPolicy);
+
+  m_slider = new MSlider();
+  m_slider->setOrientation(Qt::Vertical);
+  m_slider->setMinimum(m_mapWidget->minimumZoomLevel());
+//  m_slider->setMinLabel(tr("Min"));
+  m_slider->setMaximum(m_mapWidget->maximumZoomLevel());
+//  m_slider->setMaxLabel(tr("Max"));
+  m_slider->setValue(m_mapWidget->zoomLevel());
+  connect(m_slider, SIGNAL(valueChanged(int)),
+          this, SLOT(sliderValueChanged(int)));
+
+  layoutPolicy->addItem(m_slider);
+  layoutPolicy->addItem(m_mapWidget);
+  mapContainer->setLayout(layout);
+  m_infoLayout->addItem(mapContainer);
+
+  // Menu Actions
+  MWidgetAction *mapTypeAction = new MWidgetAction(centralWidget());
+  mapTypeAction->setLocation(MAction::ApplicationMenuLocation);
+
+  QStringList mapTypeNames;
+
+  QList<QGraphicsGeoMap::MapType> supportedMapTypes = m_mapWidget->supportedMapTypes();
+
+  if (supportedMapTypes.contains(QGraphicsGeoMap::StreetMap)) {
+    m_mapControlTypes.append(QGraphicsGeoMap::StreetMap);
+    mapTypeNames.append(tr("Street"));
+  }
+  if (supportedMapTypes.contains(QGraphicsGeoMap::SatelliteMapDay)) {
+    m_mapControlTypes.append(QGraphicsGeoMap::SatelliteMapDay);
+    mapTypeNames.append(tr("Satellite"));
+  }
+
+  if (supportedMapTypes.contains(QGraphicsGeoMap::SatelliteMapNight)) {
+    m_mapControlTypes.append(QGraphicsGeoMap::SatelliteMapNight);
+    mapTypeNames.append(tr("Satellite - Night"));
+  }
+
+  if (supportedMapTypes.contains(QGraphicsGeoMap::TerrainMap)) {
+    m_mapControlTypes.append(QGraphicsGeoMap::TerrainMap);
+    mapTypeNames.append(tr("Terrain"));
+  }
+
+  MComboBox* m_comboBox = new MComboBox;
+  m_comboBox->addItems(mapTypeNames);
+
+  m_comboBox->setIconVisible(false);
+  m_comboBox->setTitle(tr("Map Type"));
+  m_comboBox->setCurrentIndex(0);
+  connect(m_comboBox, SIGNAL(activated(int)),
+          this, SLOT(slotMapTypeChanged(int)));
+  mapTypeAction->setWidget(m_comboBox);
+  addAction(mapTypeAction);
+}
+
+void EventDetailsPage::slotMapTypeChanged(int selection)
+{
+  QGraphicsGeoMap::MapType mapType = m_mapControlTypes.at(selection);
+  m_mapWidget->setMapType(mapType);
+}
+
+void EventDetailsPage::sliderValueChanged(int zoomLevel)
+{
+  m_mapWidget->setZoomLevel(zoomLevel);
 }
 
 void EventDetailsPage::slotChangeStar()

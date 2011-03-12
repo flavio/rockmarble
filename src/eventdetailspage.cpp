@@ -2,12 +2,12 @@
 
 #include <MAction>
 #include <MComboBox>
-#include <MContainer>
 #include <MLayout>
 #include <MLabel>
 #include <MLinearLayoutPolicy>
 #include <MSlider>
 #include <MTheme>
+#include <MWidget>
 #include <MWidgetAction>
 #include <QtGui/QGraphicsLinearLayout>
 #include <QtCore/QUrl>
@@ -166,16 +166,8 @@ void EventDetailsPage::createMap()
   m_mapWidget->addMapObject(marker);
   m_mapWidget->setZoomLevel(m_mapWidget->maximumZoomLevel());
 
-  MContainer* mapContainer =new MContainer;
-  MLayout *layout = new MLayout;
-
-  MLinearLayoutPolicy *layoutPolicy = new MLinearLayoutPolicy(layout,
-                                                              Qt::Horizontal);
-  layoutPolicy->setSpacing(0);
-  layoutPolicy->setContentsMargins(0, 0, 0, 0);
-
-  layout->setLandscapePolicy(layoutPolicy);
-  layout->setPortraitPolicy(layoutPolicy);
+  MWidget* mapWidget =new MWidget;
+  QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(Qt::Horizontal);
 
   m_slider = new MSlider();
   m_slider->setOrientation(Qt::Vertical);
@@ -187,10 +179,10 @@ void EventDetailsPage::createMap()
   connect(m_slider, SIGNAL(valueChanged(int)),
           this, SLOT(sliderValueChanged(int)));
 
-  layoutPolicy->addItem(m_slider);
-  layoutPolicy->addItem(m_mapWidget);
-  mapContainer->setLayout(layout);
-  m_infoLayout->addItem(mapContainer);
+  layout->addItem(m_slider);
+  layout->addItem(m_mapWidget);
+  mapWidget->setLayout(layout);
+  m_infoLayout->addItem(mapWidget);
 
   // Menu Actions
   MWidgetAction *mapTypeAction = new MWidgetAction(centralWidget());

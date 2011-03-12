@@ -113,9 +113,18 @@ void ArtistPage::createContent()
   m_artistsModel = new ArtistModel(artistsModelQuery());
 
   // filtering text box
+  QGraphicsLinearLayout *containerLayout = new QGraphicsLinearLayout(Qt::Horizontal);
+
+  MLabel* filterLabel = new MLabel(tr("Filter artist:"));
+  containerLayout->addItem(filterLabel);
+
   m_filter = new MTextEdit(MTextEditModel::SingleLine, QString());
+  containerLayout->addItem(m_filter);
   m_filter->setObjectName("CommonSingleInputField");
   connect(m_filter, SIGNAL(textChanged()), this, SLOT(slotFilterChanged()));
+
+  m_filterWidget = new MWidget();
+  m_filterWidget->setLayout(containerLayout);
 
   // No artist found label
   m_noArtistLabel = new MLabel(tr("No artist available."));
@@ -213,14 +222,14 @@ void ArtistPage::slotShowSearch()
     endValue = 0.0;
   } else {
     // let's show it
-    m_filter->setOpacity(0.0); // ensure it's not visible
-    m_policy->insertItem(0, m_filter, Qt::AlignCenter);
+    m_filterWidget->setOpacity(0.0); // ensure it's not visible
+    m_policy->insertItem(0, m_filterWidget, Qt::AlignCenter);
     startValue = 0.0;
     endValue = 1.0;
   }
 
   QPropertyAnimation *fadeInAnimation = new QPropertyAnimation;
-  fadeInAnimation->setTargetObject(m_filter);
+  fadeInAnimation->setTargetObject(m_filterWidget);
   fadeInAnimation->setPropertyName("opacity");
   fadeInAnimation->setStartValue(startValue);
   fadeInAnimation->setEndValue(endValue);
@@ -235,7 +244,7 @@ void ArtistPage::slotShowSearch()
 void ArtistPage::slotFilterAnimationFinished()
 {
   if (!m_filterVisible) {
-    m_policy->removeItem(m_filter);
+    m_policy->removeItem(m_filterWidget);
   }
 }
 

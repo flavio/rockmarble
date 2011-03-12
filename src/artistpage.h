@@ -11,6 +11,7 @@ class Lastfm;
 class MLabel;
 class MLinearLayoutPolicy;
 class MTextEdit;
+class MWidget;
 
 class ArtistPage : public MApplicationPage
 {
@@ -48,6 +49,7 @@ class ArtistPage : public MApplicationPage
     bool m_filterVisible;
     bool m_showArtistsWithoutEvents;
     Lastfm* m_lastfm;
+    MWidget* m_filterWidget;
     MTextEdit* m_filter;
     MLabel* m_noArtistLabel;
     MLinearLayoutPolicy *m_policy;

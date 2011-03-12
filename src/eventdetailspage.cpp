@@ -171,9 +171,13 @@ void EventDetailsPage::createMap()
 
   m_slider = new MSlider();
   m_slider->setOrientation(Qt::Vertical);
+  m_slider->setMinLabelIconID("icon-m-camera-zoom-out");
+  m_slider->setMinLabelVisible(true);
   m_slider->setMinimum(m_mapWidget->minimumZoomLevel());
 //  m_slider->setMinLabel(tr("Min"));
   m_slider->setMaximum(m_mapWidget->maximumZoomLevel());
+  m_slider->setMaxLabelIconID("icon-m-camera-zoom-in");
+  m_slider->setMaxLabelVisible(true);
 //  m_slider->setMaxLabel(tr("Max"));
   m_slider->setValue(m_mapWidget->zoomLevel());
   connect(m_slider, SIGNAL(valueChanged(int)),

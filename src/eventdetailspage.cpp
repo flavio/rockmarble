@@ -152,6 +152,7 @@ void EventDetailsPage::createContent()
 
 void EventDetailsPage::createMap()
 {
+  setTitle(tr("Event details"));
   Event* event = DBManager::instance()->eventFromID(m_eventID);
   m_starred = event->starred();
   Location* location = event->location();

@@ -57,11 +57,11 @@ void ArtistItemCreator::updateCell(const QModelIndex &index, MWidget *cell) cons
       contentItem->setSubtitle(QObject::tr("Error while retrieving data."));
   } else {
     if (eventsNum > 1)
-      contentItem->setSubtitle(QObject::tr("Downloading. %1 concerts found...").arg(eventsNum));
+      contentItem->setSubtitle(QObject::tr("Downloading, %1 concerts found...").arg(eventsNum));
     else if (eventsNum == 1)
       contentItem->setSubtitle(QObject::tr("Downloading, 1 event found..."));
     else if (eventsNum == 0)
-      contentItem->setSubtitle(QObject::tr("Downloading, no events yet..."));
+      contentItem->setSubtitle(QObject::tr("Downloading, no events found yet..."));
     else
       contentItem->setSubtitle(QObject::tr("Error while retrieving data."));
   }

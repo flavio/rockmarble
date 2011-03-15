@@ -24,7 +24,6 @@
 
 #include "artistitemcreator.h"
 #include "artistmodel.h"
-#include "dbmanager.h"
 #include "countrypage.h"
 #include "eventpage.h"
 #include "lastfm.h"
@@ -44,23 +43,24 @@
 #include <QtCore/QPropertyAnimation>
 #include <QtGui/QGraphicsLinearLayout>
 
-ArtistPage::ArtistPage(const QString& country, QGraphicsItem *parent)
-    : MApplicationPage(parent), m_country(country)
+ArtistPage::ArtistPage(const DBManager::Storage& storage,
+                       const QString& country, QGraphicsItem *parent)
+    : MApplicationPage(parent), m_country(country), m_dbStorage(storage)
 {
   setTitle(tr("Artists playing in %1").arg(m_country));
 
-  m_lastfm = new Lastfm(this);
+  m_lastfm = new Lastfm(m_dbStorage, this);
   m_filterVisible = false;
   m_showArtistsWithoutEvents = true;
   m_pageMode = ARTISTS_BY_COUNTRY;
 }
 
-ArtistPage::ArtistPage(QGraphicsItem *parent)
-    : MApplicationPage(parent)
+ArtistPage::ArtistPage(const DBManager::Storage& storage, QGraphicsItem *parent)
+    : MApplicationPage(parent), m_dbStorage(storage)
 {
   setTitle(tr("Artists"));
 
-  m_lastfm = new Lastfm(this);
+  m_lastfm = new Lastfm(m_dbStorage, this);
   m_filterVisible = false;
   m_showArtistsWithoutEvents = true;
 
@@ -110,7 +110,7 @@ void ArtistPage::createContent()
   connect(actionSearch, SIGNAL(triggered()), this, SLOT(slotShowSearch()));
 
   // setup model
-  m_artistsModel = new ArtistModel(artistsModelQuery());
+  m_artistsModel = new ArtistModel(m_dbStorage, artistsModelQuery());
 
   // filtering text box
   QGraphicsLinearLayout *containerLayout = new QGraphicsLinearLayout(Qt::Horizontal);
@@ -137,19 +137,20 @@ void ArtistPage::createContent()
   artistsList->setSelectionMode(MList::SingleSelection);
 
   // Content item creator and item model for the list
-  artistsList->setCellCreator(new ArtistItemCreator(m_pageMode, m_country));
+  artistsList->setCellCreator(new ArtistItemCreator(m_pageMode, m_dbStorage,
+                                                    m_country));
   artistsList->setItemModel(m_artistsModel);
   m_policy->addItem(artistsList);
 
   connect(artistsList, SIGNAL(itemClicked(QModelIndex)),
            this, SLOT(slotArtistClicked(QModelIndex)));
-  connect(DBManager::instance(), SIGNAL(artistAdded(int,bool)),
+  connect(DBManager::instance(m_dbStorage), SIGNAL(artistAdded(int,bool)),
            this, SLOT(slotArtistAdded(int,bool)));
 }
 
 QSqlQuery ArtistPage::artistsModelQuery()
 {
-  QSqlQuery query;
+  QSqlQuery query(DBManager::instance(m_dbStorage)->database());
   QString q;
   if (m_pageMode == ALL_ARTISTS) {
     q = "SELECT distinct artists.id FROM artists ";
@@ -196,7 +197,7 @@ void ArtistPage::slotArtistAdded(const int artistID, bool favourite)
   if (favourite) {
     m_policy->removeItem(m_noArtistLabel);
 
-    QString artist = DBManager::instance()->artistNameFromID(artistID);
+    QString artist = DBManager::instance(m_dbStorage)->artistNameFromID(artistID);
     m_lastfm->getArtistImage(artist);
     if (!m_manuallyAddedArtists.contains(artist,Qt::CaseInsensitive))
       m_lastfm->getEventsForArtist(artist);
@@ -371,6 +372,6 @@ void ArtistPage::slotArtistClicked(const QModelIndex& index)
   if (m_pageMode == ALL_ARTISTS)
     page = new CountryPage(artistID);
   else
-    page = new EventPage(artistID, m_country);
+    page = new EventPage(artistID, m_dbStorage, m_country);
   page->appear(MSceneWindow::DestroyWhenDismissed);
 }

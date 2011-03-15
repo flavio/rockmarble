@@ -4,13 +4,15 @@
 #include <QtCore/QObject>
 #include <QtCore/QVariant>
 
+#include "dbmanager.h"
+
 class DataFetcher;
 
 class Lastfm : public QObject
 {
   Q_OBJECT
   public:
-    Lastfm(QObject* parent = 0);
+    Lastfm(const DBManager::Storage& storage, QObject* parent = 0);
 
     void getTopArtists(const QString& user);
     void getArtistImage(const QString& artist);
@@ -39,6 +41,7 @@ class Lastfm : public QObject
 
 private:
     DataFetcher* m_df;
+    DBManager::Storage m_dbStorage;
 };
 
 #endif // LASTFM_H

@@ -24,16 +24,17 @@
 #include <QNetworkConfigurationManager>
 #include <QNetworkSession>
 
-#include "dbmanager.h"
 #include "event.h"
 #include "location.h"
 #include "mapwidget.h"
 
 using namespace QtMobility;
 
-EventDetailsPage::EventDetailsPage(const int& event_id, QGraphicsItem *parent)
+EventDetailsPage::EventDetailsPage(const DBManager::Storage& storage,
+                                   const int& event_id, QGraphicsItem *parent)
   : MApplicationPage(parent),
     m_serviceProvider(0),
+    m_dbStorage(storage),
     m_mapWidget(0)
 {
   m_eventID = event_id;
@@ -94,7 +95,7 @@ void EventDetailsPage::createContent()
   QGraphicsWidget *panel = centralWidget();
   panel->setLayout(layout);
 
-  Event* event = DBManager::instance()->eventFromID(m_eventID);
+  Event* event = DBManager::instance(m_dbStorage)->eventFromID(m_eventID);
   m_starred = event->starred();
   Location* location = event->location();
 
@@ -153,7 +154,7 @@ void EventDetailsPage::createContent()
 void EventDetailsPage::createMap()
 {
   setTitle(tr("Event details"));
-  Event* event = DBManager::instance()->eventFromID(m_eventID);
+  Event* event = DBManager::instance(m_dbStorage)->eventFromID(m_eventID);
   m_starred = event->starred();
   Location* location = event->location();
   QGeoCoordinate eventCoordinates (location->latitude(), location->longitude());
@@ -242,7 +243,7 @@ void EventDetailsPage::sliderValueChanged(int zoomLevel)
 void EventDetailsPage::slotChangeStar()
 {
   m_starred = !m_starred;
-  DBManager::instance()->setEventStarred(m_eventID, m_starred);
+  DBManager::instance(m_dbStorage)->setEventStarred(m_eventID, m_starred);
   updateStarredAction();
 }
 

@@ -6,6 +6,8 @@
 #include <QtCore/QVariant>
 #include <QtSql/QSqlQuery>
 
+#include "dbmanager.h"
+
 class ArtistModel;
 class Lastfm;
 class MLabel;
@@ -20,8 +22,9 @@ class ArtistPage : public MApplicationPage
   public:
     enum PageMode {ALL_ARTISTS, ARTISTS_BY_COUNTRY};
 
-    ArtistPage(QGraphicsItem *parent = 0);
-    ArtistPage(const QString& country, QGraphicsItem *parent = 0);
+    ArtistPage(const DBManager::Storage& storage, QGraphicsItem *parent = 0);
+    ArtistPage(const DBManager::Storage& storage, const QString& country,
+               QGraphicsItem *parent = 0);
     ~ArtistPage();
 
   protected:
@@ -46,6 +49,7 @@ class ArtistPage : public MApplicationPage
 
     QString m_country;
     PageMode m_pageMode;
+    DBManager::Storage m_dbStorage;
     bool m_filterVisible;
     bool m_showArtistsWithoutEvents;
     Lastfm* m_lastfm;

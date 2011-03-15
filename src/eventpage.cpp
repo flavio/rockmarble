@@ -1,4 +1,3 @@
-#include "dbmanager.h"
 #include "eventpage.h"
 #include "eventdetailspage.h"
 #include "eventitemcreator.h"
@@ -9,18 +8,26 @@
 
 #include <QtSql/QSqlQueryModel>
 
-EventPage::EventPage(QGraphicsItem *parent)
-  : MApplicationPage(parent)
+EventPage::EventPage(const DBManager::Storage& storage, QGraphicsItem *parent)
+  : MApplicationPage(parent),
+    m_dbStorage(storage)
 {
   m_pageMode = STARRED;
   setTitle(tr("Starrred events"));
 }
 
-EventPage::EventPage(const int& artistID, const QString& country, QGraphicsItem *parent)
-  : MApplicationPage(parent), m_artistID(artistID), m_country(country)
+EventPage::EventPage(const int& artistID,
+                     const DBManager::Storage& storage,
+                     const QString& country,
+                     QGraphicsItem *parent)
+  : MApplicationPage(parent),
+    m_artistID(artistID),
+    m_dbStorage(storage),
+    m_country(country)
 {
   m_pageMode = ARTIST_BY_COUNTRY;
-  setTitle(DBManager::instance()->artistNameFromID(artistID) + " - " + country);
+  setTitle(DBManager::instance(m_dbStorage)->artistNameFromID(artistID) +
+           " - " + country);
 }
 
 EventPage::~EventPage()
@@ -29,7 +36,7 @@ EventPage::~EventPage()
 
 QSqlQuery EventPage::getQuery()
 {
-  QSqlQuery query;
+  QSqlQuery query(DBManager::instance(m_dbStorage)->database());
   if (m_pageMode == ARTIST_BY_COUNTRY) {
     query.prepare("SELECT events.id FROM events "
                   "JOIN artists_events ON artists_events.event_id = events.id "
@@ -65,7 +72,7 @@ void EventPage::createContent()
   QSqlQueryModel* eventModel = new QSqlQueryModel();
   eventModel->setQuery(getQuery());
 
-  EventItemCreator *cellCreator = new EventItemCreator();
+  EventItemCreator *cellCreator = new EventItemCreator(m_dbStorage);
   eventList->setCellCreator(cellCreator);
   eventList->setItemModel(eventModel);
   policy->addItem(eventList);
@@ -77,6 +84,7 @@ void EventPage::createContent()
 void EventPage::slotEventClicked(const QModelIndex& index)
 {
   int event_id = index.data(Qt::DisplayRole).toInt();
-  EventDetailsPage *eventDetailsPage = new EventDetailsPage(event_id);
+  EventDetailsPage *eventDetailsPage = new EventDetailsPage(m_dbStorage,
+                                                            event_id);
   eventDetailsPage->appear(MSceneWindow::DestroyWhenDismissed);
 }

@@ -122,13 +122,13 @@ void MainPage::slotItemClicked(QModelIndex index)
 
   switch (pageType) {
     case ByArtist:
-      page = new ArtistPage();
+      page = new ArtistPage(DBManager::DISK);
       break;
     case ByLocation:
       page = new CountryPage();
       break;
   case ByStar:
-    page = new EventPage();
+    page = new EventPage(DBManager::DISK);
     break;
     default:
       //"This shouldn't happen";

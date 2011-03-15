@@ -5,11 +5,14 @@
 #include <QtCore/QList>
 #include <QtSql/QSqlQuery>
 
+#include "dbmanager.h"
+
 class ArtistModel : public QAbstractListModel
 {
   Q_OBJECT
   public:
-    explicit ArtistModel(QSqlQuery query, QObject *parent = 0);
+    explicit ArtistModel(const DBManager::Storage& storage, QSqlQuery query,
+                         QObject *parent = 0);
     void setQuery(QSqlQuery query);
     int rowCount() const;
     int rowCount(const QModelIndex &parent) const;
@@ -25,6 +28,7 @@ class ArtistModel : public QAbstractListModel
 
     QList<unsigned int> m_artistIDs;
     QSqlQuery m_query;
+    DBManager::Storage m_dbStorage;
 };
 
 #endif // ARTISTMODEL_H

@@ -1,5 +1,4 @@
 #include "artistitemcreator.h"
-#include "dbmanager.h"
 
 #include <QtCore/QDir>
 #include <QtCore/QFile>
@@ -7,8 +6,12 @@
 #include <QtGui/QImage>
 
 ArtistItemCreator::ArtistItemCreator(const ArtistPage::PageMode &pageMode,
+                                     const DBManager::Storage& storage,
                                      const QString &country)
-  : m_pageMode(pageMode), m_country(country)
+  : MAbstractCellCreator<MContentItem>(),
+    m_pageMode(pageMode),
+    m_dbStorage(storage),
+    m_country(country)
 {
 }
 
@@ -32,7 +35,7 @@ void ArtistItemCreator::updateCell(const QModelIndex &index, MWidget *cell) cons
 {
   MContentItem *contentItem = qobject_cast<MContentItem *>(cell);
 
-  DBManager* db = DBManager::instance();
+  DBManager* db = DBManager::instance(m_dbStorage);
   QVariant data = index.data(Qt::DisplayRole);
   int artistID = data.toInt();
   QString artist = db->artistNameFromID(artistID);

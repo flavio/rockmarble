@@ -28,7 +28,7 @@
 int main(int argc, char *argv[])
 {
   // forces db initialization
-  DBManager::instance();
+  DBManager::instance(DBManager::DISK);
 
   MApplication app(argc, argv);
   MApplicationWindow window;

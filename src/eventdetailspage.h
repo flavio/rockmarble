@@ -1,6 +1,8 @@
 #ifndef EVENTDETAILSPAGE_H
 #define EVENTDETAILSPAGE_H
 
+#include "dbmanager.h"
+
 #include <MApplicationPage>
 #include <QGraphicsGeoMap>
 #include <QtCore/QList>
@@ -24,7 +26,8 @@ class EventDetailsPage : public MApplicationPage
   Q_OBJECT
 
   public:
-    EventDetailsPage(const int& event_id, QGraphicsItem *parent=0);
+    EventDetailsPage(const DBManager::Storage& storage,const int& event_id,
+                     QGraphicsItem *parent=0);
 
   protected:
     virtual void createContent();
@@ -45,6 +48,7 @@ class EventDetailsPage : public MApplicationPage
     QtMobility::QGeoRoutingManager *m_routingManager;
     QtMobility::QGeoSearchManager *m_searchManager;
 
+    DBManager::Storage m_dbStorage;
     MAction* m_actionStar;
     int  m_eventID;
     bool m_starred;

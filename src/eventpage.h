@@ -5,6 +5,7 @@
 #include <QtCore/QModelIndex>
 #include <QtSql/QSqlQuery>
 
+#include "dbmanager.h"
 #include "event.h"
 
 class EventPage : public MApplicationPage
@@ -15,8 +16,10 @@ class EventPage : public MApplicationPage
     enum PageMode {STARRED, ARTIST_BY_COUNTRY};
 
     // This constructor is used to show all the starred events
-    EventPage(QGraphicsItem *parent = 0);
-    EventPage(const int& artistID, const QString& country,
+    EventPage(const DBManager::Storage& storage, QGraphicsItem *parent = 0);
+    EventPage(const int& artistID,
+              const DBManager::Storage& storage,
+              const QString& country,
               QGraphicsItem *parent = 0);
     ~EventPage();
 
@@ -31,6 +34,7 @@ class EventPage : public MApplicationPage
 
     PageMode m_pageMode;
     int m_artistID;
+    DBManager::Storage m_dbStorage;
     QString m_country;
 };
 

@@ -1,14 +1,19 @@
 #include "eventitemcreator.h"
-#include "dbmanager.h"
 #include "event.h"
 #include "location.h"
+
+EventItemCreator::EventItemCreator(const DBManager::Storage& storage)
+  : MAbstractCellCreator<MContentItem>(),
+    m_dbStorage(storage)
+{
+}
 
 void EventItemCreator::updateCell(const QModelIndex &index, MWidget *cell) const
 {
   MContentItem *contentItem = qobject_cast<MContentItem *>(cell);
   QVariant data = index.data(Qt::DisplayRole);
   int eventID = data.toInt();
-  Event* event = DBManager::instance()->eventFromID(eventID);
+  Event* event = DBManager::instance(m_dbStorage)->eventFromID(eventID);
 
   QDateTime startDate = event->dateTime();
 

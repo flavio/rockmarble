@@ -1,7 +1,6 @@
 #include "lastfm.h"
 
 #include "datafetcher.h"
-#include "dbmanager.h"
 #include "event.h"
 
 #include <qjson/parserrunnable.h>
@@ -13,12 +12,12 @@
 class StoreEvents : public QRunnable
 {
   public:
-    StoreEvents(const QVariant& data) {
+    StoreEvents(const DBManager::Storage& storage, const QVariant& data) {
       m_data = data;
+      m_db = DBManager::instance(storage);
     }
 
     void run() {
-      DBManager* db = DBManager::instance();
       QVariantMap response = m_data.toMap();
       response = response["events"].toMap();
       QString artist = response["artist"].toString();
@@ -29,24 +28,27 @@ class StoreEvents : public QRunnable
         artist = attr["artist"].toString();
       }
 
-      int artistID = db->addArtist(artist, true);
+      int artistID = m_db->addArtist(artist, true);
 
       QVariantList events = response["event"].toList();
 
       foreach(QVariant event, events) {
-        db->addEvent(Event(event));
+        m_db->addEvent(Event(event));
       }
-      db->setArtistAllDataFetched(artistID, true);
+      m_db->setArtistAllDataFetched(artistID, true);
     }
 
   private:
+    DBManager* m_db;
     QVariant m_data;
 };
 
 class WriteArtistImage : public QRunnable
 {
   public:
-    WriteArtistImage(const QString& artist, const QByteArray& data) {
+    WriteArtistImage(const DBManager::Storage& storage,
+                     const QString& artist, const QByteArray& data) {
+      m_db = DBManager::instance(storage);
       m_data = data;
       m_artist = artist;
     }
@@ -57,17 +59,17 @@ class WriteArtistImage : public QRunnable
       if (!dir.exists(imagesDir))
         dir.mkpath(imagesDir);
 
-      DBManager* db = DBManager::instance();
-      int artistID = db->addArtist(m_artist);
+      int artistID = m_db->addArtist(m_artist);
       QFile file (QString("%1/%2").arg(imagesDir).arg(artistID));
       if (file.open(QFile::WriteOnly)) {
         file.write(m_data);
         file.close();
-        db->setArtistHasImage(artistID, true);
+        m_db->setArtistHasImage(artistID, true);
       }
     }
 
   private:
+    DBManager* m_db;
     QString m_artist;
     QByteArray m_data;
 };
@@ -75,28 +77,31 @@ class WriteArtistImage : public QRunnable
 class StoreArtist : public QRunnable
 {
   public:
-    StoreArtist(const QVariantMap& response) {
+    StoreArtist(const DBManager::Storage& storage, const QVariantMap& response)
+    {
+      m_db = DBManager::instance(storage);
       m_response = response;
     }
 
     void run() {
-      DBManager* db = DBManager::instance();
       QVariantMap topartists = m_response["topartists"].toMap();
       QVariantList artists = topartists["artist"].toList();
 
       foreach(QVariant entry, artists) {
         QVariantMap artist = entry.toMap();
         QString artistName = artist["name"].toString();
-        db->addArtist(artistName, true);
+        m_db->addArtist(artistName, true);
       }
     }
 
   private:
+    DBManager* m_db;
     QVariantMap m_response;
 };
 
-Lastfm::Lastfm(QObject* parent)
-  : QObject (parent) {
+Lastfm::Lastfm(const DBManager::Storage& storage, QObject* parent)
+  : QObject (parent), m_dbStorage(storage)
+{
   // data fetcher
   m_df = DataFetcher::instance();
   connect (m_df, SIGNAL(getEventsForArtistReady(const QString&,
@@ -140,7 +145,7 @@ void Lastfm::slotEventsForArtistReady(const QString& data, bool successful,
 
 void Lastfm::slotEventsForArtistConverted(QVariant data, bool successful, QString errMsg) {
   if (successful) {
-    StoreEvents* storeEvents = new StoreEvents(data);
+    StoreEvents* storeEvents = new StoreEvents(m_dbStorage, data);
     QThreadPool::globalInstance()->start(storeEvents);
   } else {
     emit error(errMsg);
@@ -182,7 +187,7 @@ void Lastfm::slotArtistImageReady(const QString& artist, const QByteArray& data,
                                   bool successful, const QString& errMsg)
 {
   if (successful) {
-    WriteArtistImage* writer = new WriteArtistImage(artist, data);
+    WriteArtistImage* writer = new WriteArtistImage(m_dbStorage, artist, data);
     QThreadPool::globalInstance()->start(writer);
     getArtistImage(artist);
   } else {
@@ -206,7 +211,7 @@ void Lastfm::slotTopArtistConverted(QVariant data, bool successful, QString errM
   if (successful) {
     QVariantMap response = data.toMap();
     if (!response.contains("error")) {
-      StoreArtist* storeArtist = new StoreArtist(response);
+      StoreArtist* storeArtist = new StoreArtist(m_dbStorage, response);
       QThreadPool::globalInstance()->start(storeArtist);
     }
     else {

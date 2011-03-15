@@ -1,19 +1,19 @@
 #include "artistmodel.h"
-#include "dbmanager.h"
 
 #include <QtSql/QSqlRecord>
 #include <QtSql/QSqlQuery>
 
-ArtistModel::ArtistModel(QSqlQuery query, QObject *parent) :
-    QAbstractListModel(parent)
+ArtistModel::ArtistModel(const DBManager::Storage& storage, QSqlQuery query,
+                         QObject *parent)
+  : QAbstractListModel(parent), m_dbStorage(storage)
 {
   setQuery(query);
 
-  connect(DBManager::instance(), SIGNAL(artistAdded(const int, bool)),
+  connect(DBManager::instance(m_dbStorage), SIGNAL(artistAdded(const int, bool)),
           this, SLOT(slotArtistAdded(const int, bool)));
-  connect(DBManager::instance(), SIGNAL(artistAddedToEvent(int,int)),
+  connect(DBManager::instance(m_dbStorage), SIGNAL(artistAddedToEvent(int,int)),
           this, SLOT(slotArtistAddedToEvent(int,int)));
-  connect(DBManager::instance(), SIGNAL(artistUpdated(int)),
+  connect(DBManager::instance(m_dbStorage), SIGNAL(artistUpdated(int)),
           this, SLOT(slotArtistUpdated(int)));
 }
 

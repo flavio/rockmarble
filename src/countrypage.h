@@ -1,6 +1,7 @@
 #ifndef COUNTRYPAGE_H
 #define COUNTRYPAGE_H
 
+#include "dbmanager.h"
 #include "event.h"
 
 #include <MApplicationPage>
@@ -32,6 +33,7 @@ class CountryPage : public MApplicationPage
 
     int m_artistID;
     PageMode m_pageMode;
+    DBManager::Storage m_dbStorage;
 };
 
 #endif // COUNTRYPAGE_H

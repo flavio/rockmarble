@@ -48,7 +48,10 @@ public:
   void getArtistEvents(const QString& artist);
   void getArtistInfo(const QString& artist);
   void getTopArtists(const QString& user);
-  void getEventsNearLocation(const QString& location, const int page = -1);
+  void getEventsNearLocation(const double& latitude,
+                             const double& longitude,
+                             const int& distance = 0,
+                             const int page = -1);
 
 Q_SIGNALS:
   // #1 : Reply converted to a QVarian object

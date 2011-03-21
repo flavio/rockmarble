@@ -91,17 +91,24 @@ void DataFetcher::getTopArtists(const QString& user)
   doRequest(urlEL, DataFetcher::TopArtistsRequest, user);
 }
 
-void DataFetcher::getEventsNearLocation(const QString& location, const int page)
+void DataFetcher::getEventsNearLocation(const double& latitude,
+                                        const double& longitude,
+                                        const int& distance,
+                                        const int page)
 {
   qDebug() << Q_FUNC_INFO;
 
   QUrl urlEL(QString("http://ws.audioscrobbler.com/2.0/?method=geo.getevents&api_key=%1&format=json").arg(API_KEY));
-  urlEL.addQueryItem("location", location);
+  urlEL.addQueryItem("lat", QString("%1").arg(latitude));
+  urlEL.addQueryItem("long", QString("%1").arg(longitude));
+  urlEL.addQueryItem("distance", QString("%1").arg(distance));
   if (page != -1) {
     QString pageParam;
     pageParam.setNum(page);
     urlEL.addQueryItem("page", pageParam);
   }
+  QString location = QString("{'lat' : '%1'','long' : '%2', 'distance' : '%3'}")\
+                     .arg(latitude).arg(longitude).arg(distance);
   doRequest(urlEL, DataFetcher::EventsNearLocationRequest, location);
 }
 

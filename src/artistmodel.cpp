@@ -30,7 +30,7 @@ int ArtistModel::rowCount(const QModelIndex &parent) const
 
 void ArtistModel::slotArtistAdded(const int artistID, bool favourite)
 {
-  if (!favourite)
+  if ((m_dbStorage == DBManager::DISK) && !favourite)
     return;
 
   QList<unsigned int> newIDs = getArtistIDs();
@@ -43,8 +43,11 @@ void ArtistModel::slotArtistAdded(const int artistID, bool favourite)
 void ArtistModel::slotArtistAddedToEvent(int artistID, int eventID)
 {
   Q_UNUSED(eventID);
-  QModelIndex index = createIndex(m_artistIDs.indexOf(artistID), 0);
-  emit dataChanged(index, index);
+  if (m_dbStorage == DBManager::MEMORY ||
+      DBManager::instance(m_dbStorage)->isArtistFavourite(artistID)) {
+    QModelIndex index = createIndex(m_artistIDs.indexOf(artistID), 0);
+    emit dataChanged(index, index);
+  }
 }
 
 void ArtistModel::slotArtistUpdated(int artistID)

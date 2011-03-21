@@ -9,6 +9,12 @@ unix {
     CONFIG += link_pkgconfig
     PKGCONFIG += meegotouchcore
 }
+
+debug {
+  CONFIG += debug
+  DEFINES += FAKE_GPS
+}
+
 QT = sql network
 CONFIG += mobility
 MOBILITY = location bearer
@@ -32,10 +38,10 @@ HEADERS += src/datafetcher.h \
     src/pageitemcreator.h \
     src/pagesmodel.h \
     src/artistmodel.h \
-    src/mapwidget.h
+    src/mapwidget.h \
+    src/nearlocationpage.h
 SOURCES += src/datafetcher.cpp \
     src/event.cpp \
-    src/eventmodel.cpp \
     src/location.cpp \
     src/main.cpp \
     src/mainpage.cpp \
@@ -51,7 +57,8 @@ SOURCES += src/datafetcher.cpp \
     src/pageitemcreator.cpp \
     src/pagesmodel.cpp \
     src/artistmodel.cpp \
-    src/mapwidget.cpp
+    src/mapwidget.cpp \
+    src/nearlocationpage.cpp
 RESOURCES += resources.qrc
 
 # All generated files goes to the same directory

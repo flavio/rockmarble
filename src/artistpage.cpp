@@ -67,6 +67,21 @@ ArtistPage::ArtistPage(const DBManager::Storage& storage, QGraphicsItem *parent)
   m_pageMode = ALL_ARTISTS;
 }
 
+ArtistPage::ArtistPage(const double latitude, const double longitude,
+                       const int& distance, QGraphicsItem *parent)
+    : MApplicationPage(parent),
+      m_latitude(latitude), m_longitude(longitude), m_distance(distance)
+{
+  setTitle(tr("Artists playing near you"));
+
+  m_dbStorage = DBManager::MEMORY;
+  m_lastfm = new Lastfm(m_dbStorage, this);
+  m_filterVisible = false;
+  m_showArtistsWithoutEvents = true;
+
+  m_pageMode = ARTIST_NEAR_LOCATION;
+}
+
 ArtistPage::~ArtistPage()
 {
 }
@@ -146,6 +161,10 @@ void ArtistPage::createContent()
            this, SLOT(slotArtistClicked(QModelIndex)));
   connect(DBManager::instance(m_dbStorage), SIGNAL(artistAdded(int,bool)),
            this, SLOT(slotArtistAdded(int,bool)));
+
+  if (m_pageMode == ARTIST_NEAR_LOCATION) {
+    m_lastfm->getEventsNearLocation(m_latitude, m_longitude, m_distance);
+  }
 }
 
 QSqlQuery ArtistPage::artistsModelQuery()
@@ -186,6 +205,21 @@ QSqlQuery ArtistPage::artistsModelQuery()
       name += m_filter->text() + '%';
       query.addBindValue(name);
     }
+  } else if (m_pageMode == ARTIST_NEAR_LOCATION) {
+    q = "SELECT distinct artists.id FROM artists ";
+    if (!m_showArtistsWithoutEvents) {
+      q += " JOIN artists_events on artists.id = artists_events.artist_id ";
+    }
+    if (m_filterVisible && !m_filter->text().isEmpty()) {
+      q += " WHERE artists.name LIKE ? ";
+    }
+    q += " ORDER BY artists.name ASC";
+    query.prepare(q);
+    if (m_filterVisible && !m_filter->text().isEmpty()) {
+      QString name('%');
+      name += m_filter->text() + '%';
+      query.addBindValue(name);
+    }
   }
 
   query.exec();
@@ -194,8 +228,13 @@ QSqlQuery ArtistPage::artistsModelQuery()
 
 void ArtistPage::slotArtistAdded(const int artistID, bool favourite)
 {
-  if (favourite) {
+  if (m_dbStorage == DBManager::MEMORY || favourite) {
     m_policy->removeItem(m_noArtistLabel);
+
+    if (m_dbStorage == DBManager::MEMORY) {
+      // the following code applies only to disk
+      return;
+    }
 
     QString artist = DBManager::instance(m_dbStorage)->artistNameFromID(artistID);
     m_lastfm->getArtistImage(artist);
@@ -369,9 +408,17 @@ void ArtistPage::slotArtistClicked(const QModelIndex& index)
 {
   int artistID = index.data(Qt::DisplayRole).toInt();
   MApplicationPage* page;
-  if (m_pageMode == ALL_ARTISTS)
-    page = new CountryPage(artistID);
-  else
-    page = new EventPage(artistID, m_dbStorage, m_country);
+  switch (m_pageMode) {
+    case ALL_ARTISTS:
+      page = new CountryPage(artistID, m_dbStorage);
+      break;
+    case ARTISTS_BY_COUNTRY:
+      page = new EventPage(artistID, m_dbStorage, m_country);
+      break;
+    case ARTIST_NEAR_LOCATION:
+      page = new EventPage(artistID, m_dbStorage);
+      break;
+  }
+
   page->appear(MSceneWindow::DestroyWhenDismissed);
 }

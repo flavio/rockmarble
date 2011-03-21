@@ -18,8 +18,9 @@ class CountryPage : public MApplicationPage
   public:
     enum PageMode {ALL_COUNTRIES, BY_ARTIST};
 
-    CountryPage(QGraphicsItem *parent = 0);
-    CountryPage(const int& artistID, QGraphicsItem *parent = 0);
+    CountryPage(DBManager::Storage storage, QGraphicsItem *parent = 0);
+    CountryPage(const int& artistID, DBManager::Storage storage,
+                QGraphicsItem *parent = 0);
     ~CountryPage();
 
   protected:

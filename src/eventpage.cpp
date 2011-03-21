@@ -30,6 +30,18 @@ EventPage::EventPage(const int& artistID,
            " - " + country);
 }
 
+EventPage::EventPage(const int& artistID,
+                     const DBManager::Storage& storage,
+                     QGraphicsItem *parent)
+  : MApplicationPage(parent),
+    m_artistID(artistID),
+    m_dbStorage(storage)
+{
+  m_pageMode = ARTIST_NEAR_LOCATION;
+  setTitle(DBManager::instance(m_dbStorage)->artistNameFromID(artistID) +
+           " - " + tr("near you"));
+}
+
 EventPage::~EventPage()
 {
 }
@@ -37,7 +49,8 @@ EventPage::~EventPage()
 QSqlQuery EventPage::getQuery()
 {
   QSqlQuery query(DBManager::instance(m_dbStorage)->database());
-  if (m_pageMode == ARTIST_BY_COUNTRY) {
+  switch(m_pageMode) {
+  case ARTIST_BY_COUNTRY:
     query.prepare("SELECT events.id FROM events "
                   "JOIN artists_events ON artists_events.event_id = events.id "
                   "JOIN locations ON locations.id = events.location_id "
@@ -45,13 +58,23 @@ QSqlQuery EventPage::getQuery()
                   "ORDER BY events.start_date ASC");
     query.addBindValue(m_artistID);
     query.addBindValue(m_country);
-  } else {
-    // STARRED mode
+    break;
+  case ARTIST_NEAR_LOCATION:
+    query.prepare("SELECT events.id FROM events "
+                  "JOIN artists_events ON artists_events.event_id = events.id "
+                  "JOIN locations ON locations.id = events.location_id "
+                  "WHERE artists_events.artist_id = ? "
+                  "ORDER BY events.start_date ASC");
+    query.addBindValue(m_artistID);
+    break;
+  case STARRED:
     query.prepare("SELECT events.id FROM events "
                   "WHERE starred = ? "
                   "ORDER BY events.start_date ASC");
     query.addBindValue((int) true);
+    break;
   }
+
   query.exec();
   return query;
 }

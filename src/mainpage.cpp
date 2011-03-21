@@ -25,6 +25,7 @@
 #include "mainpage.h"
 #include "pageitemcreator.h"
 #include "pagesmodel.h"
+#include "nearlocationpage.h"
 
 #include <MAction>
 #include <MDialog>
@@ -125,10 +126,13 @@ void MainPage::slotItemClicked(QModelIndex index)
       page = new ArtistPage(DBManager::DISK);
       break;
     case ByLocation:
-      page = new CountryPage();
+      page = new CountryPage(DBManager::DISK);
       break;
   case ByStar:
     page = new EventPage(DBManager::DISK);
+    break;
+  case ByCurrentLocation:
+    page = new NearLocationPage();
     break;
     default:
       //"This shouldn't happen";

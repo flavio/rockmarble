@@ -44,7 +44,8 @@ void ArtistItemCreator::updateCell(const QModelIndex &index, MWidget *cell) cons
   contentItem->boundingRect();
 
   int eventsNum;
-  if (m_pageMode == ArtistPage::ALL_ARTISTS)
+  if (m_pageMode == ArtistPage::ALL_ARTISTS ||
+      m_pageMode == ArtistPage::ARTIST_NEAR_LOCATION)
     eventsNum = db->eventsWithArtistNum(artistID);
   else
     eventsNum = db->eventsWithArtistInCountryNum(artistID, m_country);

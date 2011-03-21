@@ -13,13 +13,16 @@ class EventPage : public MApplicationPage
   Q_OBJECT
 
   public:
-    enum PageMode {STARRED, ARTIST_BY_COUNTRY};
+    enum PageMode {STARRED, ARTIST_BY_COUNTRY, ARTIST_NEAR_LOCATION};
 
     // This constructor is used to show all the starred events
     EventPage(const DBManager::Storage& storage, QGraphicsItem *parent = 0);
     EventPage(const int& artistID,
               const DBManager::Storage& storage,
               const QString& country,
+              QGraphicsItem *parent = 0);
+    EventPage(const int& artistID,
+              const DBManager::Storage& storage,
               QGraphicsItem *parent = 0);
     ~EventPage();
 

@@ -21,6 +21,7 @@ class DBManager : public QObject
     int addArtist(const QString& name, bool favourite = false);
     void setArtistHasImage(const int& artistID, bool hasImage);
     void setArtistAllDataFetched(const int& artistID, bool done);
+    void setAllArtistHaveAllData();
     void addEvent(const Event& event);
     void setEventStarred(const int& eventID, const bool& starred);
     int eventsWithArtistNum(const int& artistID);
@@ -47,6 +48,7 @@ class DBManager : public QObject
     DBManager(const Storage& storage, QObject* parent = 0);
     void initDB(const Storage& storage);
     bool executeQuery(const QString&);
+    bool executeQuery(const QString&, QSqlDatabase& db);
     bool executeQuery(QSqlQuery*);
 
     void addArtistToEvent(const QString& artist, const int& eventID);

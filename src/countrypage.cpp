@@ -15,16 +15,16 @@
 
 #include <QDebug>
 
-CountryPage::CountryPage(QGraphicsItem *parent)
-  : MApplicationPage(parent)
+CountryPage::CountryPage(DBManager::Storage storage, QGraphicsItem *parent)
+  : MApplicationPage(parent), m_dbStorage(storage)
 {
   setTitle(tr("Countries"));
   m_pageMode = ALL_COUNTRIES;
-  m_dbStorage = DBManager::DISK;
 }
 
-CountryPage::CountryPage(const int& artistID, QGraphicsItem *parent)
-  : MApplicationPage(parent), m_artistID(artistID)
+CountryPage::CountryPage(const int& artistID, DBManager::Storage storage,
+                         QGraphicsItem *parent)
+  : MApplicationPage(parent), m_artistID(artistID), m_dbStorage(storage)
 {
   m_pageMode = BY_ARTIST;
   m_dbStorage = DBManager::DISK;

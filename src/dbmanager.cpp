@@ -44,7 +44,13 @@ QSqlDatabase DBManager::database()
 
 bool DBManager::executeQuery(const QString& query)
 {
-  QSqlQuery q (query, database());
+  QSqlDatabase db = database();
+  return executeQuery(query, db);
+}
+
+bool DBManager::executeQuery(const QString& query, QSqlDatabase& db)
+{
+  QSqlQuery q (query, db);
   return executeQuery(&q);
 }
 
@@ -59,21 +65,29 @@ bool DBManager::executeQuery(QSqlQuery* q)
 }
 
 void DBManager::initDB(const Storage& storage) {
-  const QString dbPath (QDir::homePath() + "/.rockmarble/");
-  const QString dbFile ("rockmarble.sqlite");
-  QDir dir;
-
-  if (!dir.exists(dbPath))
-    dir.mkpath(dbPath);
-
   QString dbID = (storage == DISK) ? "DISK" : "MEMORY";
   QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", dbID);
+
   if (storage == DISK ) {
+    const QString dbPath (QDir::homePath() + "/.rockmarble/");
+    const QString dbFile ("rockmarble.sqlite");
+    QDir dir;
+
+    if (!dir.exists(dbPath))
+      dir.mkpath(dbPath);
+
     db.setHostName("localhost");
     db.setDatabaseName(dbPath + dbFile);
   } else {
     // MEMORY
-    db.setDatabaseName(":memory:");
+//    db.setDatabaseName(":memory:");
+    const QString dbFile (QDir::tempPath() + "/rockmarble_memory.sqlite");
+    QDir dir;
+    if (dir.exists(dbFile))
+      dir.remove(dbFile);
+
+    db.setHostName("localhost");
+    db.setDatabaseName(dbFile);
   }
   bool ok = db.open();
 
@@ -92,7 +106,7 @@ void DBManager::initDB(const Storage& storage) {
                "name varchar(30) NOT NULL UNIQUE, "
                "all_data_fetched boolean NOT NULL DEFAULT 0, "
                "has_image boolean NOT NULL DEFAULT 0, "
-               "favourite boolean NOT NULL DEFAULT 0)");
+               "favourite boolean NOT NULL DEFAULT 0)", db);
   }
   if (!tables.contains("locations")) {
     executeQuery("create table locations ( "
@@ -102,7 +116,7 @@ void DBManager::initDB(const Storage& storage) {
                "country varchar(30) NOT NULL, "
                "street varchar(30) NOT NULL, "
                "longitude real NOT NULL, "
-               "latitude real NOT NULL) ");
+               "latitude real NOT NULL) ", db);
   }
   if (!tables.contains("events")) {
     executeQuery("create table events ( "
@@ -112,14 +126,14 @@ void DBManager::initDB(const Storage& storage) {
                "description varchar(30), "
                "starred boolean NOT NULL DEFAULT 0, "
                "start_date datetime NOT NULL, "
-               "FOREIGN KEY(location_id) REFERENCES locations(id)) ");
+               "FOREIGN KEY(location_id) REFERENCES locations(id)) ", db);
   }
   if (!tables.contains("artists_events")) {
     executeQuery("create table artists_events ( "
                "artist_id integer NOT NULL, "
                "event_id integer NOT NULL, "
                "FOREIGN KEY(artist_id) REFERENCES artists(id), "
-               "FOREIGN KEY(event_id) REFERENCES events(id)) ");
+               "FOREIGN KEY(event_id) REFERENCES events(id)) ", db);
   }
 }
 
@@ -249,8 +263,7 @@ void DBManager::addArtistToEvent(const QString& artist, const int& eventID)
       executeQuery(&q);
     }
   }
-  if (isArtistFavourite(artistID))
-    emit artistAddedToEvent(artistID, eventID);
+  emit artistAddedToEvent(artistID, eventID);
 }
 
 int DBManager::addLocation(const Location *location)
@@ -361,6 +374,18 @@ bool DBManager::artistHasAllData(const int &artistID)
   return ret;
 }
 
+void DBManager::setAllArtistHaveAllData()
+{
+  QSqlQuery q(database());
+  int artistID;
+  q.prepare("SELECT id FROM artists ");
+  if (executeQuery(&q)) {
+    while (q.next()) {
+      artistID = q.value(q.record().indexOf("id")).toInt();
+      setArtistAllDataFetched(artistID, true);
+    }
+  }
+}
 
 QStringList DBManager::artistsFromEvent(const int& eventID)
 {

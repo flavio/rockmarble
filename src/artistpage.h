@@ -20,11 +20,13 @@ class ArtistPage : public MApplicationPage
   Q_OBJECT
 
   public:
-    enum PageMode {ALL_ARTISTS, ARTISTS_BY_COUNTRY};
+    enum PageMode {ALL_ARTISTS, ARTISTS_BY_COUNTRY, ARTIST_NEAR_LOCATION};
 
     ArtistPage(const DBManager::Storage& storage, QGraphicsItem *parent = 0);
     ArtistPage(const DBManager::Storage& storage, const QString& country,
                QGraphicsItem *parent = 0);
+    ArtistPage(const double latitude, const double longitude,
+               const int& distance, QGraphicsItem *parent = 0);
     ~ArtistPage();
 
   protected:
@@ -59,6 +61,9 @@ class ArtistPage : public MApplicationPage
     MLinearLayoutPolicy *m_policy;
     ArtistModel* m_artistsModel;
     QStringList m_manuallyAddedArtists;
+    double m_latitude;
+    double m_longitude;
+    int m_distance;
 };
 
 #endif // ARTISTPAGE_H

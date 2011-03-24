@@ -29,6 +29,9 @@
 #include "nearlocationsearchpage.h"
 
 #include <MAction>
+#include <MApplicationWindow>
+#include <MButton>
+#include <MButtonGroup>
 #include <MDialog>
 #include <MLabel>
 #include <MLayout>
@@ -37,6 +40,7 @@
 #include <MSceneManager>
 
 #include <QtCore/QFile>
+#include <QtCore/QPointer>
 #include <QtGui/QGraphicsLinearLayout>
 
 MainPage::MainPage(QGraphicsItem *parent)
@@ -81,6 +85,15 @@ void MainPage::createContent()
   layout->setPortraitPolicy(policy);
 
   // Menu Actions
+#ifdef SHOW_ORIENTATION_MENU
+  MAction* actionOrientation = new MAction(this);
+  actionOrientation->setText("Set orientation");
+  actionOrientation->setLocation(MAction::ApplicationMenuLocation);
+  this->addAction(actionOrientation);
+  connect(actionOrientation, SIGNAL(triggered()),
+          this, SLOT(showOrientationSelectionDialog()));
+#endif
+
   MAction* actionAbout = new MAction(panel);
   actionAbout->setText(tr("About"));
   actionAbout->setLocation(MAction::ApplicationMenuLocation);
@@ -165,4 +178,97 @@ void MainPage::slotItemClicked(QModelIndex index)
   }
 
   page->appear(MSceneWindow::DestroyWhenDismissed);
+}
+
+void MainPage::showOrientationSelectionDialog()
+{
+    QPointer<MDialog> dialog = new MDialog("Select orientation (angle)", M::OkButton | M::CancelButton);
+
+    QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(Qt::Vertical);
+    dialog->centralWidget()->setLayout(layout);
+
+    MButtonGroup *group = new MButtonGroup(dialog->centralWidget());
+
+    MButton *automatic = new MButton("Automatic");
+    automatic->setCheckable(true);
+    automatic->setChecked(!applicationWindow()->isOrientationAngleLocked() &&
+                          !applicationWindow()->isOrientationLocked());
+    layout->addItem(automatic);
+    group->addButton(automatic);
+
+    MButton *portrait = new MButton("Portrait");
+    portrait->setCheckable(true);
+    portrait->setChecked(applicationWindow()->isOrientationLocked()
+                         && applicationWindow()->orientation() == M::Portrait);
+    layout->addItem(portrait);
+    group->addButton(portrait);
+
+    MButton *landscape = new MButton("Landscape");
+    landscape->setCheckable(true);
+    landscape->setChecked(applicationWindow()->isOrientationLocked()
+                          && applicationWindow()->orientation() == M::Landscape);
+    layout->addItem(landscape);
+    group->addButton(landscape);
+
+    MButton *angle0 = new MButton("0 degrees");
+    angle0->setCheckable(true);
+    angle0->setChecked(applicationWindow()->isOrientationAngleLocked()
+                       && applicationWindow()->orientationAngle() == M::Angle0);
+    layout->addItem(angle0);
+    group->addButton(angle0);
+
+    MButton *angle90 = new MButton("90 degrees clockwise");
+    angle90->setCheckable(true);
+    angle0->setChecked(applicationWindow()->isOrientationAngleLocked()
+                       && applicationWindow()->orientationAngle() == M::Angle90);
+    layout->addItem(angle90);
+    group->addButton(angle90);
+
+    MButton *angle180 = new MButton("180 degrees clockwise");
+    angle180->setCheckable(true);
+    angle0->setChecked(applicationWindow()->isOrientationAngleLocked()
+                       && applicationWindow()->orientationAngle() == M::Angle180);
+    layout->addItem(angle180);
+    group->addButton(angle180);
+
+    MButton *angle270 = new MButton("270 degrees clockwise");
+    angle270->setCheckable(true);
+    angle0->setChecked(applicationWindow()->isOrientationAngleLocked()
+                       && applicationWindow()->orientationAngle() == M::Angle270);
+    layout->addItem(angle270);
+    group->addButton(angle270);
+
+    if (dialog->exec() == MDialog::Accepted) {
+        MButton *mode = group->checkedButton();
+        if (mode == automatic) {
+            applicationWindow()->setOrientationAngleLocked(false);
+            applicationWindow()->setOrientationLocked(false);
+        } else if (mode == portrait) {
+            applicationWindow()->setOrientationAngleLocked(false);
+            applicationWindow()->setOrientationAngle(M::Angle270);
+            applicationWindow()->setOrientationLocked(true);
+        } else if (mode == landscape) {
+            applicationWindow()->setOrientationAngleLocked(false);
+            applicationWindow()->setOrientationAngle(M::Angle0);
+            applicationWindow()->setOrientationLocked(true);
+        } else if (mode == angle0) {
+            applicationWindow()->setOrientationLocked(false);
+            applicationWindow()->setOrientationAngle(M::Angle0);
+            applicationWindow()->setOrientationAngleLocked(true);
+        } else if (mode == angle90) {
+            applicationWindow()->setOrientationLocked(false);
+            applicationWindow()->setOrientationAngle(M::Angle90);
+            applicationWindow()->setOrientationAngleLocked(true);
+        } else if (mode == angle180) {
+            applicationWindow()->setOrientationLocked(false);
+            applicationWindow()->setOrientationAngle(M::Angle180);
+            applicationWindow()->setOrientationAngleLocked(true);
+        } else if (mode == angle270) {
+            applicationWindow()->setOrientationLocked(false);
+            applicationWindow()->setOrientationAngle(M::Angle270);
+            applicationWindow()->setOrientationAngleLocked(true);
+        }
+    }
+
+    delete dialog;
 }

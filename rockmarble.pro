@@ -12,7 +12,7 @@ unix {
 
 debug {
   CONFIG += debug
-  DEFINES += FAKE_GPS
+  DEFINES += FAKE_GPS SHOW_ORIENTATION_MENU
 }
 
 QT = sql network

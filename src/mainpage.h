@@ -50,6 +50,7 @@ class MainPage : public MApplicationPage
   private slots:
     void slotAbout();
     void slotItemClicked(QModelIndex);
+    void showOrientationSelectionDialog();
 
   private:
     QList<Page> m_pages;

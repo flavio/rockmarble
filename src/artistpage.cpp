@@ -43,6 +43,7 @@
 #include <MTextEdit>
 
 #include <QtCore/QAbstractItemModel>
+#include <QtCore/QDate>
 #include <QtCore/QPropertyAnimation>
 #include <QtGui/QGraphicsLinearLayout>
 
@@ -126,6 +127,11 @@ void ArtistPage::createContent()
     connect(actionFilter, SIGNAL(triggered()), this, SLOT(slotShowFilter()));
   }
 
+  MAction* actionRefresh = new MAction("icon-m-toolbar-refresh", "", this);
+  actionRefresh->setLocation(MAction::ToolBarLocation);
+  addAction(actionRefresh);
+  connect(actionRefresh, SIGNAL(triggered()), this, SLOT(slotRefreshEvents()));
+
   MAction* actionSearch = new MAction("icon-m-toolbar-search", "", this);
   actionSearch->setLocation(MAction::ToolBarLocation);
   addAction(actionSearch);
@@ -187,6 +193,19 @@ void ArtistPage::createContent()
 
     //search events
     m_lastfm->getEventsNearLocation(m_latitude, m_longitude, m_distance);
+  }
+
+  if (m_dbStorage == DBManager::DISK) {
+    DBManager* db = DBManager::instance(m_dbStorage);
+    QStringList incompleteArtists = db->incompleteArtists();
+    foreach(QString artist, incompleteArtists) {
+      m_lastfm->getEventsForArtist(artist);
+    }
+
+    QStringList artistsWithoutImage = db->artistsWithoutImage();
+    foreach(QString artist, artistsWithoutImage) {
+      m_lastfm->getArtistImage(artist);
+    }
   }
 }
 
@@ -264,6 +283,19 @@ void ArtistPage::slotArtistAdded(const int artistID, bool favourite)
     if (!m_manuallyAddedArtists.contains(artist,Qt::CaseInsensitive))
       m_lastfm->getEventsForArtist(artist);
   }
+}
+
+void ArtistPage::slotRefreshEvents()
+{
+  DBManager* db = DBManager::instance(m_dbStorage);
+
+  // remove 2-days old events
+  db->removeOldEvents(QDate::currentDate().addDays(-2));
+
+  // load new events
+  QStringList artists = db->artists(true);
+  foreach (QString artist, artists)
+    m_lastfm->getEventsForArtist(artist);
 }
 
 void ArtistPage::slotRefreshArtistsModel()

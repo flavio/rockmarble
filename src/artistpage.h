@@ -46,6 +46,7 @@ class ArtistPage : public MApplicationPage
     void slotShowSearch();
     void slotFilterAnimationFinished();
     void slotRefreshArtistsModel();
+    void slotRefreshEvents();
 
   private:
     QSqlQuery artistsModelQuery();

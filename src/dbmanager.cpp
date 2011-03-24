@@ -437,6 +437,55 @@ void DBManager::setAllArtistHaveAllData()
   }
 }
 
+const QStringList DBManager::incompleteArtists()
+{
+  QStringList artists;
+  QSqlQuery q(database());
+
+  q.prepare("SELECT name FROM artists where "
+            "favourite = ? AND all_data_fetched = ?");
+  q.addBindValue((int) true);
+  q.addBindValue((int) false);
+  if (executeQuery(&q)) {
+    while (q.next()) {
+      artists << q.value(q.record().indexOf("name")).toString();
+    }
+  }
+  return artists;
+}
+
+const QStringList DBManager::artistsWithoutImage()
+{
+  QStringList artists;
+  QSqlQuery q(database());
+
+  q.prepare("SELECT name FROM artists where "
+            "favourite = ? AND has_image = ?");
+  q.addBindValue((int) true);
+  q.addBindValue((int) false);
+  if (executeQuery(&q)) {
+    while (q.next()) {
+      artists << q.value(q.record().indexOf("name")).toString();
+    }
+  }
+  return artists;
+}
+
+const QStringList DBManager::artists(bool favourite)
+{
+  QStringList artists;
+  QSqlQuery q(database());
+
+  q.prepare("SELECT name FROM artists where favourite = ?");
+  q.addBindValue((int) favourite);
+  if (executeQuery(&q)) {
+    while (q.next()) {
+      artists << q.value(q.record().indexOf("name")).toString();
+    }
+  }
+  return artists;
+}
+
 QStringList DBManager::artistsFromEvent(const int& eventID)
 {
   QStringList artists;
@@ -495,4 +544,54 @@ Location* DBManager::locationFromID(const int &locationID)
   } else {
     return 0;
   }
+}
+
+void DBManager::removeOldEvents(const QDate &upTo)
+{
+  QList<int> eventIDs;
+  QSqlQuery query (database());
+  query.prepare("select id from events where start_date < ? ");
+  query.addBindValue(upTo);
+  if (executeQuery(&query)) {
+    while (query.next()) {
+      eventIDs <<  query.value(query.record().indexOf("id")).toInt();
+    }
+  }
+
+  foreach (int id, eventIDs) {
+    QList<int> artistsIDs;
+
+    // find all the favourite artists that are going to lose one event
+    query.prepare("select artists.id from artists join artists_events on "
+                  "artists.id = artists_events.artist_id where "
+                  "artists.favourite = ? and artists_events.event_id = ?");
+    query.addBindValue((int) true);
+    query.addBindValue(id);
+    if (executeQuery(&query)) {
+      while (query.next())
+        artistsIDs << query.value(query.record().indexOf("id")).toInt();
+    }
+
+    // delete all entries inside of artists_events
+    query.prepare("delete from artists_events where event_id = ?");
+    query.addBindValue(id);
+    executeQuery(&query);
+
+    foreach (int id, artistsIDs) {
+      emit artistUpdated(id);
+    }
+
+    // delete all the non-favourite artists that have no event
+    query.prepare("delete from artists where favourite = ? and "
+                  "id not in (select artist_id from artists_events)");
+    query.addBindValue((int) false);
+    executeQuery(&query);
+
+    query.prepare("delete from events where id = ?");
+    query.addBindValue(id);
+    executeQuery(&query);
+  }
+
+  executeQuery("delete from locations where id not in"
+               "(select location_id from events)");
 }

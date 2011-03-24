@@ -1,6 +1,7 @@
 #ifndef DBMANAGER_H
 #define DBMANAGER_H
 
+#include <QtCore/QDate>
 #include <QtCore/QString>
 #include <QtCore/QObject>
 #include <QtSql/QSqlDatabase>
@@ -25,6 +26,7 @@ class DBManager : public QObject
     void setArtistAllDataFetched(const int& artistID, bool done);
     void setAllArtistHaveAllData();
     void addEvent(const Event& event);
+    void removeOldEvents(const QDate& upTo);
     void setEventStarred(const int& eventID, const bool& starred);
     int eventsWithArtistNum(const int& artistID);
     int eventsWithArtistInCountryNum(const int& artistID,
@@ -33,6 +35,9 @@ class DBManager : public QObject
     int artistIDFromName(const QString& artistName);
     bool artistHasImage(const int& artistID);
     bool artistHasAllData(const int& artistID);
+    const QStringList incompleteArtists();
+    const QStringList artistsWithoutImage();
+    const QStringList artists(bool favourite);
 
     bool isArtistFavourite(const int& artistID);
 

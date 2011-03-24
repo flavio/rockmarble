@@ -1,4 +1,5 @@
-#include "nearlocationpage.h"
+#include "nearlocationsearchpage.h"
+
 
 #include <MBanner>
 #include <MButton>
@@ -18,21 +19,20 @@
 #include <QtGui/QGraphicsLinearLayout>
 
 #include "artistpage.h"
+#include "nearlocationmainpage.h"
 
-NearLocationPage::NearLocationPage(QGraphicsItem *parent)
+NearLocationSearchPage::NearLocationSearchPage(QGraphicsItem *parent)
   : MApplicationPage(parent)
 {
     m_trackingLocation = false;
-    // force initialization of the memory db
-    DBManager::instance(DBManager::MEMORY);
-    setTitle(tr("Events near you"));
+    setTitle(tr("Search events near you"));
 }
 
-NearLocationPage::~NearLocationPage()
+NearLocationSearchPage::~NearLocationSearchPage()
 {
 }
 
-void NearLocationPage::createContent()
+void NearLocationSearchPage::createContent()
 {
   QGraphicsWidget *panel = centralWidget();
   QGraphicsLinearLayout* layout = new QGraphicsLinearLayout(Qt::Vertical);
@@ -78,19 +78,19 @@ void NearLocationPage::createContent()
   showMessage(tr("Tracking location..."), false);
 }
 
-void NearLocationPage::updatePosition(const QGeoPositionInfo& pos)
+void NearLocationSearchPage::updatePosition(const QGeoPositionInfo& pos)
 {
   m_position = pos;
   showMessage(tr("Location found."), false);
   m_btnSearchEvents->setEnabled(true);
 }
 
-void NearLocationPage::updatePositionTimeout()
+void NearLocationSearchPage::updatePositionTimeout()
 {
   showMessage(tr("Cannot find current location."), true);
 }
 
-void NearLocationPage::showMessage(const QString &message, bool error)
+void NearLocationSearchPage::showMessage(const QString &message, bool error)
 {
   MBanner* banner = new MBanner();
   banner->setObjectName("SystemBanner");
@@ -102,8 +102,9 @@ void NearLocationPage::showMessage(const QString &message, bool error)
   banner->appear(MSceneWindow::DestroyWhenDone);
 }
 
-void NearLocationPage::slotSearchEvents()
+void NearLocationSearchPage::slotSearchEvents()
 {
+  DBManager::instance(DBManager::MEMORY)->cleanTables();
   MApplicationPage* page = new ArtistPage(m_position.coordinate().latitude(),
                                           m_position.coordinate().longitude(),
                                           m_kmBox->currentIndex()*10);

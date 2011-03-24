@@ -10,12 +10,12 @@ class MComboBox;
 
 using namespace QtMobility;
 
-class NearLocationPage : public MApplicationPage
+class NearLocationSearchPage : public MApplicationPage
 {
   Q_OBJECT
   public:
-    NearLocationPage(QGraphicsItem *parent = 0);
-    ~NearLocationPage();
+    NearLocationSearchPage(QGraphicsItem *parent = 0);
+    ~NearLocationSearchPage();
 
   protected:
     void createContent();

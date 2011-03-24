@@ -39,7 +39,9 @@ HEADERS += src/datafetcher.h \
     src/pagesmodel.h \
     src/artistmodel.h \
     src/mapwidget.h \
-    src/nearlocationpage.h
+    src/page.h \
+    src/nearlocationmainpage.h \
+    src/nearlocationsearchpage.h
 SOURCES += src/datafetcher.cpp \
     src/event.cpp \
     src/location.cpp \
@@ -58,7 +60,8 @@ SOURCES += src/datafetcher.cpp \
     src/pagesmodel.cpp \
     src/artistmodel.cpp \
     src/mapwidget.cpp \
-    src/nearlocationpage.cpp
+    src/nearlocationmainpage.cpp \
+    src/nearlocationsearchpage.cpp
 RESOURCES += resources.qrc
 
 # All generated files goes to the same directory

@@ -25,7 +25,8 @@
 #include "mainpage.h"
 #include "pageitemcreator.h"
 #include "pagesmodel.h"
-#include "nearlocationpage.h"
+#include "nearlocationmainpage.h"
+#include "nearlocationsearchpage.h"
 
 #include <MAction>
 #include <MDialog>
@@ -35,6 +36,7 @@
 #include <MList>
 #include <MSceneManager>
 
+#include <QtCore/QFile>
 #include <QtGui/QGraphicsLinearLayout>
 
 MainPage::MainPage(QGraphicsItem *parent)
@@ -42,14 +44,30 @@ MainPage::MainPage(QGraphicsItem *parent)
 {
   setTitle("Rockmarble");
 
-  m_pages.insert(ByArtist, tr("Artist"));
-  m_pages.insert(ByLocation, tr("Location"));
-  m_pages.insert(ByStar, tr("Starred"));
-  m_pages.insert(ByCurrentLocation, tr("Your current location"));
+  Page artistPage (ByArtist, tr("Artist"),
+           QString("icon-m-content-artist"),
+           tr("Search the events by artist and then by country."));
+  m_pages << artistPage;
+
+  Page locationPage (ByLocation, tr("Location"),
+           QString("icon-m-clock-city-create"),
+           tr("Search the events by country and then by artist."));
+  m_pages << locationPage;
+
+  Page currenLocationtPage (ByCurrentLocation, tr("Your current location"),
+           QString("icon-m-common-location"),
+           tr("Show all the events taking place near you."));
+  m_pages << currenLocationtPage;
+
+  Page starredPage (ByStar, tr("Starred"),
+           QString("icon-m-common-favorite-mark"),
+           tr("Show all the events you starred."));
+  m_pages << starredPage;
 }
 
-MainPage::~MainPage()
+void MainPage::slotAboutToQuit()
 {
+  DBManager::removeDatabase(DBManager::MEMORY);
 }
 
 void MainPage::createContent()
@@ -131,13 +149,19 @@ void MainPage::slotItemClicked(QModelIndex index)
   case ByStar:
     page = new EventPage(DBManager::DISK);
     break;
-  case ByCurrentLocation:
-    page = new NearLocationPage();
+  case ByCurrentLocation: {
+    if (!QFile::exists(DBManager::databaseFile(DBManager::MEMORY)) ||
+        DBManager::instance(DBManager::MEMORY)->isDatabaseEmpty()) {
+      // this is not the first time the 'current location' is selected
+      page = new NearLocationSearchPage();
+    } else {
+      // this is the first time the 'current location' is selected
+      page = new NearLocationMainPage();
+    }
     break;
-    default:
-      //"This shouldn't happen";
-      return;
-      break;
+  } default:
+    //"This shouldn't happen";
+    return;
   }
 
   page->appear(MSceneWindow::DestroyWhenDismissed);

@@ -22,8 +22,10 @@
 #define MAINPAGE_H
 
 #include <MApplicationPage>
-#include <QtCore/QMap>
+#include <QtCore/QList>
 #include <QtCore/QModelIndex>
+
+#include "page.h"
 
 class MainPage : public MApplicationPage
 {
@@ -31,7 +33,6 @@ class MainPage : public MApplicationPage
 
   public:
     MainPage(QGraphicsItem *parent = 0);
-    ~MainPage();
 
     enum PageType {
       ByArtist,
@@ -43,12 +44,15 @@ class MainPage : public MApplicationPage
   protected:
     void createContent();
 
+  public slots:
+    void slotAboutToQuit();
+
   private slots:
     void slotAbout();
     void slotItemClicked(QModelIndex);
 
   private:
-    QMap<PageType, QString> m_pages;
+    QList<Page> m_pages;
 };
 
 #endif // MAINPAGE_H

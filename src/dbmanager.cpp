@@ -4,12 +4,16 @@
 
 #include <QtCore/QDebug>
 #include <QtCore/QDir>
+#include <QtCore/QMutex>
 #include <QtCore/QVariant>
 #include <QtGui/QApplication>
 #include <QtSql/QSqlError>
 #include <QtSql/QSqlQuery>
 #include <QtSql/QSqlRecord>
 
+
+DBManager* DBManager::m_mainDatabase = 0;
+DBManager* DBManager::m_currentLocationDatabase = 0;
 
 DBManager::DBManager(const Storage& storage, QObject *parent)
   : QObject(parent), m_storage(storage)
@@ -18,21 +22,28 @@ DBManager::DBManager(const Storage& storage, QObject *parent)
 }
 
 DBManager* DBManager::instance(const Storage& storage) {
+  static QMutex mainDBMutex;
+  static QMutex locationDBMutex;
   switch (storage) {
     case DISK: {
-      static DBManager * dbManagerDiskInstance = 0;
-      if (!dbManagerDiskInstance) {
-        dbManagerDiskInstance = new DBManager(storage, qApp);
+      if (!m_mainDatabase) {
+        mainDBMutex.lock();
+        if (!m_mainDatabase)
+          m_mainDatabase = new DBManager(storage, qApp);
+        mainDBMutex.unlock();
       }
-      return dbManagerDiskInstance;
+      return m_mainDatabase;
     } case MEMORY: {
-      static DBManager * dbManagerMemoryInstance = 0;
-      if (!dbManagerMemoryInstance) {
-        dbManagerMemoryInstance = new DBManager(storage, qApp);
+      if (!m_currentLocationDatabase) {
+        locationDBMutex.lock();
+        if (!m_currentLocationDatabase)
+          m_currentLocationDatabase = new DBManager(storage, qApp);
+        locationDBMutex.unlock();
       }
-      return dbManagerMemoryInstance;
+      return m_currentLocationDatabase;
     }
   }
+  qWarning() << "DBManager::instance is goint to return 0 - this shouldn't happen";
   return 0;
 }
 
@@ -64,31 +75,66 @@ bool DBManager::executeQuery(QSqlQuery* q)
     return true;
 }
 
+const QString DBManager::databaseFile(const Storage &storage)
+{
+  const QString dbPath (QDir::homePath() + "/.rockmarble/");
+  QString dbFile;
+
+  switch (storage) {
+  case DISK:
+    dbFile = "rockmarble.sqlite";
+    break;
+  case MEMORY:
+    dbFile = "rockmarble_current_location.sqlite";
+    break;
+  }
+  return dbPath + dbFile;
+}
+
+bool DBManager::isDatabaseEmpty()
+{
+  QSqlQuery q("SELECT COUNT (id) AS count_all from artists",
+              database());
+  if (executeQuery(&q)) {
+    if (q.next()) {
+      return q.value(q.record().indexOf("count_all")).toInt() == 0;
+    } else
+      return true;
+  } else
+    return true;
+}
+
+bool DBManager::removeDatabase(const Storage &storage)
+{
+  QDir dir;
+  const QString dbFile = databaseFile(storage);
+  if (!dir.exists(dbFile))
+    return true;
+  else
+    return dir.remove(dbFile);
+}
+
+void DBManager::cleanTables()
+{
+  if (!QFile::exists(databaseFile(m_storage)))
+    return;
+  executeQuery("DELETE FROM artists_events");
+  executeQuery("DELETE FROM events");
+  executeQuery("DELETE FROM locations");
+  executeQuery("DELETE FROM artists");
+}
+
 void DBManager::initDB(const Storage& storage) {
   QString dbID = (storage == DISK) ? "DISK" : "MEMORY";
   QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", dbID);
+  QDir dir;
 
-  if (storage == DISK ) {
-    const QString dbPath (QDir::homePath() + "/.rockmarble/");
-    const QString dbFile ("rockmarble.sqlite");
-    QDir dir;
+  const QString dbPath (QDir::homePath() + "/.rockmarble/");
+  if (!dir.exists(dbPath))
+    dir.mkpath(dbPath);
 
-    if (!dir.exists(dbPath))
-      dir.mkpath(dbPath);
-
-    db.setHostName("localhost");
-    db.setDatabaseName(dbPath + dbFile);
-  } else {
-    // MEMORY
-//    db.setDatabaseName(":memory:");
-    const QString dbFile (QDir::tempPath() + "/rockmarble_memory.sqlite");
-    QDir dir;
-    if (dir.exists(dbFile))
-      dir.remove(dbFile);
-
-    db.setHostName("localhost");
-    db.setDatabaseName(dbFile);
-  }
+  db.setHostName("localhost");
+  db.setDatabaseName(databaseFile(storage));
   bool ok = db.open();
 
   if (!ok) {
@@ -102,39 +148,43 @@ void DBManager::initDB(const Storage& storage) {
 
   if (!tables.contains("artists")) {
     executeQuery("create table artists ( "
-               "id integer primary key autoincrement not null, "
-               "name varchar(30) NOT NULL UNIQUE, "
-               "all_data_fetched boolean NOT NULL DEFAULT 0, "
-               "has_image boolean NOT NULL DEFAULT 0, "
-               "favourite boolean NOT NULL DEFAULT 0)", db);
+                 "id integer primary key autoincrement not null, "
+                 "name varchar(30) NOT NULL UNIQUE, "
+                 "all_data_fetched boolean NOT NULL DEFAULT 0, "
+                 "has_image boolean NOT NULL DEFAULT 0, "
+                 "favourite boolean NOT NULL DEFAULT 0)", db);
   }
+  qWarning() << "post artists" << db.tables();
   if (!tables.contains("locations")) {
     executeQuery("create table locations ( "
-               "id integer primary key autoincrement not null, "
-               "name varchar(30), "
-               "city varchar(30) NOT NULL, "
-               "country varchar(30) NOT NULL, "
-               "street varchar(30) NOT NULL, "
-               "longitude real NOT NULL, "
-               "latitude real NOT NULL) ", db);
+                 "id integer primary key autoincrement not null, "
+                 "name varchar(30), "
+                 "city varchar(30) NOT NULL, "
+                 "country varchar(30) NOT NULL, "
+                 "street varchar(30) NOT NULL, "
+                 "longitude real NOT NULL, "
+                 "latitude real NOT NULL) ", db);
   }
+  qWarning() << "post locations" << db.tables();
   if (!tables.contains("events")) {
     executeQuery("create table events ( "
-               "id integer primary key autoincrement not null, "
-               "location_id integer NOT NULL, "
-               "title varchar(30), "
-               "description varchar(30), "
-               "starred boolean NOT NULL DEFAULT 0, "
-               "start_date datetime NOT NULL, "
-               "FOREIGN KEY(location_id) REFERENCES locations(id)) ", db);
+                 "id integer primary key autoincrement not null, "
+                 "location_id integer NOT NULL, "
+                 "title varchar(30), "
+                 "description varchar(30), "
+                 "starred boolean NOT NULL DEFAULT 0, "
+                 "start_date datetime NOT NULL, "
+                 "FOREIGN KEY(location_id) REFERENCES locations(id)) ", db);
   }
+  qWarning() << "post events" << db.tables();
   if (!tables.contains("artists_events")) {
     executeQuery("create table artists_events ( "
-               "artist_id integer NOT NULL, "
-               "event_id integer NOT NULL, "
-               "FOREIGN KEY(artist_id) REFERENCES artists(id), "
-               "FOREIGN KEY(event_id) REFERENCES events(id)) ", db);
+                 "artist_id integer NOT NULL, "
+                 "event_id integer NOT NULL, "
+                 "FOREIGN KEY(artist_id) REFERENCES artists(id), "
+                 "FOREIGN KEY(event_id) REFERENCES events(id)) ", db);
   }
+  qWarning() << "post artists_events" << db.tables();
 }
 
 int DBManager::artistIDFromName(const QString& artistName)

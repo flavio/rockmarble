@@ -21,14 +21,16 @@
   */
 
 #include "artistpage.h"
-
 #include "artistitemcreator.h"
 #include "artistmodel.h"
 #include "countrypage.h"
 #include "eventpage.h"
 #include "lastfm.h"
+#include "nearlocationmainpage.h"
+#include "nearlocationsearchpage.h"
 
 #include <MAction>
+#include <MApplicationWindow>
 #include <MBanner>
 #include <MButton>
 #include <MDialog>
@@ -36,6 +38,7 @@
 #include <MLayout>
 #include <MLinearLayoutPolicy>
 #include <MList>
+#include <MScene>
 #include <MSceneManager>
 #include <MTextEdit>
 
@@ -55,16 +58,20 @@ ArtistPage::ArtistPage(const DBManager::Storage& storage,
   m_pageMode = ARTISTS_BY_COUNTRY;
 }
 
-ArtistPage::ArtistPage(const DBManager::Storage& storage, QGraphicsItem *parent)
+ArtistPage::ArtistPage(const DBManager::Storage& storage,
+                       const PageMode& pageMode,
+                       QGraphicsItem *parent)
     : MApplicationPage(parent), m_dbStorage(storage)
 {
-  setTitle(tr("Artists"));
-
+  m_pageMode = pageMode;
   m_lastfm = new Lastfm(m_dbStorage, this);
   m_filterVisible = false;
   m_showArtistsWithoutEvents = true;
 
-  m_pageMode = ALL_ARTISTS;
+  if (pageMode == ARTIST_NEAR_LOCATION_SHOW)
+    setTitle(tr("Artists playing near you"));
+  else
+    setTitle(tr("Artists"));
 }
 
 ArtistPage::ArtistPage(const double latitude, const double longitude,
@@ -79,7 +86,7 @@ ArtistPage::ArtistPage(const double latitude, const double longitude,
   m_filterVisible = false;
   m_showArtistsWithoutEvents = true;
 
-  m_pageMode = ARTIST_NEAR_LOCATION;
+  m_pageMode = ARTIST_NEAR_LOCATION_SEARCH;
 }
 
 ArtistPage::~ArtistPage()
@@ -162,7 +169,23 @@ void ArtistPage::createContent()
   connect(DBManager::instance(m_dbStorage), SIGNAL(artistAdded(int,bool)),
            this, SLOT(slotArtistAdded(int,bool)));
 
-  if (m_pageMode == ARTIST_NEAR_LOCATION) {
+  if (m_pageMode == ARTIST_NEAR_LOCATION_SEARCH) {
+    //overwrite history
+    MApplicationWindow* appWindow = applicationWindow();
+    MScene* scene = appWindow->scene();
+    MSceneManager* sceneManager = scene->sceneManager();
+    QList<MSceneWindow*> history = sceneManager->pageHistory();
+    if (history.last()->metaObject()->className() == NearLocationSearchPage::staticMetaObject.className()) {
+      // overwrite history only if the last page is NearLocationSearchPage
+      history.removeAt(history.size()-1);
+      if (history.last()->metaObject()->className() != NearLocationMainPage::staticMetaObject.className()) {
+        MApplicationPage* prevPage = new NearLocationMainPage();
+        history << prevPage;
+      }
+      sceneManager->setPageHistory(history);
+    }
+
+    //search events
     m_lastfm->getEventsNearLocation(m_latitude, m_longitude, m_distance);
   }
 }
@@ -205,7 +228,8 @@ QSqlQuery ArtistPage::artistsModelQuery()
       name += m_filter->text() + '%';
       query.addBindValue(name);
     }
-  } else if (m_pageMode == ARTIST_NEAR_LOCATION) {
+  } else if (m_pageMode == ARTIST_NEAR_LOCATION_SEARCH ||
+             m_pageMode == ARTIST_NEAR_LOCATION_SHOW) {
     q = "SELECT distinct artists.id FROM artists ";
     if (!m_showArtistsWithoutEvents) {
       q += " JOIN artists_events on artists.id = artists_events.artist_id ";
@@ -221,7 +245,6 @@ QSqlQuery ArtistPage::artistsModelQuery()
       query.addBindValue(name);
     }
   }
-
   query.exec();
   return query;
 }
@@ -415,7 +438,8 @@ void ArtistPage::slotArtistClicked(const QModelIndex& index)
     case ARTISTS_BY_COUNTRY:
       page = new EventPage(artistID, m_dbStorage, m_country);
       break;
-    case ARTIST_NEAR_LOCATION:
+    case ARTIST_NEAR_LOCATION_SEARCH:
+    case ARTIST_NEAR_LOCATION_SHOW:
       page = new EventPage(artistID, m_dbStorage);
       break;
   }

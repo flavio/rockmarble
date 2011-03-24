@@ -20,9 +20,12 @@ class ArtistPage : public MApplicationPage
   Q_OBJECT
 
   public:
-    enum PageMode {ALL_ARTISTS, ARTISTS_BY_COUNTRY, ARTIST_NEAR_LOCATION};
+    enum PageMode {ALL_ARTISTS, ARTISTS_BY_COUNTRY,
+                   ARTIST_NEAR_LOCATION_SHOW, ARTIST_NEAR_LOCATION_SEARCH};
 
-    ArtistPage(const DBManager::Storage& storage, QGraphicsItem *parent = 0);
+    ArtistPage(const DBManager::Storage& storage,
+               const PageMode& pageMode = ALL_ARTISTS,
+               QGraphicsItem *parent = 0);
     ArtistPage(const DBManager::Storage& storage, const QString& country,
                QGraphicsItem *parent = 0);
     ArtistPage(const double latitude, const double longitude,

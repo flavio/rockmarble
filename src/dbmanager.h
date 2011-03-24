@@ -17,6 +17,8 @@ class DBManager : public QObject
     enum Storage {DISK, MEMORY};
 
     static DBManager* instance(const Storage& storage);
+    static bool removeDatabase(const Storage& storage);
+    static const QString databaseFile(const Storage& storage);
 
     int addArtist(const QString& name, bool favourite = false);
     void setArtistHasImage(const int& artistID, bool hasImage);
@@ -38,6 +40,8 @@ class DBManager : public QObject
     Location* locationFromID(const int& locationID);
 
     QSqlDatabase database();
+    bool isDatabaseEmpty();
+    void cleanTables();
 
   signals:
     void artistAdded(const int artistID, bool favourite);
@@ -46,6 +50,9 @@ class DBManager : public QObject
 
   private:
     DBManager(const Storage& storage, QObject* parent = 0);
+    DBManager(const DBManager&); //hide copy constructor
+    DBManager& operator=(const DBManager&); //hide assignment operator
+
     void initDB(const Storage& storage);
     bool executeQuery(const QString&);
     bool executeQuery(const QString&, QSqlDatabase& db);
@@ -54,6 +61,9 @@ class DBManager : public QObject
     void addArtistToEvent(const QString& artist, const int& eventID);
     int addLocation(const Location* location);
     QStringList artistsFromEvent(const int& eventID);
+
+    static DBManager* m_mainDatabase;
+    static DBManager* m_currentLocationDatabase;
 
     Storage m_storage;
 };

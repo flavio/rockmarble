@@ -24,7 +24,6 @@
 #include "dbmanager.h"
 #include "mainpage.h"
 
-
 int main(int argc, char *argv[])
 {
   // forces db initialization
@@ -33,6 +32,8 @@ int main(int argc, char *argv[])
   MApplication app(argc, argv);
   MApplicationWindow window;
   MainPage* mainpage = new MainPage();
+  QObject::connect(&app, SIGNAL(aboutToQuit()),
+                   mainpage, SLOT(slotAboutToQuit()));
   mainpage->appear(&window);
   window.show();
 

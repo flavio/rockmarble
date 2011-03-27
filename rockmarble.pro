@@ -23,7 +23,6 @@ MOBILITY = location bearer
 HEADERS += src/datafetcher.h \
     src/defines.h \
     src/event.h \
-    src/eventmodel.h \
     src/location.h \
     src/mainpage.h \
     src/artistitemcreator.h \

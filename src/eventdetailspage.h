@@ -8,6 +8,7 @@
 #include <QtCore/QList>
 
 class QGraphicsLinearLayout;
+class QNetworkSession;
 class MAction;
 class MapWidget;
 class MComboBox;
@@ -18,7 +19,6 @@ namespace QtMobility {
   class QGeoMappingManager;
   class QGeoRoutingManager;
   class QGeoSearchManager;
-  class QNetworkSession;
 }
 
 class EventDetailsPage : public MApplicationPage
@@ -52,7 +52,7 @@ class EventDetailsPage : public MApplicationPage
     MAction* m_actionStar;
     int  m_eventID;
     bool m_starred;
-    QtMobility::QNetworkSession *m_session;
+    QNetworkSession *m_session;
     MapWidget* m_mapWidget;
     QGraphicsLinearLayout* m_infoLayout;
     MSlider* m_slider;

@@ -17,7 +17,7 @@ debug {
 
 QT = sql network
 CONFIG += mobility
-MOBILITY = location bearer
+MOBILITY = location
 
 # Input
 HEADERS += src/datafetcher.h \

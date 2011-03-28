@@ -50,17 +50,17 @@ MainPage::MainPage(QGraphicsItem *parent)
 
   Page artistPage (ByArtist, tr("Artist"),
            QString("icon-m-content-artist"),
-           tr("Search the events by artist and then by country."));
+           tr("Search events by artist."));
   m_pages << artistPage;
 
   Page locationPage (ByLocation, tr("Location"),
            QString("icon-m-clock-city-create"),
-           tr("Search the events by country and then by artist."));
+           tr("Search events by location."));
   m_pages << locationPage;
 
   Page currenLocationtPage (ByCurrentLocation, tr("Your current location"),
            QString("icon-m-common-location"),
-           tr("Show all the events taking place near you."));
+           tr("Show all the events near you."));
   m_pages << currenLocationtPage;
 
   Page starredPage (ByStar, tr("Starred"),

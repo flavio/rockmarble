@@ -7,7 +7,8 @@
 
 #include <MApplicationPage>
 
-
+class MLabel;
+class MLinearLayoutPolicy;
 class MList;
 
 class CountryPage : public MApplicationPage
@@ -25,13 +26,18 @@ class CountryPage : public MApplicationPage
 
   private slots:
     void slotCountryClicked(const QModelIndex& index);
+    void slotLocationCreated(int locationID);
 
   private:
     ISqlQuery getQuery();
 
     int m_artistID;
     CountryModel::Mode m_pageMode;
+    CountryModel* m_countryModel;
     DBManager::Storage m_dbStorage;
+    MLabel* m_noCountryLabel;
+    MLinearLayoutPolicy* m_policy;
+    bool m_noCountryLabelVisible;
 };
 
 #endif // COUNTRYPAGE_H

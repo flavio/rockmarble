@@ -155,7 +155,8 @@ void ArtistPage::createContent()
   m_filterWidget->setLayout(containerLayout);
 
   // No artist found label
-  m_noArtistLabel = new MLabel(tr("No artist available."));
+  m_noArtistLabel = new MLabel(tr("No artist available, add them using one of "
+                                  "menu options."));
   m_noArtistLabel->setAlignment(Qt::AlignCenter);
   if (m_artistsModel->rowCount() == 0)
     m_policy->addItem(m_noArtistLabel);

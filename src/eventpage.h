@@ -3,7 +3,6 @@
 
 #include <MApplicationPage>
 #include <QtCore/QModelIndex>
-#include <QtSql/QSqlQuery>
 
 #include "dbmanager.h"
 #include "event.h"
@@ -33,8 +32,6 @@ class EventPage : public MApplicationPage
     void slotEventClicked(const QModelIndex& index);
 
   private:
-    QSqlQuery getQuery();
-
     PageMode m_pageMode;
     int m_artistID;
     DBManager::Storage m_dbStorage;

@@ -202,6 +202,10 @@ int DBManager::artistIDFromName(const QString& artistName)
     return -1;
 }
 
+bool DBManager::isArtistFavourite(const QString& artistName) {
+  return isArtistFavourite(artistIDFromName(artistName));
+}
+
 bool DBManager::isArtistFavourite(const int& artistID)
 {
   QSqlQuery q(database());
@@ -287,6 +291,7 @@ void DBManager::addEvent(const Event& event)
       q.addBindValue((int) event.starred());
       q.addBindValue(location_id);
       executeQuery(&q);
+      emit eventCreated(event.id());
     }
 
     addArtistToEvent(event.headliner(), event.id());

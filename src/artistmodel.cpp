@@ -1,7 +1,6 @@
 #include "artistmodel.h"
 
 #include <QtSql/QSqlRecord>
-#include <QtSql/QSqlQuery>
 
 ArtistModel::ArtistModel(const DBManager::Storage& storage, QSqlQuery query,
                          QObject *parent)

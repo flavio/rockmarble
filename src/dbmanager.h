@@ -35,6 +35,7 @@ class DBManager : public QObject
     int artistIDFromName(const QString& artistName);
     bool artistHasImage(const int& artistID);
     bool artistHasAllData(const int& artistID);
+    bool artistsPlaysInLocation(const int& artistID, const int& locationID);
     const QStringList incompleteArtists();
     const QStringList artistsWithoutImage();
     const QStringList artists(bool favourite);
@@ -52,6 +53,7 @@ class DBManager : public QObject
     void artistAdded(const int artistID, bool favourite);
     void artistUpdated(const int artistID);
     void artistAddedToEvent(const int artistID, const int eventID);
+    void locationCreated(const int locationID);
 
   private:
     DBManager(const Storage& storage, QObject* parent = 0);

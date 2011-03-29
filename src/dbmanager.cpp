@@ -318,34 +318,39 @@ void DBManager::addArtistToEvent(const QString& artist, const int& eventID)
 
 int DBManager::addLocation(const Location *location)
 {
-  QSqlQuery q(database());
-  q.prepare("SELECT id FROM locations WHERE name = ? AND "
-            "city = ? AND "
-            "country = ? AND "
-            "latitude = ? AND "
-            "longitude = ? AND "
-            "street = ?");
-  q.addBindValue(location->name());
-  q.addBindValue(location->city());
-  q.addBindValue(location->country());
-  q.addBindValue(location->latitude());
-  q.addBindValue(location->longitude());
-  q.addBindValue(location->street());
-  if (executeQuery(&q)) {
-    if (q.next()) {
-      return q.value(q.record().indexOf("id")).toInt();
+  QSqlQuery findQuery(database());
+  findQuery.prepare("SELECT id FROM locations WHERE name = ? AND "
+                    "city = ? AND "
+                    "country = ? AND "
+                    "latitude = ? AND "
+                    "longitude = ? AND "
+                    "street = ?");
+  findQuery.addBindValue(location->name());
+  findQuery.addBindValue(location->city());
+  findQuery.addBindValue(location->country());
+  findQuery.addBindValue(location->latitude());
+  findQuery.addBindValue(location->longitude());
+  findQuery.addBindValue(location->street());
+  if (executeQuery(&findQuery)) {
+    if (findQuery.next()) {
+      return findQuery.value(findQuery.record().indexOf("id")).toInt();
     } else {
-      q.prepare("INSERT INTO locations (name, city, country, "
+      QSqlQuery createQuery(database());
+      createQuery.prepare("INSERT INTO locations (name, city, country, "
                 "latitude, longitude, street) VALUES (?,?,?,?,?,?)");
-      q.addBindValue(location->name());
-      q.addBindValue(location->city());
-      q.addBindValue(location->country());
-      q.addBindValue(location->latitude());
-      q.addBindValue(location->longitude());
-      q.addBindValue(location->street());
-      if (executeQuery(&q)) {
-        //qWarning() << "created a new location";
-        return addLocation(location);
+      createQuery.addBindValue(location->name());
+      createQuery.addBindValue(location->city());
+      createQuery.addBindValue(location->country());
+      createQuery.addBindValue(location->latitude());
+      createQuery.addBindValue(location->longitude());
+      createQuery.addBindValue(location->street());
+      if (executeQuery(&createQuery)) {
+        if (executeQuery(&findQuery) && findQuery.next()) {
+          int location_id = findQuery.value(findQuery.record().indexOf("id")).toInt();
+          emit locationCreated(location_id);
+          return location_id;
+        } else
+          return -1;
       } else
         return -1;
     }
@@ -594,4 +599,24 @@ void DBManager::removeOldEvents(const QDate &upTo)
 
   executeQuery("delete from locations where id not in"
                "(select location_id from events)");
+}
+
+bool DBManager::artistsPlaysInLocation(const int &artistID, const int &locationID)
+{
+  QSqlQuery q(database());
+  q.prepare("SELECT COUNT(events.id) AS event_num FROM "
+            "artists JOIN artists_events ON artists.id = artists_events.artist_id "
+            "JOIN events ON events.id = artists_events.event_id "
+            "WHERE events.location_id = ? AND artists.id = ?");
+  q.addBindValue(locationID);
+  q.addBindValue(artistID);
+  if (!executeQuery(&q))
+    return false;
+  else {
+    if (q.next()) {
+      bool event_num = q.value(q.record().indexOf("event_num")).toInt();
+      return event_num > 0;
+    } else
+      return false;
+  }
 }

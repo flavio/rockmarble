@@ -1,13 +1,12 @@
 #ifndef COUNTRYPAGE_H
 #define COUNTRYPAGE_H
 
+#include "countrymodel.h"
 #include "dbmanager.h"
 #include "event.h"
 
 #include <MApplicationPage>
-#include <QtCore/QModelIndex>
-#include <QtCore/QMultiMap>
-#include <QtSql/QSqlQuery>
+
 
 class MList;
 
@@ -16,8 +15,6 @@ class CountryPage : public MApplicationPage
   Q_OBJECT
 
   public:
-    enum PageMode {ALL_COUNTRIES, BY_ARTIST};
-
     CountryPage(DBManager::Storage storage, QGraphicsItem *parent = 0);
     CountryPage(const int& artistID, DBManager::Storage storage,
                 QGraphicsItem *parent = 0);
@@ -33,7 +30,7 @@ class CountryPage : public MApplicationPage
     QSqlQuery getQuery();
 
     int m_artistID;
-    PageMode m_pageMode;
+    CountryModel::Mode m_pageMode;
     DBManager::Storage m_dbStorage;
 };
 

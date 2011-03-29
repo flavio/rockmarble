@@ -19,14 +19,14 @@ CountryPage::CountryPage(DBManager::Storage storage, QGraphicsItem *parent)
   : MApplicationPage(parent), m_dbStorage(storage)
 {
   setTitle(tr("Countries"));
-  m_pageMode = ALL_COUNTRIES;
+  m_pageMode = CountryModel::ALL_COUNTRIES;
 }
 
 CountryPage::CountryPage(const int& artistID, DBManager::Storage storage,
                          QGraphicsItem *parent)
   : MApplicationPage(parent), m_artistID(artistID), m_dbStorage(storage)
 {
-  m_pageMode = BY_ARTIST;
+  m_pageMode = CountryModel::BY_ARTIST;
   m_dbStorage = DBManager::DISK;
   setTitle(DBManager::instance(m_dbStorage)->artistNameFromID(artistID));
 }
@@ -35,38 +35,13 @@ CountryPage::~CountryPage()
 {
 }
 
-QSqlQuery CountryPage::getQuery()
-{
-  QString q;
-  QSqlQuery query(DBManager::instance(m_dbStorage)->database());
-  if (m_pageMode == BY_ARTIST) {
-    q = "SELECT locations.country FROM events "
-        "JOIN artists_events ON artists_events.event_id = events.id "
-        "JOIN locations ON locations.id = events.location_id "
-        "WHERE artists_events.artist_id = ? "
-        "GROUP BY locations.country "
-        "ORDER BY locations.country ASC";
-    query.prepare(q);
-    query.addBindValue(m_artistID);
-  } else if (m_pageMode == ALL_COUNTRIES) {
-    q = "SELECT locations.country FROM events "
-        "JOIN artists_events ON artists_events.event_id = events.id "
-        "JOIN artists ON artists.id = artists_events.artist_id "
-        "JOIN locations ON locations.id = events.location_id "
-        "WHERE artists.favourite = ? "
-        "GROUP BY locations.country "
-        "ORDER BY locations.country ASC";
-    query.prepare(q);
-    query.addBindValue(1);
-  }
-  query.exec();
-  return query;
-}
-
 void CountryPage::createContent()
 {
-  QSqlQueryModel* countryModel = new QSqlQueryModel();
-  countryModel->setQuery(getQuery());
+  CountryModel* countryModel;
+  if (m_pageMode == CountryModel::BY_ARTIST)
+    countryModel = new CountryModel(m_dbStorage, m_artistID);
+  else
+    countryModel = new CountryModel(m_dbStorage);
 
   QGraphicsWidget *panel = centralWidget();
   MLayout *layout = new MLayout(panel);
@@ -90,9 +65,9 @@ void CountryPage::slotCountryClicked(const QModelIndex& index)
 {
   QString country= index.data(Qt::DisplayRole).toString();
   MApplicationPage* page;
-  if (m_pageMode == BY_ARTIST)
+  if (m_pageMode == CountryModel::BY_ARTIST)
     page = new EventPage(m_artistID, m_dbStorage, country);
-  else if (m_pageMode == ALL_COUNTRIES)
+  else if (m_pageMode == CountryModel::ALL_COUNTRIES)
     page = new ArtistPage(m_dbStorage, country);
 
   page->appear(MSceneWindow::DestroyWhenDismissed);

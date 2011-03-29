@@ -3,9 +3,9 @@
 
 #include <QtCore/QAbstractListModel>
 #include <QtCore/QList>
-#include <QtSql/QSqlQuery>
 
 #include "dbmanager.h"
+#include "isqlquery.h"
 
 class EventModel : public QAbstractListModel
 {
@@ -31,7 +31,7 @@ class EventModel : public QAbstractListModel
   private:
     void setup();
     QList<int> getEventIDs();
-    QSqlQuery getQuery();
+    ISqlQuery getQuery();
 
     QList<int> m_eventIDs;
     DBManager::Storage m_dbStorage;

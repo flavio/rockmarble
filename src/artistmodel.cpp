@@ -2,7 +2,7 @@
 
 #include <QtSql/QSqlRecord>
 
-ArtistModel::ArtistModel(const DBManager::Storage& storage, QSqlQuery query,
+ArtistModel::ArtistModel(const DBManager::Storage& storage, ISqlQuery query,
                          QObject *parent)
   : QAbstractListModel(parent), m_dbStorage(storage)
 {
@@ -69,7 +69,7 @@ QVariant ArtistModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
-void ArtistModel::setQuery(QSqlQuery query)
+void ArtistModel::setQuery(ISqlQuery query)
 {
   m_query = query;
   beginResetModel();

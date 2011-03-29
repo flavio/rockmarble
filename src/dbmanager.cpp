@@ -1,5 +1,5 @@
 #include "dbmanager.h"
-
+#include "isqlquery.h"
 #include "location.h"
 
 #include <QtCore/QDebug>
@@ -8,7 +8,6 @@
 #include <QtCore/QVariant>
 #include <QtGui/QApplication>
 #include <QtSql/QSqlError>
-#include <QtSql/QSqlQuery>
 #include <QtSql/QSqlRecord>
 
 
@@ -61,11 +60,11 @@ bool DBManager::executeQuery(const QString& query)
 
 bool DBManager::executeQuery(const QString& query, QSqlDatabase& db)
 {
-  QSqlQuery q (query, db);
+  ISqlQuery q (query, db);
   return executeQuery(&q);
 }
 
-bool DBManager::executeQuery(QSqlQuery* q)
+bool DBManager::executeQuery(ISqlQuery* q)
 {
   if (!q->exec()) {
     qWarning() << "error while executing" << q->lastQuery();
@@ -93,7 +92,7 @@ const QString DBManager::databaseFile(const Storage &storage)
 
 bool DBManager::isDatabaseEmpty()
 {
-  QSqlQuery q("SELECT COUNT (id) AS count_all from artists",
+  ISqlQuery q("SELECT COUNT (id) AS count_all from artists",
               database());
   if (executeQuery(&q)) {
     if (q.next()) {
@@ -189,7 +188,7 @@ void DBManager::initDB(const Storage& storage) {
 
 int DBManager::artistIDFromName(const QString& artistName)
 {
-  QSqlQuery q(database());
+  ISqlQuery q(database());
   q.prepare("SELECT id FROM artists WHERE name = ?");
   q.addBindValue(artistName);
   if (executeQuery(&q)) {
@@ -208,7 +207,7 @@ bool DBManager::isArtistFavourite(const QString& artistName) {
 
 bool DBManager::isArtistFavourite(const int& artistID)
 {
-  QSqlQuery q(database());
+  ISqlQuery q(database());
   q.prepare("SELECT id FROM artists WHERE id = ? AND favourite = ?");
   q.addBindValue(artistID);
   q.addBindValue((int)true);
@@ -228,7 +227,7 @@ int DBManager::addArtist(const QString &name, bool favourite)
   if (artistID != -1) {
     return artistID;
   } else {
-    QSqlQuery q(database());
+    ISqlQuery q(database());
     q.prepare("INSERT INTO artists (name, favourite) VALUES (?,?)");
     q.addBindValue(name);
     q.addBindValue((int) favourite);
@@ -245,7 +244,7 @@ int DBManager::addArtist(const QString &name, bool favourite)
 
 void DBManager::setArtistHasImage(const int &artistID, bool hasImage)
 {
-  QSqlQuery q(database());
+  ISqlQuery q(database());
   q.prepare("UPDATE artists SET has_image = ? WHERE id = ?");
   q.addBindValue((int) hasImage);
   q.addBindValue(artistID);
@@ -255,7 +254,7 @@ void DBManager::setArtistHasImage(const int &artistID, bool hasImage)
 
 void DBManager::setArtistAllDataFetched(const int& artistID, bool done)
 {
-  QSqlQuery q(database());
+  ISqlQuery q(database());
   q.prepare("UPDATE artists SET all_data_fetched = ? WHERE id = ?");
   q.addBindValue((int) done);
   q.addBindValue(artistID);
@@ -266,7 +265,7 @@ void DBManager::setArtistAllDataFetched(const int& artistID, bool done)
 
 void DBManager::setEventStarred(const int &eventID, const bool &starred)
 {
-  QSqlQuery q(database());
+  ISqlQuery q(database());
   q.prepare("UPDATE events SET starred = ? WHERE id = ?");
   q.addBindValue((int) starred);
   q.addBindValue(eventID);
@@ -277,7 +276,7 @@ void DBManager::addEvent(const Event& event)
 {
   int location_id = addLocation(event.location());
 
-  QSqlQuery q(database());
+  ISqlQuery q(database());
   q.prepare("SELECT id FROM events WHERE id = ?");
   q.addBindValue(event.id());
   if (executeQuery(&q)) {
@@ -290,8 +289,8 @@ void DBManager::addEvent(const Event& event)
       q.addBindValue(event.dateTime());
       q.addBindValue((int) event.starred());
       q.addBindValue(location_id);
-      executeQuery(&q);
-      emit eventCreated(event.id());
+      if (executeQuery(&q))
+        emit eventCreated(event.id());
     }
 
     addArtistToEvent(event.headliner(), event.id());
@@ -305,7 +304,7 @@ void DBManager::addArtistToEvent(const QString& artist, const int& eventID)
 {
   int artistID = addArtist(artist, false);
 
-  QSqlQuery q(database());
+  ISqlQuery q(database());
   q.prepare("SELECT * FROM artists_events WHERE artist_id = ? AND "
             "event_id = ?");
   q.addBindValue(artistID);
@@ -323,7 +322,7 @@ void DBManager::addArtistToEvent(const QString& artist, const int& eventID)
 
 int DBManager::addLocation(const Location *location)
 {
-  QSqlQuery findQuery(database());
+  ISqlQuery findQuery(database());
   findQuery.prepare("SELECT id FROM locations WHERE name = ? AND "
                     "city = ? AND "
                     "country = ? AND "
@@ -340,7 +339,7 @@ int DBManager::addLocation(const Location *location)
     if (findQuery.next()) {
       return findQuery.value(findQuery.record().indexOf("id")).toInt();
     } else {
-      QSqlQuery createQuery(database());
+      ISqlQuery createQuery(database());
       createQuery.prepare("INSERT INTO locations (name, city, country, "
                 "latitude, longitude, street) VALUES (?,?,?,?,?,?)");
       createQuery.addBindValue(location->name());
@@ -365,7 +364,7 @@ int DBManager::addLocation(const Location *location)
 
 int DBManager::eventsWithArtistNum(const int &artistID)
 {
-  QSqlQuery query ("select count(events.id) as event_num from events "
+  ISqlQuery query ("select count(events.id) as event_num from events "
                    "join artists_events on events.id = artists_events.event_id "
                    "where artists_events.artist_id = ?", database());
   query.addBindValue(artistID);
@@ -380,7 +379,7 @@ int DBManager::eventsWithArtistNum(const int &artistID)
 int DBManager::eventsWithArtistInCountryNum(const int &artistID,
                                             const QString &country)
 {
-  QSqlQuery query ("select count(events.id) as event_num from events "
+  ISqlQuery query ("select count(events.id) as event_num from events "
                    "join artists_events on events.id = artists_events.event_id "
                    "join locations on events.location_id = locations.id "
                    "where artists_events.artist_id = ?"
@@ -398,7 +397,7 @@ int DBManager::eventsWithArtistInCountryNum(const int &artistID,
 QString DBManager::artistNameFromID(const int &artistID)
 {
   QString artist;
-  QSqlQuery q ("select name from artists where id = ?", database());
+  ISqlQuery q ("select name from artists where id = ?", database());
   q.addBindValue(artistID);
   if (executeQuery(&q)) {
     q.next();
@@ -411,7 +410,7 @@ QString DBManager::artistNameFromID(const int &artistID)
 bool DBManager::artistHasImage(const int &artistID)
 {
   bool ret = false;
-  QSqlQuery q ("select has_image from artists where id = ?", database());
+  ISqlQuery q ("select has_image from artists where id = ?", database());
   q.addBindValue(artistID);
   if (executeQuery(&q)) {
     q.next();
@@ -424,7 +423,7 @@ bool DBManager::artistHasImage(const int &artistID)
 bool DBManager::artistHasAllData(const int &artistID)
 {
   bool ret = false;
-  QSqlQuery q ("select all_data_fetched from artists where id = ?", database());
+  ISqlQuery q ("select all_data_fetched from artists where id = ?", database());
   q.addBindValue(artistID);
   if (executeQuery(&q)) {
     q.next();
@@ -436,7 +435,7 @@ bool DBManager::artistHasAllData(const int &artistID)
 
 void DBManager::setAllArtistHaveAllData()
 {
-  QSqlQuery q(database());
+  ISqlQuery q(database());
   int artistID;
   q.prepare("SELECT id FROM artists ");
   if (executeQuery(&q)) {
@@ -450,7 +449,7 @@ void DBManager::setAllArtistHaveAllData()
 const QStringList DBManager::incompleteArtists()
 {
   QStringList artists;
-  QSqlQuery q(database());
+  ISqlQuery q(database());
 
   q.prepare("SELECT name FROM artists where "
             "favourite = ? AND all_data_fetched = ?");
@@ -467,7 +466,7 @@ const QStringList DBManager::incompleteArtists()
 const QStringList DBManager::artistsWithoutImage()
 {
   QStringList artists;
-  QSqlQuery q(database());
+  ISqlQuery q(database());
 
   q.prepare("SELECT name FROM artists where "
             "favourite = ? AND has_image = ?");
@@ -484,7 +483,7 @@ const QStringList DBManager::artistsWithoutImage()
 const QStringList DBManager::artists(bool favourite)
 {
   QStringList artists;
-  QSqlQuery q(database());
+  ISqlQuery q(database());
 
   q.prepare("SELECT name FROM artists where favourite = ?");
   q.addBindValue((int) favourite);
@@ -499,14 +498,14 @@ const QStringList DBManager::artists(bool favourite)
 QStringList DBManager::artistsFromEvent(const int& eventID)
 {
   QStringList artists;
-  QSqlQuery query ("select artist_id from artists_events where event_id = ?",
+  ISqlQuery query ("select artist_id from artists_events where event_id = ?",
                    database());
   query.addBindValue(eventID);
   if (!executeQuery(&query))
     return artists;
 
   while (query.next()) {
-    QSqlQuery q ("select name from artists where id = ?", database());
+    ISqlQuery q ("select name from artists where id = ?", database());
     q.addBindValue(query.value(query.record().indexOf("artist_id")).toInt());
     if (executeQuery(&q) && q.next())
       artists << q.value(q.record().indexOf("name")).toString();
@@ -516,14 +515,13 @@ QStringList DBManager::artistsFromEvent(const int& eventID)
 
 Event* DBManager::eventFromID(const int &eventID)
 {
-  QSqlQuery query ("select * from events where id = ?", database());
+  ISqlQuery query ("select * from events where id = ?", database());
   query.addBindValue(eventID);
   if (!executeQuery(&query))
     return 0;
 
   if (query.next()) {
     QStringList artists = artistsFromEvent(eventID);
-    query.value(query.record().indexOf("event_num")).toInt();
     QString title = query.value(query.record().indexOf("title")).toString();
     QString description = query.value(query.record().indexOf("description")).toString();
     QDateTime dateTime = query.value(query.record().indexOf("start_date")).toDateTime();
@@ -538,7 +536,7 @@ Event* DBManager::eventFromID(const int &eventID)
 
 Location* DBManager::locationFromID(const int &locationID)
 {
-  QSqlQuery query ("select * from locations where id = ? ", database());
+  ISqlQuery query ("select * from locations where id = ? ", database());
   query.addBindValue(locationID);
   if (!executeQuery(&query))
     return 0;
@@ -559,7 +557,7 @@ Location* DBManager::locationFromID(const int &locationID)
 void DBManager::removeOldEvents(const QDate &upTo)
 {
   QList<int> eventIDs;
-  QSqlQuery query (database());
+  ISqlQuery query (database());
   query.prepare("select id from events where start_date < ? ");
   query.addBindValue(upTo);
   if (executeQuery(&query)) {
@@ -608,7 +606,7 @@ void DBManager::removeOldEvents(const QDate &upTo)
 
 bool DBManager::artistsPlaysInLocation(const int &artistID, const int &locationID)
 {
-  QSqlQuery q(database());
+  ISqlQuery q(database());
   q.prepare("SELECT COUNT(events.id) AS event_num FROM "
             "artists JOIN artists_events ON artists.id = artists_events.artist_id "
             "JOIN events ON events.id = artists_events.event_id "

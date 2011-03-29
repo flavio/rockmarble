@@ -3,6 +3,7 @@
 #include "countryitemcreator.h"
 #include "event.h"
 #include "eventpage.h"
+#include "isqlquery.h"
 #include "location.h"
 
 #include <MLayout>
@@ -10,10 +11,7 @@
 #include <MLinearLayoutPolicy>
 
 #include <QtGui/QStringListModel>
-#include <QtSql/QSqlQuery>
 #include <QtSql/QSqlQueryModel>
-
-#include <QDebug>
 
 CountryPage::CountryPage(DBManager::Storage storage, QGraphicsItem *parent)
   : MApplicationPage(parent), m_dbStorage(storage)

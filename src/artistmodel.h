@@ -3,17 +3,17 @@
 
 #include <QtCore/QAbstractListModel>
 #include <QtCore/QList>
-#include <QtSql/QSqlQuery>
 
 #include "dbmanager.h"
+#include "isqlquery.h"
 
 class ArtistModel : public QAbstractListModel
 {
   Q_OBJECT
   public:
-    explicit ArtistModel(const DBManager::Storage& storage, QSqlQuery query,
+    explicit ArtistModel(const DBManager::Storage& storage, ISqlQuery query,
                          QObject *parent = 0);
-    void setQuery(QSqlQuery query);
+    void setQuery(ISqlQuery query);
     int rowCount() const;
     int rowCount(const QModelIndex &parent) const;
     QVariant data(const QModelIndex &index, int role) const;
@@ -27,7 +27,7 @@ class ArtistModel : public QAbstractListModel
     QList<unsigned int> getArtistIDs();
 
     QList<unsigned int> m_artistIDs;
-    QSqlQuery m_query;
+    ISqlQuery m_query;
     DBManager::Storage m_dbStorage;
 };
 

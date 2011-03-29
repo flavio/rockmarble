@@ -4,9 +4,9 @@
 #include <MApplicationPage>
 #include <QtCore/QModelIndex>
 #include <QtCore/QVariant>
-#include <QtSql/QSqlQuery>
 
 #include "dbmanager.h"
+#include "isqlquery.h"
 
 class ArtistModel;
 class Lastfm;
@@ -49,7 +49,7 @@ class ArtistPage : public MApplicationPage
     void slotRefreshEvents();
 
   private:
-    QSqlQuery artistsModelQuery();
+    ISqlQuery artistsModelQuery();
 
     void showMessage(const QString& message, bool error = false);
 

@@ -73,7 +73,7 @@ QVariant EventModel::data(const QModelIndex &index, int role) const
 QList<int> EventModel::getEventIDs()
 {
   QList<int> eventIDs;
-  QSqlQuery query = getQuery();
+  ISqlQuery query = getQuery();
   if (query.exec()) {
     while (query.next()) {
       eventIDs << query.value(query.record().indexOf("event_id")).toInt();
@@ -82,10 +82,10 @@ QList<int> EventModel::getEventIDs()
   return eventIDs;
 }
 
-QSqlQuery EventModel::getQuery()
+ISqlQuery EventModel::getQuery()
 {
   QString q;
-  QSqlQuery query(DBManager::instance(m_dbStorage)->database());
+  ISqlQuery query(DBManager::instance(m_dbStorage)->database());
   switch(m_mode) {
     case ARTIST_BY_COUNTRY:
       query.prepare("SELECT events.id AS event_id FROM events "

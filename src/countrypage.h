@@ -27,7 +27,7 @@ class CountryPage : public MApplicationPage
     void slotCountryClicked(const QModelIndex& index);
 
   private:
-    QSqlQuery getQuery();
+    ISqlQuery getQuery();
 
     int m_artistID;
     CountryModel::Mode m_pageMode;

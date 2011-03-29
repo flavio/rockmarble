@@ -82,7 +82,7 @@ QVariant CountryModel::data(const QModelIndex &index, int role) const
 QStringList CountryModel::getCountries()
 {
   QStringList countries;
-  QSqlQuery query = getQuery();
+  ISqlQuery query = getQuery();
   if (query.exec()) {
     while (query.next()) {
       countries << query.value(query.record().indexOf("country")).toString();
@@ -91,10 +91,10 @@ QStringList CountryModel::getCountries()
   return countries;
 }
 
-QSqlQuery CountryModel::getQuery()
+ISqlQuery CountryModel::getQuery()
 {
   QString q;
-  QSqlQuery query(DBManager::instance(m_dbStorage)->database());
+  ISqlQuery query(DBManager::instance(m_dbStorage)->database());
   if (m_mode == BY_ARTIST) {
     q = "SELECT locations.country as country FROM events "
         "JOIN artists_events ON artists_events.event_id = events.id "

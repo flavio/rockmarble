@@ -42,7 +42,8 @@ HEADERS += src/datafetcher.h \
     src/nearlocationmainpage.h \
     src/nearlocationsearchpage.h \
     src/countrymodel.h \
-    src/eventmodel.h
+    src/eventmodel.h \
+    src/isqlquery.h
 SOURCES += src/datafetcher.cpp \
     src/event.cpp \
     src/location.cpp \
@@ -64,7 +65,8 @@ SOURCES += src/datafetcher.cpp \
     src/nearlocationmainpage.cpp \
     src/nearlocationsearchpage.cpp \
     src/countrymodel.cpp \
-    src/eventmodel.cpp
+    src/eventmodel.cpp \
+    src/isqlquery.cpp
 RESOURCES += resources.qrc
 
 # All generated files goes to the same directory

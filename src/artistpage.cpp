@@ -210,9 +210,9 @@ void ArtistPage::createContent()
   }
 }
 
-QSqlQuery ArtistPage::artistsModelQuery()
+ISqlQuery ArtistPage::artistsModelQuery()
 {
-  QSqlQuery query(DBManager::instance(m_dbStorage)->database());
+  ISqlQuery query(DBManager::instance(m_dbStorage)->database());
   QString q;
   if (m_pageMode == ALL_ARTISTS) {
     q = "SELECT distinct artists.id FROM artists ";

@@ -9,7 +9,7 @@
 #include "event.h"
 
 class Location;
-class QSqlQuery;
+class ISqlQuery;
 
 class DBManager : public QObject
 {
@@ -65,7 +65,7 @@ class DBManager : public QObject
     void initDB(const Storage& storage);
     bool executeQuery(const QString&);
     bool executeQuery(const QString&, QSqlDatabase& db);
-    bool executeQuery(QSqlQuery*);
+    bool executeQuery(ISqlQuery*);
 
     void addArtistToEvent(const QString& artist, const int& eventID);
     int addLocation(const Location* location);

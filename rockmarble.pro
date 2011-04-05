@@ -10,8 +10,8 @@ unix {
     PKGCONFIG += meegotouchcore
 }
 
-debug {
-  CONFIG += debug
+#CONFIG += debug
+CONFIG(debug, debug|release) {
   DEFINES += FAKE_GPS SHOW_ORIENTATION_MENU
 }
 
@@ -88,27 +88,3 @@ desktop.files = rockmarble.desktop
 INSTALLS += icon64
 icon64.path = /usr/share/icons/hicolor/64x64/apps
 icon64.files = icons/rockmarble.png
-
-# Targets for debian source and binary package creation
-debian-src.commands = dpkg-buildpackage \
-    -S \
-    -r \
-    -us \
-    -uc \
-    -d
-debian-bin.commands = dpkg-buildpackage \
-    -b \
-    -r \
-    -uc \
-    -d
-debian-all.depends = debian-src \
-    debian-bin
-
-# Clean all but Makefile
-compiler_clean.commands = -$(DEL_FILE) \
-    $(TARGET)
-QMAKE_EXTRA_TARGETS += debian-all \
-    debian-src \
-    debian-bin \
-    compiler_clean
-OTHER_FILES += qml/main.qml

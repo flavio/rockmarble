@@ -35,7 +35,8 @@ EventDetailsPage::EventDetailsPage(const DBManager::Storage& storage,
   : MApplicationPage(parent),
     m_serviceProvider(0),
     m_dbStorage(storage),
-    m_mapWidget(0)
+    m_mapWidget(0),
+    m_session(0)
 {
   m_eventID = event_id;
   // Set Internet Access Point
@@ -146,7 +147,11 @@ void EventDetailsPage::createContent()
   updateStarredAction();
 
   // trigger creation of the map widget
-  m_session->open();
+  if (m_session)
+    m_session->open();
+  else {
+    m_infoLayout->addItem(new MLabel(tr("No network connection, cannot fetch map.")));
+  }
 
   delete event;
 }

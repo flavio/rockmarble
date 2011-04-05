@@ -38,6 +38,7 @@
 #include <MLayout>
 #include <MLinearLayoutPolicy>
 #include <MList>
+#include <MPannableViewport>
 #include <MScene>
 #include <MSceneManager>
 #include <MTextEdit>
@@ -322,6 +323,8 @@ void ArtistPage::slotShowSearch()
     m_policy->insertItem(0, m_filterWidget, Qt::AlignCenter);
     startValue = 0.0;
     endValue = 1.0;
+    QPointF pos(0.0, 0.0);
+    this->pannableViewport()->setPosition(pos);
   }
 
   QPropertyAnimation *fadeInAnimation = new QPropertyAnimation;

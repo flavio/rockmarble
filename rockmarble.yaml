@@ -14,6 +14,7 @@ PkgConfigBR:
     - QtOpenGL
     - QtGui
     - qjson
+    - qt-mobility >- 1.1.0
 Configure: none
 Builder: none
 Files:

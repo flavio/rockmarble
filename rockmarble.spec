@@ -16,17 +16,19 @@ Source0:    %{name}-%{version}.tar.bz2
 Source100:  rockmarble.yaml
 Requires(post): /bin/touch
 Requires(post): gtk2
-Requires:  	qjson
+BuildRequires:  qt-mobility >= 1.1.0
+Requires:  qjson
 BuildRequires:  pkgconfig(QtCore) >= 4.6.0
 BuildRequires:  pkgconfig(QtGui)
+BuildRequires:  qt-mobility-devel >= 1.1.0
 BuildRequires:  qjson-devel
 BuildRequires:  desktop-file-utils
 
 
 %description
-rockmarble is a simple program that fetches artist tour dates from last.fm and shows the event location using marble
-
-
+Rockmarble shows you where your favorite artists are going to play.
+It shows also who is rocking in a certain country or who is going to rock
+near your current location.
 
 %prep
 %setup -q -n %{name}-%{version}

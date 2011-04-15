@@ -1,5 +1,3 @@
-#include "artistpage.h"
-
 /* This file is part of rockmarble
   *
   * Copyright (C) 2011 Flavio Castelli <flavio@castelli.name>

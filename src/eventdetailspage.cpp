@@ -55,8 +55,8 @@ EventDetailsPage::EventDetailsPage(const DBManager::Storage& storage,
   : MApplicationPage(parent),
     m_serviceProvider(0),
     m_dbStorage(storage),
-    m_mapWidget(0),
-    m_session(0)
+    m_session(0),
+    m_mapWidget(0)
 {
   m_eventID = event_id;
   // Set Internet Access Point

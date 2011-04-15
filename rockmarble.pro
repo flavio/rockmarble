@@ -10,7 +10,7 @@ unix {
     PKGCONFIG += meegotouchcore
 }
 
-CONFIG += debug
+#CONFIG += debug
 CONFIG(debug, debug|release) {
   DEFINES += FAKE_GPS SHOW_ORIENTATION_MENU
 }

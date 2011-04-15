@@ -1,4 +1,4 @@
-rockmarble version 0.6.0
+rockmarble version 0.7.0
 -------------------------------------------------
 Website: http://rockmarble.sourceforge.net
 
@@ -16,7 +16,11 @@ License
 
 Description
 -----------
-  rockmarble is a simple program that fetches artist tour dates from last.fm and shows the event location using marble
+  rockmarble is a MeeGo app that allows you to find good live music.
+  You can either follow your favourite artists or find new ones.
+
+  Everything started as a simple Qt app that has been later ported to MeeGo.
+  You can find the old app inside of the old_user_interface branch.
 
 Have fun,
 Flavio

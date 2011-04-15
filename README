@@ -7,7 +7,15 @@ Project Lead/Maintainer (2009-current):
 
 Install
 -------
-  For installation or compiling instructions, see the INSTALL file.
+  Add the following repository on your MeeGo device:
+    sudo zypper ar -f http://repo.pub.meego.com/home:/flavio/meego_1.1_core/ rockmarble
+
+  And then install it:
+    sudo zypper in rockmarble
+
+Building
+--------
+  For compiling instructions, see the BUILDING file.
 
 License
 -------

@@ -4,6 +4,8 @@ Installing rockmarble
 QJson requires:
 - Qt 4.0 or greater
 - QJson 0.5 or greater
+- lib meego touch code
+- lib Qt mobility 1.1.o or greater
 
 For Unix/Linux/Mac/Windows:
 
